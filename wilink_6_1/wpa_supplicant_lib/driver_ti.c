@@ -745,6 +745,7 @@ static int wpa_driver_tista_driver_cmd( void *priv, char *cmd, char *buf, size_t
 		}
 		ret = wpa_driver_tista_driver_stop(priv);
 		if( ret == 0 ) {
+			scan_exit(drv); /* clear scan cache */
 			drv->driver_is_loaded = FALSE;
 			wpa_msg(drv->ctx, MSG_INFO, WPA_EVENT_DRIVER_STATE "STOPPED");
 		}
@@ -1427,6 +1428,7 @@ static int wpa_driver_tista_associate(void *priv,
 			wpa_driver_wext_set_ifflags(drv->wext, flags | IFF_UP);
 		}
 	}
+
 #ifdef WPA_SUPPLICANT_VER_0_5_X
 	/* Set driver network mode (Adhoc/Infrastructure) according to supplied parameters */
 	wpa_driver_wext_set_mode(drv->wext, params->mode);
