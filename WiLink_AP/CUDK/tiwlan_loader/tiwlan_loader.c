@@ -39,7 +39,7 @@
 #include "ipc_sta.h"
 #include "WlanDrvCommon.h"
 
-#define TIWLAN_DRV_NAME "tiwlan"
+#define TIWLAN_DRV_NAME "tiap"
 
 S8    g_drv_name[IF_NAME_SIZE + 1];
 
