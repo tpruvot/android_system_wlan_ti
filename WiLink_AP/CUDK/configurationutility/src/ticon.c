@@ -60,9 +60,10 @@
 #define CHK_NULL(p)    (p)
 #endif
 
-#define TIWLAN_DRV_NAME "tiwlan0"
-#define SUPPL_IF_FILE "/var/run/tiwlan0"
- 
+#define TIWLAN_DRV_NAME "tiap0"
+//#define SUPPL_IF_FILE "/var/run/tiwlan0"
+#define SUPPL_IF_FILE "/data/misc/wifi/tiap0"
+
 extern int consoleRunScript( char *script_file, THandle hConsole);
 
 /* local types */
