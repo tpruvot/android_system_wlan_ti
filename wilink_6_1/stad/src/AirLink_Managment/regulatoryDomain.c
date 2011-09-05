@@ -649,7 +649,7 @@ TRACE1(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, "regulatoryDomai
         break;
 
 	default:
-TRACE1(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "Get param, Params is not supported, %d\n\n", pParam->paramType);
+		TRACE1(pRegulatoryDomain->hReport, REPORT_SEVERITY_WARNING, "Get param, Params is not supported, %d\n\n", pParam->paramType);
 		return PARAM_NOT_SUPPORTED;
 	}
 
@@ -1297,6 +1297,7 @@ static TI_STATUS regulatoryDomain_updateCurrTxPower(regulatoryDomain_t	*pRegulat
     pTwdParam = (TTwdParamInfo *)os_memoryAlloc(pRegulatoryDomain->hOs, sizeof(TTwdParamInfo));
     if (!pTwdParam)
     {
+        os_memoryFree(pRegulatoryDomain->hOs, pParam, sizeof(paramInfo_t));
         return TI_NOK;
     }
 

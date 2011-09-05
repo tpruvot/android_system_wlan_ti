@@ -33,7 +33,6 @@
 #include "tidef.h"
 #include <linux/kernel.h>
 #include <asm/io.h>
-//#include <mach/tc.h>
 #include <linux/delay.h>
 #include <linux/platform_device.h>
 #include <linux/wifi_tiwlan.h>
@@ -42,6 +41,7 @@
 #include "ioctl_init.h"
 #include "WlanDrvIf.h"
 #include "Device1273.h"
+
 
 #define OS_API_MEM_ADDR		0x0000000
 #define OS_API_REG_ADDR		0x0300000
@@ -56,22 +56,9 @@ static int wifi_probe( struct platform_device *pdev )
 
 	printk("%s\n", __FUNCTION__);
 	wifi_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ, "device_wifi_irq");
-#if 0
-	if (wifi_irqres) {
-		printk("wifi_irqres->start = %lu\n", (unsigned long)(wifi_irqres->start));
-		printk("wifi_irqres->flags = %lx\n", wifi_irqres->flags);
-	}
-#endif
+
 	if( wifi_ctrl ) {
 		wifi_control_data = wifi_ctrl;
-#if 0
-		if( wifi_ctrl->set_power )
-			wifi_ctrl->set_power(1);	/* Power On */
-		if( wifi_ctrl->set_reset )
-			wifi_ctrl->set_reset(0);	/* Reset clear */
-		if( wifi_ctrl->set_carddetect )
-			wifi_ctrl->set_carddetect(1);	/* CardDetect (0->1) */
-#endif
 	}
 	return 0;
 }
@@ -149,26 +136,32 @@ int wifi_set_reset( int on, unsigned long msec )
 }
 
 /*-----------------------------------------------------------------------------
-Routine Name: hPlatform_hardResetTnetw
-Routine Description: set the GPIO to low after awaking the TNET from ELP.
-Arguments: None
-Return Value: 0 - Ok
+Routine Name:
+        hPlatform_hardResetTnetw
+Routine Description:
+        set the GPIO to low after awaking the TNET from ELP.
+Arguments:
+        OsContext - our adapter context.
+Return Value:
+        None
 -----------------------------------------------------------------------------*/
 
-int hPlatform_hardResetTnetw( void )
+int hPlatform_hardResetTnetw(void)
 {
 	int err;
 
 	/* Turn power OFF */
 	if ((err = wifi_set_power(0, 500)) == 0) {
-		/* Turn power ON*/
+		/* Turn power ON */
 		err = wifi_set_power(1, 50);
 	}
-	return err;
+
+    return err;
+
 } /* hPlatform_hardResetTnetw() */
 
 /* Turn device power off */
-int hPlatform_DevicePowerOff( void )
+int hPlatform_DevicePowerOff (void)
 {
 	int err;
 
@@ -188,12 +181,14 @@ int hPlatform_DevicePowerOffSetLongerDelay(void)
 }
 
 /* Turn device power on */
-int hPlatform_DevicePowerOn( void )
+int hPlatform_DevicePowerOn (void)
 {
 	int err;
 
-	wifi_set_power(1, 15); /* Fixed power sequence */
-	wifi_set_power(0, 15);
+    /* New Power Up Sequence */
+    wifi_set_power(1, 15);
+    wifi_set_power(0, 1);
+
 	/* Should not be changed, 50 msec cause failures */
 	err = wifi_set_power(1, 70);
 	return err;
@@ -242,7 +237,7 @@ int hPlatform_initInterrupt( void *tnet_drv, void* handle_add )
 {
 	TWlanDrvIfObj *drv = tnet_drv;
 	int rc;
-	
+
 	if (drv->irq == 0 || handle_add == NULL)
 	{
 		print_err("hPlatform_initInterrupt() bad param drv->irq=%d handle_add=0x%x !!!\n",drv->irq,(int)handle_add);
@@ -265,24 +260,11 @@ void hPlatform_freeInterrupt( void *tnet_drv )
 {
 	TWlanDrvIfObj *drv = tnet_drv;
 
+	if (drv->irq == 0)
+		return;
+
 	set_irq_wake(drv->irq, 0);
 	free_irq(drv->irq, drv);
-}
-
-/****************************************************************************************
- *                        hPlatform_hwGetRegistersAddr()                                 
- ****************************************************************************************
-DESCRIPTION:	
-
-ARGUMENTS:		
-
-RETURN:			
-
-NOTES:         	
-*****************************************************************************************/
-void *hPlatform_hwGetRegistersAddr(TI_HANDLE OsContext)
-{
-	return (void *)OS_API_REG_ADDR;
 }
 
 /****************************************************************************************
@@ -296,7 +278,7 @@ RETURN:
 
 NOTES:         	
 *****************************************************************************************/
-void *hPlatform_hwGetMemoryAddr(TI_HANDLE OsContext)
+void* hPlatform_hwGetMemoryAddr(TI_HANDLE OsContext)
 {
 	return (void *)OS_API_MEM_ADDR;
 }

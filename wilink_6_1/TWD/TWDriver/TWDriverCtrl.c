@@ -238,6 +238,14 @@ TI_STATUS TWD_SetParam (TI_HANDLE hTWD, TTwdParamInfo *pParamInfo)
                                       pParamInfo->content.tDcoItrimParams.moderationTimeoutUsec, NULL, NULL);
             break;
 
+        case TWD_SDIO_VALIDATION_PARAMS_ID: 
+            fwDbg_ValidateSdio( pTWD->hFwDbg, 
+                                pParamInfo->content.tSdioValidationTestParams.uNumOfLoops,
+                                pParamInfo->content.tSdioValidationTestParams.uTxnSize
+                              );
+            break;
+
+
         default:
             TRACE1(pTWD->hReport, REPORT_SEVERITY_ERROR, "TWD_SetParam - ERROR - Param is not supported, 0x%x\n", pParamInfo->paramType);
             return PARAM_NOT_SUPPORTED;
@@ -920,6 +928,4 @@ ETxnStatus TWD_WdExpireEvent(TI_HANDLE hTWD)
 	}
 
     return TXN_STATUS_COMPLETE;
-	}
-
-
+}

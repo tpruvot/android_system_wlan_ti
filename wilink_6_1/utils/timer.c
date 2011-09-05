@@ -38,7 +38,6 @@
  *  \see    timer.h, osapi.c
  */
 
-
 #define __FILE_ID__  FILE_ID_0
 #include "osApi.h"
 #include "report.h"
@@ -125,6 +124,12 @@ TI_STATUS tmr_Destroy (TI_HANDLE hTimerModule)
 {
     TTimerModule *pTimerModule = (TTimerModule *)hTimerModule;
 
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_Destroy(): ERROR - NULL timer!\n"));
+        return TI_NOK;
+    }
+
     /* Alert if there are still timers that were not destroyed */
     if (pTimerModule->uTimersCount)
     {
@@ -155,6 +160,11 @@ TI_STATUS tmr_Destroy (TI_HANDLE hTimerModule)
 TI_STATUS tmr_Free(TI_HANDLE hTimerModule)
 {
     TTimerModule *pTimerModule = (TTimerModule *)hTimerModule;
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_Free(): ERROR - NULL timer!\n"));
+        return TI_NOK;
+    }
 
     /* free module object */
 	os_memoryFree (pTimerModule->hOs, pTimerModule, sizeof(TTimerModule));
@@ -213,6 +223,12 @@ void tmr_Init (TI_HANDLE hTimerModule, TI_HANDLE hOs, TI_HANDLE hReport, TI_HAND
 	TTimerModule *pTimerModule = (TTimerModule *)hTimerModule;
     TI_UINT32     uNodeHeaderOffset;
 
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_Init(): ERROR - NULL timer!\n"));
+        return;
+    }
+
     pTimerModule->hOs           = hOs;
     pTimerModule->hReport       = hReport;
     pTimerModule->hContext      = hContext;
@@ -263,14 +279,21 @@ void tmr_UpdateDriverState (TI_HANDLE hTimerModule, TI_BOOL bOperState)
 {
 	TTimerModule *pTimerModule = (TTimerModule *)hTimerModule;
 
-    if (bOperState == pTimerModule->bOperState) 
+    if (!pTimerModule)
     {
-        TRACE1(pTimerModule->hReport, REPORT_SEVERITY_ERROR, "tmr_UpdateDriverState(): New bOperState (%d) is as current!\n", bOperState);
+        WLAN_OS_REPORT (("tmr_UpdateDriverState(): ERROR - NULL timer!\n"));
         return;
     }
 
     /* Enter critical section */
     context_EnterCriticalSection (pTimerModule->hContext);
+
+    if (bOperState == pTimerModule->bOperState) 
+    {
+        context_LeaveCriticalSection (pTimerModule->hContext);
+        TRACE1(pTimerModule->hReport, REPORT_SEVERITY_ERROR, "tmr_UpdateDriverState(): New bOperState (%d) is as current!\n", bOperState);
+        return;
+    }
 
     /* Save new state (TRUE means operational). */
     pTimerModule->bOperState = bOperState;
@@ -297,7 +320,6 @@ void tmr_UpdateDriverState (TI_HANDLE hTimerModule, TI_BOOL bOperState)
 
 
 
-
 /** 
  * \fn     tmr_CreateTimer
  * \brief  Create a new timer
@@ -314,6 +336,11 @@ TI_HANDLE tmr_CreateTimer (TI_HANDLE hTimerModule)
 	TTimerModule *pTimerModule = (TTimerModule *)hTimerModule; /* The timer module handle */
     TTimerInfo   *pTimerInfo;  /* The created timer handle */
 
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_CreateTimer(): ERROR - NULL timer!\n"));
+        return NULL;
+    }
 	/* Allocate timer object */
 	pTimerInfo = os_memoryAlloc (pTimerModule->hOs, sizeof(TTimerInfo));
 	if (!pTimerInfo)
@@ -355,17 +382,27 @@ TI_HANDLE tmr_CreateTimer (TI_HANDLE hTimerModule)
  */ 
 TI_STATUS tmr_DestroyTimer (TI_HANDLE hTimerInfo)
 {
-    TTimerInfo   *pTimerInfo   = (TTimerInfo *)hTimerInfo;                 /* The timer handle */     
-	TTimerModule *pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule; /* The timer module handle */
+    TTimerInfo *pTimerInfo = (TTimerInfo *)hTimerInfo; /* The timer handle */   
+    TTimerModule *pTimerModule; /* The timer module handle */
+
+    if (!pTimerInfo)
+    {
+        return TI_NOK;
+    }
+    pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule;
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_DestroyTimer(): ERROR - NULL timer!\n"));
+        return TI_NOK;
+    }
 
     /* Free the OS-API timer */
-    os_timerDestroy (pTimerModule->hOs, pTimerInfo->hOsTimerObj);
-
+    if (pTimerInfo->hOsTimerObj) {
+        os_timerDestroy (pTimerModule->hOs, pTimerInfo->hOsTimerObj);
+        pTimerModule->uTimersCount--;  /* update created timers number */
+    }
     /* Free the timer object */
     os_memoryFree (pTimerModule->hOs, hTimerInfo, sizeof(TTimerInfo));
-	
-    pTimerModule->uTimersCount--;  /* update created timers number */
-
     return TI_OK;
 }
 
@@ -398,7 +435,13 @@ void tmr_StartTimer (TI_HANDLE     hTimerInfo,
                      TI_BOOL       bPeriodic)
 {
     TTimerInfo   *pTimerInfo   = (TTimerInfo *)hTimerInfo;                 /* The timer handle */     
-	TTimerModule *pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule; /* The timer module handle */
+    TTimerModule *pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule; /* The timer module handle */
+
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_StartTimer(): ERROR - NULL timer!\n"));
+        return;
+    }
 
     /* Save the timer parameters. */
     pTimerInfo->fExpiryCbFunc            = fExpiryCbFunc;
@@ -431,6 +474,12 @@ void tmr_StopTimer (TI_HANDLE hTimerInfo)
     TTimerInfo   *pTimerInfo   = (TTimerInfo *)hTimerInfo;                 /* The timer handle */     
 	TTimerModule *pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule; /* The timer module handle */
 
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_StopTimer(): ERROR - NULL timer!\n"));
+        return;
+    }
+
     /* Stop OS-API timer running */
     os_timerStop(pTimerModule->hOs, pTimerInfo->hOsTimerObj);
 
@@ -456,6 +505,12 @@ void tmr_GetExpiry (TI_HANDLE hTimerInfo)
 {
     TTimerInfo   *pTimerInfo   = (TTimerInfo *)hTimerInfo;                 /* The timer handle */     
 	TTimerModule *pTimerModule = (TTimerModule *)pTimerInfo->hTimerModule; /* The timer module handle */
+
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_GetExpiry(): ERROR - NULL timer!\n"));
+        return;
+    }
 
     /* Enter critical section */
     context_EnterCriticalSection (pTimerModule->hContext);
@@ -506,6 +561,12 @@ void tmr_HandleExpiry (TI_HANDLE hTimerModule)
 	TTimerModule *pTimerModule = (TTimerModule *)hTimerModule; /* The timer module handle */
     TTimerInfo   *pTimerInfo;      /* The timer handle */     
     TI_BOOL       bTwdInitOccured; /* Indicates if TWD init occured since timer start */
+
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_HandleExpiry(): ERROR - NULL timer!\n"));
+        return;
+    }
 
     while (1)
     {
@@ -570,10 +631,15 @@ void tmr_PrintModule (TI_HANDLE hTimerModule)
 {
 	TTimerModule *pTimerModule = (TTimerModule *)hTimerModule;
 
+    if (!pTimerModule)
+    {
+        WLAN_OS_REPORT (("tmr_PrintModule(): ERROR - NULL timer!\n"));
+        return;
+    }
     /* Print module parameters */
     WLAN_OS_REPORT(("tmr_PrintModule(): uContextId=%d, bOperState=%d, uTwdInitCount=%d, uTimersCount=%d\n", 
-        pTimerModule->uContextId, pTimerModule->bOperState, 
-        pTimerModule->uTwdInitCount, pTimerModule->uTimersCount));
+    pTimerModule->uContextId, pTimerModule->bOperState, 
+    pTimerModule->uTwdInitCount, pTimerModule->uTimersCount));
 
     /* Print Init Queue Info */
     WLAN_OS_REPORT(("tmr_PrintModule(): Init-Queue:\n")); 
@@ -586,13 +652,13 @@ void tmr_PrintModule (TI_HANDLE hTimerModule)
 
 void tmr_PrintTimer (TI_HANDLE hTimerInfo)
 {
+#ifdef REPORT_LOG
     TTimerInfo   *pTimerInfo   = (TTimerInfo *)hTimerInfo;                 /* The timer handle */     
 
     WLAN_OS_REPORT(("tmr_PrintTimer(): uIntervalMs=%d, bPeriodic=%d, bOperStateWhenStarted=%d, uTwdInitCountWhenStarted=%d, hOsTimerObj=0x%x, fExpiryCbFunc=0x%x\n", 
-        pTimerInfo->uIntervalMsec, pTimerInfo->bPeriodic, pTimerInfo->bOperStateWhenStarted, 
-        pTimerInfo->uTwdInitCountWhenStarted, pTimerInfo->hOsTimerObj, pTimerInfo->fExpiryCbFunc));
+    pTimerInfo->uIntervalMsec, pTimerInfo->bPeriodic, pTimerInfo->bOperStateWhenStarted, 
+    pTimerInfo->uTwdInitCountWhenStarted, pTimerInfo->hOsTimerObj, pTimerInfo->fExpiryCbFunc));
+#endif
 }
 
 #endif /* TI_DBG */
-
-

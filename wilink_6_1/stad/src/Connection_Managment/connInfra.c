@@ -256,7 +256,6 @@ TI_STATUS conn_infraConfig(conn_t *pConn)
     return fsm_Config(pConn->infra_pFsm, (fsm_Matrix_t)smMatrix, CONN_INFRA_NUM_STATES, CONN_INFRA_NUM_EVENTS, conn_infraSMEvent, pConn->hOs);
 }
 
-
 /***********************************************************************
  *                        conn_infraSMEvent                                 
  ***********************************************************************
@@ -393,7 +392,6 @@ static TI_STATUS mlmeWait_to_WaitDisconnect(void *pData)
     pParam->paramType = RX_DATA_PORT_STATUS_PARAM;
     pParam->content.rxDataPortStatus = CLOSE;
     rxData_setParam(pConn->hRxData, pParam);
-
 
     /* Update TxMgmtQueue SM to close Tx path. */
     txMgmtQ_SetConnState (pConn->hTxMgmtQ, TX_CONN_STATE_CLOSE);
@@ -689,6 +687,8 @@ static TI_STATUS configHW_to_connected(void *pData)
     siteMgr_printPrimarySiteDesc(pConn->hSiteMgr);
      TRACE0(pConn->hReport, REPORT_SEVERITY_CONSOLE, "****************************************\n"); 
     WLAN_OS_REPORT(("****************************************\n"));
+#else
+    os_printf("%s: *** NEW CONNECTION ***\n", __func__);
 #endif
 
     return TI_OK;
@@ -732,8 +732,7 @@ static TI_STATUS connInfra_ScrWait(void *pData)
         pConn->scrRequested[ uResourceIndex ] = TI_TRUE;
 
         /* sanity check */
-        if ((scrReplyStatus[ uResourceIndex ] > SCR_CRS_PEND) ||
-            (scrReplyStatus[ uResourceIndex ] < SCR_CRS_RUN))
+        if (scrReplyStatus[ uResourceIndex ] > SCR_CRS_PEND)
         {
             TRACE2(pConn->hReport, REPORT_SEVERITY_ERROR , "Idle_to_ScrWait: SCR for resource %d returned status %d\n", uResourceIndex, scrReplyStatus[ uResourceIndex ]);
             return TI_NOK;
@@ -752,7 +751,7 @@ static TI_STATUS connInfra_ScrWait(void *pData)
     else
     {
         /* mark which resource is pending (or both) */
-        for (uResourceIndex = SCR_RESOURCE_PERIODIC_SCAN;
+        for (uResourceIndex = SCR_RESOURCE_SERVING_CHANNEL;
              uResourceIndex < SCR_RESOURCE_NUM_OF_RESOURCES;
              uResourceIndex++)
         {
@@ -797,7 +796,11 @@ void InfraConnSM_ScrCB( TI_HANDLE hConn, EScrClientRequestStatus requestStatus,
         break;
 
     case SCR_CRS_FW_RESET:
-        /* Ignore FW reset, the MLME SM will handle re-try of the conn */
+        if (pConn->state == STATE_CONN_INFRA_WAIT_JOIN_CMPLT)
+		{
+			connInfra_JoinCmpltNotification((TI_HANDLE) pConn);
+		}
+
         TRACE0( pConn->hReport, REPORT_SEVERITY_INFORMATION, "Infra Conn: Recovery occured.\n");
         break;
 

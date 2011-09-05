@@ -327,7 +327,7 @@ TI_STATUS txCtrl_Unload (TI_HANDLE hTxCtrl)
 *				STATUS_XMIT_BUSY    - Packet dropped due to lack of HW resources, retransmit later.
 *				STATUS_XMIT_ERROR   - Packet dropped due to an unexpected problem (bug).
 ********************************************************************************/
-TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
+EStatusXmit txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 {
     txCtrl_t   *pTxCtrl = (txCtrl_t *)hTxCtrl;
 	ETxnStatus eStatus;       /* The Xfer return value (different than this function's return values). */
@@ -690,13 +690,26 @@ TI_UINT32 txCtrl_BuildDataPktHdr (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk, Ac
 	 *   - Add padding for FW security overhead: 4 bytes for TKIP, 8 for AES.
 	 */
 
-       	if (( (pPktCtrlBlk->tTxPktParams.uPktType == TX_PKT_TYPE_EAPOL)
-			  &&
-			  pTxCtrl->eapolEncryptionStatus) 
-		 ||
-			((pPktCtrlBlk->tTxPktParams.uPktType != TX_PKT_TYPE_EAPOL)
-			  &&
-			  pTxCtrl->currentPrivacyInvokedMode ))
+   	if ( ( (pPktCtrlBlk->tTxPktParams.uPktType != TX_PKT_TYPE_EAPOL)
+           &&
+		   pTxCtrl->currentPrivacyInvokedMode 
+         )
+
+         ||
+
+         ( (pPktCtrlBlk->tTxPktParams.uPktType == TX_PKT_TYPE_EAPOL)
+		   &&
+		   pTxCtrl->eapolEncryptionStatus
+           &&
+           (txMgmtQ_GetConnState(pTxCtrl->hTxMgmtQ) == TX_CONN_STATE_OPEN)
+         )                                                                   /* - Encrypt Eapols only when eapolEncryptionStatus is true 
+                                                                                  and station is connected (during re-key). 
+                                                                                - In connection and roaming do not encrypt Eapols.
+                                                                                - This condition will cost us an extra clock tick in
+                                                                                  the Data Path ONLY in case of an Eapol. 
+                                                                                  This is not the common case in the Data Path.
+                                                                              */
+       )
         {
 
 			fc |= DOT11_FC_WEP;

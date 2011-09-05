@@ -217,11 +217,16 @@ void txCtrlBlk_Free (TI_HANDLE hTxCtrlBlk, TTxCtrlBlk *pCurrentEntry)
 	TTxCtrlBlkObj   *pTxCtrlBlk = (TTxCtrlBlkObj *)hTxCtrlBlk;
 	TTxCtrlBlk *pFirstFreeEntry = &(pTxCtrlBlk->aTxCtrlBlkTbl[0]);
 
+	if (!pTxCtrlBlk)
+    {
+		return;
+	}
+
 #ifdef TI_DBG
 	/* If the pointed entry is already free, print error and exit (not expected to happen). */
 	if (pCurrentEntry->pNextFreeEntry != 0)
 	{
-TRACE2(pTxCtrlBlk->hReport, REPORT_SEVERITY_ERROR, "txCtrlBlk_free(): Entry %d alredy free, UsedEntries=%d\n", 			pCurrentEntry->tTxDescriptor.descID, pTxCtrlBlk->uNumUsedEntries);
+		TRACE2(pTxCtrlBlk->hReport, REPORT_SEVERITY_ERROR, "txCtrlBlk_free(): Entry %d alredy free, UsedEntries=%d\n", 			pCurrentEntry->tTxDescriptor.descID, pTxCtrlBlk->uNumUsedEntries);
 		return;
 	}
 	pTxCtrlBlk->uNumUsedEntries--;
@@ -260,6 +265,7 @@ TTxCtrlBlk *txCtrlBlk_GetPointer (TI_HANDLE hTxCtrlBlk, TI_UINT8 descId)
 #ifdef TI_DBG
 void txCtrlBlk_PrintTable (TI_HANDLE hTxCtrlBlk)
 {
+#ifdef REPORT_LOG
 	TTxCtrlBlkObj *pTxCtrlBlk = (TTxCtrlBlkObj *)hTxCtrlBlk;
 	TI_UINT8 entry;
 
@@ -279,6 +285,7 @@ void txCtrlBlk_PrintTable (TI_HANDLE hTxCtrlBlk)
             pTxCtrlBlk->aTxCtrlBlkTbl[entry].tTxDescriptor.totalMemBlks,
             pTxCtrlBlk->aTxCtrlBlkTbl[entry].tTxPktParams.uFlags));
 	}
+#endif
 }
 #endif /* TI_DBG */
 

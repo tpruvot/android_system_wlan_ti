@@ -126,8 +126,6 @@ TI_STATUS cmdHndlr_Destroy (TI_HANDLE hCmdHndlr, TI_HANDLE hEvHandler)
 		cmdInterpret_Destroy (pCmdHndlr->hCmdInterpret, hEvHandler);
 	}
 
-    cmdHndlr_ClearQueue (hCmdHndlr);
-
 	if (pCmdHndlr->hCmdQueue)
 	{
 		que_Destroy (pCmdHndlr->hCmdQueue);
@@ -156,18 +154,15 @@ void cmdHndlr_ClearQueue (TI_HANDLE hCmdHndlr)
     TConfigCommand  *pCurrCmd;
 
     /* Dequeue and free all queued commands in a critical section */
-    while (1)
-    {
+    do {
         context_EnterCriticalSection (pCmdHndlr->hContext);
         pCurrCmd = (TConfigCommand *)que_Dequeue(pCmdHndlr->hCmdQueue);
         context_LeaveCriticalSection (pCmdHndlr->hContext);
-        if (pCurrCmd == NULL)
-        {
-            break;
-        }
+        if (pCurrCmd != NULL) {
         /* Just release the semaphore. The command is freed subsequently. */
         os_SignalObjectSet (pCmdHndlr->hOs, pCurrCmd->pSignalObject);
-    }
+        }
+    } while (pCurrCmd != NULL);
 }
 
 
@@ -284,6 +279,7 @@ TI_STATUS cmdHndlr_InsertCommand (TI_HANDLE     hCmdHndlr,
 	{
 		os_printf("cmdPerform: Failed to enqueue new command\n");
 		os_SignalObjectFree (pCmdHndlr->hOs, pNewCmd->pSignalObject);
+        pNewCmd->pSignalObject = NULL;
 		os_memoryFree (pCmdHndlr->hOs, pNewCmd, sizeof (TConfigCommand));
         context_LeaveCriticalSection (pCmdHndlr->hContext);  /* Leave critical section */
         return TI_NOK;
@@ -327,6 +323,7 @@ TI_STATUS cmdHndlr_InsertCommand (TI_HANDLE     hCmdHndlr,
 
 	/* Free signalling object and command structure */
 	os_SignalObjectFree (pCmdHndlr->hOs, pNewCmd->pSignalObject);
+	pNewCmd->pSignalObject = NULL;
 
     /* If command not completed in this context (Async) don't free the command memory */
     if(COMMAND_PENDING != pNewCmd->eCmdStatus)

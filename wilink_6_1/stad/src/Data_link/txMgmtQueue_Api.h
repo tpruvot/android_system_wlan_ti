@@ -72,6 +72,8 @@ void		txMgmtQ_StopAll (TI_HANDLE hTxMgmtQ);
 void		txMgmtQ_WakeAll (TI_HANDLE hTxMgmtQ);
 void		txMgmtQ_SetConnState (TI_HANDLE hTxMgmtQ, ETxConnState txConnState);
 
+ETxConnState  txMgmtQ_GetConnState (TI_HANDLE hTxMgmtQ);
+
 #ifdef TI_DBG
 void        txMgmtQ_PrintModuleParams (TI_HANDLE hTxMgmtQ);
 void        txMgmtQ_PrintQueueStatistics (TI_HANDLE	hTxMgmtQ);

@@ -226,7 +226,6 @@ typedef struct _apConn_t
     TI_UINT32               disconnectFromRoamMngrNum;
     TI_UINT32               stopFromSmeNum;
 
-
     TI_HANDLE               hAPConnSM;
 	apConn_roamingTrigger_e	assocRoamingTrigger;
 } apConn_t;
@@ -298,6 +297,7 @@ TI_HANDLE apConn_create(TI_HANDLE hOs)
         if (pAPConnection->hAPConnSM == NULL)
         {
             WLAN_OS_REPORT(("FATAL ERROR: apConn_create(): Error allocating Connection StateMachine! - aborting\n"));
+            os_memoryFree(hOs, pAPConnection, sizeof(apConn_t));
             return NULL;
         }
 
@@ -307,7 +307,7 @@ TI_HANDLE apConn_create(TI_HANDLE hOs)
     else /* Failed to allocate control block */
     {
         WLAN_OS_REPORT(("FATAL ERROR: apConn_create(): Error allocating cb - aborting\n"));
-        os_memoryFree(hOs, pAPConnection, sizeof(apConn_t));
+
         return NULL;
     }
 }
@@ -1269,7 +1269,7 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
 		pAPConnection->roamReason = roamingEventType;
 	}
 
-    /* 3c. Check if Roaming Manager is available */
+    /* 3c. Check if Roaming Manager is not available and the roaming trigger is not in the low quality level  */
     if (((!pAPConnection->roamingEnabled) || (pAPConnection->roamEventCallb == NULL) ||
           (pAPConnection->currentState == AP_CONNECT_STATE_IDLE))
         && (roamingEventType > ROAMING_TRIGGER_MAX_TX_RETRIES))
@@ -1289,7 +1289,7 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
         else
         {
             /* Infra-structure BSS case - disconnect the link */
-            if (roamingEventType >= ROAMING_TRIGGER_AP_DISCONNECT && (roamingEventType != ROAMING_TRIGGER_TSPEC_REJECTED))
+            if (roamingEventType >= ROAMING_TRIGGER_AP_DISCONNECT)
             {
                 pAPConnection->removeKeys = TI_TRUE;
             }
@@ -1299,9 +1299,13 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
             }
             UPDATE_SEND_DEAUTH_PACKET_FLAG(roamingEventType);
 			if (roamingEventType == ROAMING_TRIGGER_SECURITY_ATTACK)
+            {
 				pAPConnection->deauthPacketReasonCode = STATUS_MIC_FAILURE;
+            }
 			else
+            {
 				pAPConnection->deauthPacketReasonCode = STATUS_UNSPECIFIED;
+            }
             apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_STOP, pAPConnection);
         }
         return TI_OK;
@@ -1325,13 +1329,6 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
         }
         /* Report to Roaming Manager */
 
-#ifdef XCC_MODULE_INCLUDED
-        /* For XCC only - if the is reason is TSPEC reject - mark this as BssLoss - To be changed later */
-        if (roamingEventType == ROAMING_TRIGGER_TSPEC_REJECTED)
-        {
-            roamingEventType = ROAMING_TRIGGER_BSS_LOSS;
-        }
-#endif        
         pAPConnection->roamEventCallb(pAPConnection->hRoamMng, &roamingEventType, reasonCode);
     }
 
@@ -2286,7 +2283,6 @@ static void apConn_smHandleTspecReneg (void *pData)
     apConn_t *pAPConnection = (apConn_t *)pData;
     paramInfo_t param;
 
-    
     if (pAPConnection->voiceTspecConfigured
 #ifndef XCC_MODULE_INCLUDED
           && pAPConnection->reNegotiateTSPEC
@@ -2301,7 +2297,6 @@ static void apConn_smHandleTspecReneg (void *pData)
         {
             /* TSPEC is already configured, move to CONNECTED */
             apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_FINISHED_OK, pAPConnection);
-            return;;
         }
         else
 #endif
@@ -2314,16 +2309,13 @@ static void apConn_smHandleTspecReneg (void *pData)
             {
                 /* Re-negotiation of TSPEC cannot be performed */
                 apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_FINISHED_NOT_OK, pAPConnection);
-                return;
             }
-            return;
         }
     }
     else
     {
         /* No need to re-negotiate TSPEC, move to CONNECTED */
         apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_FINISHED_OK, pAPConnection);
-        return;
     }
 }
 

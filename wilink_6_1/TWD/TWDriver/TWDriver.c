@@ -432,12 +432,12 @@ void TWD_Init (TI_HANDLE    hTWD,
                    pTWD->hTwIf);
 
     hwInit_Init (pTWD->hHwInit,
-                   pTWD->hReport,
-		   pTWD->hTimer,
-                   hTWD, 
-	               hTWD, 
-		           (TFinalizeCb)TWD_FinalizeDownload, 
-                   TWD_InitHwCb);
+                 pTWD->hReport, 
+                 pTWD->hTimer, 
+                 hTWD, 
+	             hTWD, 
+		         (TFinalizeCb)TWD_FinalizeDownload, 
+                 TWD_InitHwCb);
 
     /*
      * Initialize the FW-Transfer modules
@@ -451,7 +451,7 @@ void TWD_Init (TI_HANDLE    hTWD,
     RxQueue_Init (pTWD->hRxQueue, pTWD->hReport, pTWD->hTimer);
 
 #ifdef TI_DBG
-    fwDbg_Init (pTWD->hFwDbg, pTWD->hReport, pTWD->hTwIf);
+    fwDbg_Init (pTWD->hFwDbg, pTWD->hReport, pTWD->hTwIf, pTWD->hFwEvent);
 #endif /* TI_DBG */
 
     /* Initialize the MAC Services */
@@ -479,7 +479,7 @@ void TWD_Init (TI_HANDLE    hTWD,
 }
 
  TI_STATUS TWD_InitHw (TI_HANDLE hTWD, 
-					  TI_UINT8 *pbuf, 
+					   TI_UINT8  *pbuf, 
 					   TI_UINT32 length,
                        TI_UINT32 uRxDmaBufLen,
                        TI_UINT32 uTxDmaBufLen)
@@ -601,6 +601,9 @@ static TI_STATUS TWD_ConfigFwCb (TI_HANDLE hTWD, TI_STATUS status)
     /* Provide number of HW Tx-blocks and descriptors to Tx-HW-Queue module */
     txHwQueue_SetHwInfo (pTWD->hTxHwQueue, pDmaParams);
 
+    /* call all the CB stored in the aRecoveryQueue */
+    cmdQueue_EndReconfig(pTWD->hCmdQueue);
+
     /* If the configure complete function was registered, we call it here - end of TWD_Configure stage */
     if (pTWD->fConfigFwCb) 
     {
@@ -617,13 +620,13 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
 {
     TTwd         *pTWD = (TTwd *)hTWD;
 
-    TWlanParams         *pWlanParams = &DB_WLAN(pTWD->hCmdBld);
-    TKeepAliveList      *pKlvParams = &DB_KLV(pTWD->hCmdBld);
-    IniFileRadioParam   *pRadioParams = &DB_RADIO(pTWD->hCmdBld);
-    IniFileExtendedRadioParam   *pExtRadioParams = &DB_EXT_RADIO(pTWD->hCmdBld);
-    IniFileGeneralParam *pGenParams = &DB_GEN(pTWD->hCmdBld);
-	TRateMngParams      *pRateMngParams = &DB_RM(pTWD->hCmdBld);
-    TDmaParams          *pDmaParams = &DB_DMA(pTWD->hCmdBld);
+    TWlanParams         		*pWlanParams = &DB_WLAN(pTWD->hCmdBld);
+    TKeepAliveList      		*pKlvParams = &DB_KLV(pTWD->hCmdBld);
+    IniFileRadioParam   		*pRadioParams = &DB_RADIO(pTWD->hCmdBld);
+	IniFileExtendedRadioParam   *pExtRadioParams = &DB_EXT_RADIO(pTWD->hCmdBld);
+    IniFileGeneralParam 		*pGenParams = &DB_GEN(pTWD->hCmdBld);
+	TRateMngParams      		*pRateMngParams = &DB_RM(pTWD->hCmdBld);
+    TDmaParams          		*pDmaParams = &DB_DMA(pTWD->hCmdBld);
 
     TI_UINT32            k, uIndex;
     int iParam;
@@ -679,7 +682,7 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     pWlanParams->ListenInterval             = (TI_UINT8)pInitParams->tGeneral.halCtrlListenInterval;
     pWlanParams->RateFallback               = pInitParams->tGeneral.halCtrlRateFallbackRetry;        
     pWlanParams->MacClock                   = pInitParams->tGeneral.halCtrlMacClock;     
-    pWlanParams->ArmClock                   = pInitParams->tGeneral.halCtrlArmClock;     
+    pWlanParams->ArmClock                   = pInitParams->tGeneral.halCtrlArmClock;
 
     pWlanParams->ch14TelecCca = pInitParams->tGeneral.halCtrlCh14TelecCca;
 
@@ -688,11 +691,11 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     pWlanParams->TxCompletePacingTimeout    = pInitParams->tGeneral.TxCompletePacingTimeout;  
     pWlanParams->RxIntrPacingThreshold      = pInitParams->tGeneral.RxIntrPacingThreshold;     
     pWlanParams->RxIntrPacingTimeout        = pInitParams->tGeneral.RxIntrPacingTimeout;      
-    
+
     /* Number of Rx mem-blocks to allocate in FW */
     pDmaParams->NumRxBlocks                 = pInitParams->tGeneral.uRxMemBlksNum;
 
-    
+
     /* Configure ARP IP */
     pWlanParams->arpFilterType    = pInitParams->tArpIpFilter.filterType;
     IP_COPY (pWlanParams->arp_IP_addr, pInitParams->tArpIpFilter.addr);
@@ -766,10 +769,11 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
      */
     pWlanParams->tTwdHtCapabilities.b11nEnable =            pInitParams->tGeneral.b11nEnable;
     /* Configure HT capabilities setting */
-    pWlanParams->tTwdHtCapabilities.uChannelWidth =         CHANNEL_WIDTH_20MHZ;                  
-    pWlanParams->tTwdHtCapabilities.uRxSTBC =               RXSTBC_NOT_SUPPORTED;
-    pWlanParams->tTwdHtCapabilities.uMaxAMSDU =             MAX_MSDU_3839_OCTETS;                         
-    pWlanParams->tTwdHtCapabilities.uMaxAMPDU =             pInitParams->tGeneral.uMaxAMPDU;
+    pWlanParams->tTwdHtCapabilities.uChannelWidth = CHANNEL_WIDTH_20MHZ;                  
+    pWlanParams->tTwdHtCapabilities.uRxSTBC       = RXSTBC_NOT_SUPPORTED;
+    pWlanParams->tTwdHtCapabilities.uMaxAMSDU     = MAX_MSDU_3839_OCTETS;                         
+    pWlanParams->tTwdHtCapabilities.uMaxAMPDU     = pInitParams->tGeneral.uMaxAMPDU;
+
     pWlanParams->tTwdHtCapabilities.uAMPDUSpacing =         AMPDU_SPC_8_MICROSECONDS;
     pWlanParams->tTwdHtCapabilities.aRxMCS[0] =             (MCS_SUPPORT_MCS_0 |
                                                              MCS_SUPPORT_MCS_1 |
@@ -832,7 +836,6 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     return TI_OK;
 }
 
-
 TI_STATUS TWD_ConfigFw (TI_HANDLE hTWD)
 {
     TTwd *pTWD = (TTwd *)hTWD;
@@ -854,12 +857,15 @@ void TWD_FinalizeDownload (TI_HANDLE hTWD)
 {
     TTwd *pTWD = (TTwd *)hTWD;
 
-    TRACE0(pTWD->hReport, REPORT_SEVERITY_INIT , "TWD_FinalizeDownload: called\n");
 
 	if ( pTWD == NULL )
 	{
 		return;
 	}
+
+    TRACE0(pTWD->hReport, REPORT_SEVERITY_INIT , "TWD_FinalizeDownload: called\n");
+
+
     /* Here at the end call the Initialize Complete callback that will release the user Init semaphore */
     TRACE0(pTWD->hReport, REPORT_SEVERITY_INIT, "Before sending the Init Complet callback !!!!!\n");
 
@@ -1193,9 +1199,10 @@ void TWD_EnableExternalEvents (TI_HANDLE hTWD)
      * Enable sleep after all firmware initializations completed 
      * The awake was in the TWD_initHw phase
      */
-    twIf_Sleep (pTWD->hTwIf);
 
     fwEvent_EnableExternalEvents (pTWD->hFwEvent);
+
+    twIf_Sleep (pTWD->hTwIf);
 }
 
 TI_BOOL TWD_RecoveryEnabled (TI_HANDLE hTWD)
@@ -1804,4 +1811,3 @@ void TWD_FinalizePolarityRead(TI_HANDLE hTWD)
   /*  allways read FEM type from Radio Registers */ 
    hwInit_ReadRadioParams(pTWD->hHwInit);   
 }
-

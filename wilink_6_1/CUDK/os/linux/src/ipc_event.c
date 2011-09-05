@@ -32,7 +32,7 @@
 /************/
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <linux/if.h>
+#include <net/if.h>
 #include <linux/rtnetlink.h>
 #include <signal.h>
 #include <sys/mman.h>
@@ -44,7 +44,6 @@
 #include "STADExternalIf.h"
 #include "ParsEvent.h"
 #include "ipc_event.h"
-
 
 /* defines */
 /***********/
@@ -59,10 +58,6 @@
 
 /* local types */
 /***************/
-
-/* DBG Julie */
-typedef unsigned long long u64;
-
 typedef struct IpcEvent_Shared_Memory_t
 {
     int pipe_fields[2];
@@ -135,8 +130,6 @@ static VOID IpcEvent_PrintEvent(IpcEvent_Child_t* pIpcEventChild, U32 EventId, T
     {
         switch(EventId)
         {
-
-
             case IPC_EVENT_DISASSOCIATED:
             {
                 OS_802_11_DISASSOCIATE_REASON_T    *pDisAssoc;
@@ -288,7 +281,8 @@ static VOID IpcEvent_PrintEvent(IpcEvent_Child_t* pIpcEventChild, U32 EventId, T
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_WPS_SESSION_OVERLAP\n");
                 break;
             case IPC_EVENT_RSSI_SNR_TRIGGER:
-                os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_RSSI_SNR_TRIGGER (index = %d), Data = %d\n", (S8)(*(pData + 2) - 1),((*pData>128)? (0xFFFFFF00 | (*pData)) : (S8)(*pData)));
+                os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_RSSI_SNR_TRIGGER (index = %d), Data = %d\n", 
+                                (S8)(*(pData + 2) - 1),PRINT_FORMAT_S8_VAL(*pData));
                 break;
             case IPC_EVENT_TIMEOUT:
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_TIMEOUT\n");
@@ -305,7 +299,6 @@ static VOID IpcEvent_PrintEvent(IpcEvent_Child_t* pIpcEventChild, U32 EventId, T
                 os_error_printf(CU_MSG_ERROR, (PS8)"**** Unknow EventId %d ****\n", EventId); 
         }
     }   
-
 }
 
 static VOID IpcEvent_wext_event_wireless(IpcEvent_Child_t* pIpcEventChild, PS8 data, S32 len)
@@ -489,6 +482,15 @@ static S32 IpcEvent_Handle_Parent_Event(IpcEvent_Child_t* pIpcEventChild)
     S8 msg[IPC_EVENT_MSG_MAX_LEN];
 
     S32 msgLen = read(pIpcEventChild->pipe_from_parent,msg, IPC_EVENT_MSG_MAX_LEN);
+
+    /* If read() fails it returns -1. Avoid buffer out of boundary */
+    if(msgLen < 0)
+    {
+        os_error_printf(CU_MSG_ERROR, (PS8)"ERROR - IpcEvent_Handle_Parent_Event - read() failed!\n");
+
+        return FALSE;
+    }
+
     msg[msgLen] = 0;
 
     if(!os_strcmp(msg, (PS8)IPC_EVENT_MSG_KILL))

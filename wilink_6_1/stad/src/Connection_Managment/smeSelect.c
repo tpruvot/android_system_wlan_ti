@@ -78,7 +78,6 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
     int             apFoundCtr =0;
     TIWLN_SIMPLE_CONFIG_MODE eWscMode;
 
-
     TRACE0(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select called\n");
 
     /* on SG avalanche, select is not needed, send connect event automatically */
@@ -102,7 +101,6 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
         pCurrentSite = pParam->content.pPrimarySite;
         os_memoryFree(pSme->hOS, pParam, sizeof(paramInfo_t));
         return pCurrentSite;
-
     }
 
     /* get the first site from the scan result table */
@@ -113,7 +111,7 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
     {
         TRACE6(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select: considering BSSID: %02x:%02x:%02x:%02x:%02x:%02x for selection\n", pCurrentSite->bssid[ 0 ], pCurrentSite->bssid[ 1 ], pCurrentSite->bssid[ 2 ], pCurrentSite->bssid[ 3 ], pCurrentSite->bssid[ 4 ], pCurrentSite->bssid[ 5 ]);
 
-        /* if this site was previously selected in the current SME connection attempt */
+        /* if this site was previously selected in the current SME connection attempt, and conn mode is auto */
         if (TI_TRUE == pCurrentSite->bConsideredForSelect)
         {
             TRACE6(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select: BSSID: %02x:%02x:%02x:%02x:%02x:%02x was selected previously\n", pCurrentSite->bssid[ 0 ], pCurrentSite->bssid[ 1 ], pCurrentSite->bssid[ 2 ], pCurrentSite->bssid[ 3 ], pCurrentSite->bssid[ 4 ], pCurrentSite->bssid[ 5 ]);
@@ -138,7 +136,7 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
         if (TI_FALSE == sme_SelectBssidMatch (&(pCurrentSite->bssid), &(pSme->tBssid)))
         /* site doesn't match */
         {
-            TRACE6(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select: BSSID: %02x:%02x:%02x:%02x:%02x:%02x doesn't match BSSID\n", pCurrentSite->bssid[ 0 ], pCurrentSite->bssid[ 1 ], pCurrentSite->bssid[ 2 ], pCurrentSite->bssid[ 3 ], pCurrentSite->bssid[ 4 ], pCurrentSite->bssid[ 5 ]);
+            TRACE6(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select: BSSID: %02x:%02x:%02x:%02x:%02x:%02x doesn't match SSID\n", pCurrentSite->bssid[ 0 ], pCurrentSite->bssid[ 1 ], pCurrentSite->bssid[ 2 ], pCurrentSite->bssid[ 3 ], pCurrentSite->bssid[ 4 ], pCurrentSite->bssid[ 5 ]);
             pCurrentSite->bConsideredForSelect = TI_TRUE; /* don't try this site again */
             /* get the next site and continue the loop */
             pCurrentSite = scanResultTable_GetNext (pSme->hScanResultTable);
@@ -232,10 +230,6 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
         /* and continue to the next site */
         pCurrentSite = scanResultTable_GetNext (pSme->hScanResultTable);
     }
-
-
-
-
 
     /* if a matching site was found */
     if (NULL != pSelectedSite)

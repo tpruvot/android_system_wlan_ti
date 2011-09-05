@@ -376,7 +376,6 @@ TI_STATUS txCtrlParams_getParam(TI_HANDLE hTxCtrl, paramInfo_t *pParamInfo)
     default:
         TRACE0(pTxCtrl->hReport, REPORT_SEVERITY_ERROR, ": PARAMETER NOT SUPPORTED\n");
         return PARAM_NOT_SUPPORTED;
-       
     }
 
     return TI_OK;
@@ -685,6 +684,7 @@ DESCRIPTION:    Print module internal information.
 ************************************************************************/
 void txCtrlParams_printInfo(TI_HANDLE hTxCtrl)
 {
+#ifdef REPORT_LOG
 	txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
 
     WLAN_OS_REPORT(("-------------- Tx-Ctrl Module Information --------------\n"));
@@ -727,6 +727,7 @@ void txCtrlParams_printInfo(TI_HANDLE hTxCtrl)
     WLAN_OS_REPORT(("encryptionFieldSize          = %d\n", pTxCtrl->encryptionFieldSize));
     WLAN_OS_REPORT(("currBssType                  = %d\n", pTxCtrl->currBssType));
     WLAN_OS_REPORT(("========================================================\n\n"));
+#endif
 }
 
 
@@ -737,6 +738,7 @@ DESCRIPTION:    Print Tx statistics debug counters.
 ************************************************************************/
 void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl)
 {
+#ifdef REPORT_LOG
 	txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
     TI_UINT32 ac;
 
@@ -793,6 +795,7 @@ void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl)
 		pTxCtrl->dbgCounters.dbgNumPktsPending[0] +	pTxCtrl->dbgCounters.dbgNumPktsPending[1] +
 		pTxCtrl->dbgCounters.dbgNumPktsPending[2] +	pTxCtrl->dbgCounters.dbgNumPktsPending[3]));
     WLAN_OS_REPORT(("========================================================\n\n"));
+#endif
 }
 
 

@@ -244,7 +244,6 @@ void smeSm_PreConnect (TI_HANDLE hSme)
     TSme *pSme = (TSme *)hSme;
     paramInfo_t	*pParam;
 
-
     /* set the connection mode with which this connection attempt is starting */
     pSme->eLastConnectMode = pSme->eConnectMode;
  
@@ -295,6 +294,7 @@ void smeSm_PreConnect (TI_HANDLE hSme)
 			{
 				TI_UINT8     uDesiredChannel;
                 TI_BOOL     channelValidity;
+
 		        pSme->bConnectRequired = TI_FALSE;
 
                 pParam = (paramInfo_t *)os_memoryAlloc(pSme->hOS, sizeof(paramInfo_t));

@@ -223,7 +223,7 @@
 
 #define SMART_REFLEX_STATE_MIN        TI_FALSE
 #define SMART_REFLEX_STATE_MAX        TI_TRUE
-#define SMART_REFLEX_STATE_DEF        TI_TRUE
+#define SMART_REFLEX_STATE_DEF        TI_FALSE
 
 #define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
 #define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE_SRF1  "07,03,18,10,05,fb,f0,e8, 0,0,0,0,0,0,0f,3f"
@@ -392,6 +392,7 @@
 
 #define RSSI_DEFAULT_THRESHOLD          -80 
 #define SNR_DEFAULT_THRESHOLD           0 
+#define RSSI_BG_SCAN_HIGH_THRESHOLD     -45
 
 /* 
  * 'No beacon' roaming trigger configuration
@@ -628,9 +629,10 @@ typedef enum
 /*	0x26	*/	TWD_COEX_ACTIVITY_PARAM_ID,	    				/**< */
 /*	0x27	*/	TWD_FM_COEX_PARAM_ID,	    				    /**< */
 /*	0x28	*/	TWD_DCO_ITRIM_PARAMS_ID,    				    /**< */
+/*	0x29	*/	TWD_SDIO_VALIDATION_PARAMS_ID,    				/**< */
 
 				/* must be last!!! */
-/*	0x29    */	TWD_LAST_PARAM_ID								/**< */
+/*	0x30    */	TWD_LAST_PARAM_ID								/**< */
 } ETwdParam;
 
 /** \enum ETwdCallbackOwner
@@ -1223,14 +1225,15 @@ typedef enum
 */
 typedef enum
 {   
-           MAX_MPDU_MIN_VALUE = 0,
+            MAX_MPDU_MIN_VALUE = 0,
 /*	0	*/	MAX_MPDU_8191_OCTETS = MAX_MPDU_MIN_VALUE,	/**< Maximum MPDU Octets Number: 8191	*/
-/*	1	*/  MAX_MPDU_16383_OCTETS,		/**< Maximum MPDU Octets Number: 16383	*/
-/*	2	*/  MAX_MPDU_32767_OCTETS,		/**< Maximum MPDU Octets Number: 32767	*/
-/*	3	*/  MAX_MPDU_65535_OCTETS,		/**< Maximum MPDU Octets Number: 65535	*/
-           MAX_MPDU_MAX_VALUE = MAX_MPDU_65535_OCTETS
+/*	1	*/  MAX_MPDU_16383_OCTETS,		                /**< Maximum MPDU Octets Number: 16383	*/
+/*	2	*/  MAX_MPDU_32767_OCTETS,		                /**< Maximum MPDU Octets Number: 32767	*/
+/*	3	*/  MAX_MPDU_65535_OCTETS,		                /**< Maximum MPDU Octets Number: 65535	*/
+            MAX_MPDU_MAX_VALUE = MAX_MPDU_65535_OCTETS
 
 } ETwdMaxAMPDU;
+
 
 /** \enum ETwdAMPDUSpacing
  * \brief TWD AMPDU Spacing
@@ -1548,6 +1551,13 @@ typedef struct
     TI_BOOL                 bEnabled;       /**< If TRUE enable this TID streaming, if FALSE disable it. */
 
 } TPsRxStreaming;
+
+typedef struct
+{
+    TI_UINT32               uTid;           /**< The configured TID (0-7) */
+    TI_UINT32               uBaPlociy;  	/**< Ba policy */
+
+} TBaPolicy;
 
 /** \struct TDmaParams
  * \brief DMA Parameters
@@ -2365,6 +2375,22 @@ typedef struct
     uint32 moderationTimeoutUsec;
 }DcoItrimParams_t;
 
+
+/** \struct SdioValidationTestParams_t
+ * \brief SDIO Validation Test params structure
+ * 
+ * \par Description
+ * 
+ * \sa
+ */ 
+typedef struct
+{
+    TI_UINT32 uTxnSize;     /* In Bytes */
+    TI_UINT32 uNumOfLoops;
+
+} SdioValidationTestParams_t;
+
+
 /** \union TMibData
  * \brief MIB Data
  * 
@@ -2483,6 +2509,9 @@ typedef union
     /* DCO Itrim */
     DcoItrimParams_t                    tDcoItrimParams;                /**< */
 
+    /* SDIO Validation Test */
+    SdioValidationTestParams_t          tSdioValidationTestParams;      /**< */
+
 } TTwdParamContents;
 
 /** \struct TTwdParamInfo
@@ -2564,7 +2593,7 @@ typedef struct
     TI_UINT8                            halCtrlArmClock;					/**< */
     TI_UINT16                           halCtrlBcnRxTime;					/**< */
     TI_BOOL                             halCtrlRxEnergyDetection;    		/**< */
-    TI_BOOL                             halCtrlCh14TelecCca;			/**< */
+    TI_BOOL                             halCtrlCh14TelecCca;				/**< */
     TI_BOOL                             halCtrlEepromLessEnable;			/**< */
     TI_BOOL                             halCtrlRxDisableBroadcast;			/**< */
     TI_BOOL                             halCtrlRecoveryEnable;				/**< */
@@ -2731,7 +2760,7 @@ typedef struct
     TArpIpFilterInitParams              tArpIpFilter;		 /**< ARP IP filter Initialization Parameters	*/
     TMacAddrFilterInitParams            tMacAddrFilter;		 /**< MAC Address Initialization Parameters		*/
     IniFileRadioParam                   tIniFileRadioParams; /**< Radio Initialization Parameters   		*/
-    IniFileExtendedRadioParam           tIniFileExtRadioParams; /**< Extended Radio Initialization Parameters            */
+	IniFileExtendedRadioParam			tIniFileExtRadioParams; /**< Radio Initialization Parameters   		*/
     IniFileGeneralParam                 tPlatformGenParams; /**< Radio Initialization Parameters   	        */
 	RateMangeParams_t					tRateMngParams;
     DcoItrimParams_t                    tDcoItrimParams;          /**< Dco Itrim Parameters   	            */

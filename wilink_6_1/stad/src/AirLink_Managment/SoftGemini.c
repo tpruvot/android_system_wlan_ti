@@ -85,6 +85,8 @@ static void SoftGemini_DisableProtectiveMode(TI_HANDLE hSoftGemini);
 static char* SoftGemini_ConvertModeToString(ESoftGeminiEnableModes SoftGeminiEnable);
 #endif
 
+void qosMngr_SetMotrxStreaming(TI_HANDLE hQosMngr, TI_BOOL bEnable);
+
 /********************************************************************************/
 /*						Interface functions Implementation.						*/
 /********************************************************************************/
@@ -122,9 +124,9 @@ void SoftGemini_SetPSmode(TI_HANDLE hSoftGemini)
 		}
 	}
 	else 
-        {
-          TRACE0(pSoftGemini->hReport, REPORT_SEVERITY_ERROR, "  SoftGemini_SetPSmode() - Error hSoftGemini= NULL \n");
-        }
+    {
+        os_printf("  SoftGemini_SetPSmode() - Error hSoftGemini= NULL \n");
+    }
 }
 
 /************************************************************************
@@ -162,7 +164,7 @@ void SoftGemini_unSetPSmode(TI_HANDLE hSoftGemini)
 	}
     else
     {
-		TRACE0(pSoftGemini->hReport, REPORT_SEVERITY_ERROR, " SoftGemini_unSetPSmode() - Error hSoftGemini= NULL \n");
+		os_printf("SoftGemini_unSetPSmode() - Error hSoftGemini= NULL \n");
     }
 }
 
@@ -222,7 +224,8 @@ void SoftGemini_init (TStadHandlesList *pStadHandles)
 	pSoftGemini->hCmdDispatch = pStadHandles->hCmdDispatch;
 	pSoftGemini->hScanCncn    = pStadHandles->hScanCncn;
 	pSoftGemini->hCurrBss	  = pStadHandles->hCurrBss;
-    pSoftGemini->hSme         = pStadHandles->hSme;
+  pSoftGemini->hSme         = pStadHandles->hSme;
+  pSoftGemini->hQosMngr	  = pStadHandles->hQosMngr;
 }
 
 
@@ -244,7 +247,7 @@ TI_STATUS SoftGemini_SetDefaults (TI_HANDLE hSoftGemini, SoftGeminiInitParams_t 
 
 	pSoftGemini->SoftGeminiParam.paramIdx = 0xFF; /* signals to FW to config all the paramters */
 
-  
+
     /* Send the configuration to the FW */
 	status = SoftGemini_setParamsToFW(hSoftGemini, &pSoftGemini->SoftGeminiParam);
 
@@ -503,7 +506,7 @@ static void SoftGemini_setConfigParam(TI_HANDLE hSoftGemini, TI_UINT32 *param)
 	SoftGemini_t *pSoftGemini = (SoftGemini_t *)hSoftGemini;
 
 	/* param[0] - SG parameter index, param[1] - SG parameter value */
-	pSoftGemini->SoftGeminiParam.coexParams[(TI_UINT8)param[0]] = (TI_UINT32)param[1]; 
+	pSoftGemini->SoftGeminiParam.coexParams[(TI_UINT8)param[0]] = (TI_UINT32)param[1];
 	pSoftGemini->SoftGeminiParam.paramIdx = (TI_UINT8)param[0];
 }
 
@@ -521,12 +524,12 @@ void SoftGemini_printParams(TI_HANDLE hSoftGemini)
 	SoftGemini_t *pSoftGemini = (SoftGemini_t *)hSoftGemini;
 	TSoftGeminiParams *SoftGeminiParam = &pSoftGemini->SoftGeminiParam;
 
-	WLAN_OS_REPORT(("[0]:  coexBtPerThreshold = %d\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_PER_THRESHOLD])); 
+	WLAN_OS_REPORT(("[0]:  coexBtPerThreshold = %d\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_PER_THRESHOLD]));
 	WLAN_OS_REPORT(("[1]:  coexHv3MaxOverride = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_HV3_MAX_OVERRIDE])); 
-	WLAN_OS_REPORT(("[2]:  coexBtNfsSampleInterval = %d (msec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_NFS_SAMPLE_INTERVAL])); 
-	WLAN_OS_REPORT(("[3]:  coexBtLoadRatio = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_LOAD_RATIO])); 
-	WLAN_OS_REPORT(("[4]:  coexAutoPsMode = %s \n", (SoftGeminiParam->coexParams[SOFT_GEMINI_AUTO_PS_MODE]?"Enabled":"Disabled"))); 
-	WLAN_OS_REPORT(("[5]:  coexAutoScanEnlargedNumOfProbeReqPercent = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_AUTO_SCAN_PROBE_REQ])); 
+	WLAN_OS_REPORT(("[2]:  coexBtNfsSampleInterval = %d (msec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_NFS_SAMPLE_INTERVAL]));
+	WLAN_OS_REPORT(("[3]:  coexBtLoadRatio = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BT_LOAD_RATIO]));
+	WLAN_OS_REPORT(("[4]:  coexAutoPsMode = %s \n", (SoftGeminiParam->coexParams[SOFT_GEMINI_AUTO_PS_MODE]?"Enabled":"Disabled")));
+	WLAN_OS_REPORT(("[5]:  coexAutoScanEnlargedNumOfProbeReqPercent = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_AUTO_SCAN_PROBE_REQ]));
 	WLAN_OS_REPORT(("[6]:  coexHv3AutoScanEnlargedScanWinodowPercent = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_ACTIVE_SCAN_DURATION_FACTOR_HV3]));
 	WLAN_OS_REPORT(("[7]:  coexAntennaConfiguration = %s (0 = Single, 1 = Dual) \n", (SoftGeminiParam->coexParams[SOFT_GEMINI_ANTENNA_CONFIGURATION]?"Dual":"Single")));
 	WLAN_OS_REPORT(("[8]:  coexMaxConsecutiveBeaconMissPrecent = %d (%)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_BEACON_MISS_PERCENT]));
@@ -546,7 +549,7 @@ void SoftGemini_printParams(TI_HANDLE hSoftGemini)
     WLAN_OS_REPORT(("[22]: coexWlanPsMaxBtAclSlaveEDR = %d (msec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_WLAN_PS_MAX_BT_ACL_SLAVE_EDR]));
 	WLAN_OS_REPORT(("[23]: coexRxt = %d (usec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_RXT]));
 	WLAN_OS_REPORT(("[24]: coexTxt = %d (usec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_TXT]));
-	WLAN_OS_REPORT(("[25]: coexAdaptiveRxtTxt = %s \n", (SoftGeminiParam->coexParams[SOFT_GEMINI_ADAPTIVE_RXT_TXT]?"Enabled":"Disabled"))); 
+	WLAN_OS_REPORT(("[25]: coexAdaptiveRxtTxt = %s \n", (SoftGeminiParam->coexParams[SOFT_GEMINI_ADAPTIVE_RXT_TXT]?"Enabled":"Disabled")));
 	WLAN_OS_REPORT(("[26]: coexPsPollTimeout = %d (msec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_PS_POLL_TIMEOUT]));
 	WLAN_OS_REPORT(("[27]: coexUpsdTimeout = %d (msec) \n", SoftGeminiParam->coexParams[SOFT_GEMINI_UPSD_TIMEOUT]));
 	WLAN_OS_REPORT(("[28]: coexWlanActiveBtAclMasterMinEDR = %d (msec)\n", SoftGeminiParam->coexParams[SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_MASTER_MIN_EDR]));
@@ -846,10 +849,12 @@ TRACE0(pSoftGemini->hReport, REPORT_SEVERITY_WARNING, ": SG is disabled, existin
 	if ( (SENSE_MODE_ENABLE == *str) && (!pSoftGemini->bDriverEnabled) )
 	{
 			SoftGemini_EnableDriver(hSoftGemini);
+			qosMngr_SetMotrxStreaming(pSoftGemini->hQosMngr,TI_TRUE);
 	}
 	else if ( (SENSE_MODE_DISABLE == *str) && (pSoftGemini->bDriverEnabled) )
 	{
 			SoftGemini_DisableDriver(hSoftGemini);
+			qosMngr_SetMotrxStreaming(pSoftGemini->hQosMngr,TI_FALSE);
 	}
 }
 
@@ -944,7 +949,7 @@ TI_STATUS SoftGemini_handleRecovery(TI_HANDLE hSoftGemini)
     TRACE1(pSoftGemini->hReport, REPORT_SEVERITY_INFORMATION, "Set SG to-%d\n", pSoftGemini->SoftGeminiEnable);
 
 	/* Config the params to FW */
-	
+
 	SoftGemini_setParamsToFW(hSoftGemini, &pSoftGemini->SoftGeminiParam);
 	/*SoftGemini_printParams(hSoftGemini);*/
 	return TI_OK;

@@ -409,6 +409,7 @@ RETURN:
 void healthMonitor_printFailureEvents(TI_HANDLE hHealthMonitor)
 {
   #ifdef TI_DBG
+#ifdef REPORT_LOG
     THealthMonitor  *pHealthMonitor = (THealthMonitor*)hHealthMonitor;
     int i;
 
@@ -421,7 +422,7 @@ void healthMonitor_printFailureEvents(TI_HANDLE hHealthMonitor)
     WLAN_OS_REPORT(("Maximum number of commands in mailbox queue = %u\n", TWD_GetMaxNumberOfCommandsInQueue(pHealthMonitor->hTWD)));
     WLAN_OS_REPORT(("Health Test Performed       = %d\n", pHealthMonitor->numOfHealthTests));
     WLAN_OS_REPORT(("\n"));
-
+#endif
   #endif /* TI_DBG */
 }
 

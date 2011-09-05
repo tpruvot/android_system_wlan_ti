@@ -58,7 +58,6 @@ typedef enum
 /*	24	*/	RESET_TX_RESULT_COUNTERS,
 /*	25	*/	RESET_TX_XFER_COUNTERS,
 
-
 /* Rx debug functions */
 /*	50	*/	PRINT_RX_BLOCK                  = 50,
 /*	51	*/	PRINT_RX_COUNTERS,

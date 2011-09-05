@@ -220,13 +220,18 @@ TI_STATUS roamingMngr_triggerRoamingCb(TI_HANDLE hRoamingMngr, void *pData, TI_U
 #endif
     if (roamingTrigger <= ROAMING_TRIGGER_BG_SCAN_GROUP)
     {
-        TI_BOOL    lowQuality = TI_FALSE;
+        ERssiQuality    rssiQuality = ROAMING_QUALITY_NORMAL;
         if (roamingTrigger == ROAMING_TRIGGER_LOW_QUALITY_FOR_BG_SCAN)
         {
-            lowQuality = TI_TRUE;
+            rssiQuality = ROAMING_QUALITY_LOW;
         }
-        TRACE1(pRoamingMngr->hReport, REPORT_SEVERITY_INFORMATION, "roamingMngr_triggerRoamingCb, lowQuality = %d \n", lowQuality);
-        scanMngr_qualityChangeTrigger(pRoamingMngr->hScanMngr, lowQuality);
+		else if (roamingTrigger == ROAMING_TRIGGER_HIGH_QUALITY_FOR_BG_SCAN)
+        {
+             rssiQuality = ROAMING_QUALITY_HIGH;
+        }
+
+        TRACE1(pRoamingMngr->hReport, REPORT_SEVERITY_INFORMATION, "roamingMngr_triggerRoamingCb, rssiQuality = %d \n", rssiQuality);
+        scanMngr_notifyChangeTrigger(pRoamingMngr->hScanMngr, rssiQuality);
     }
     else
     {
@@ -645,7 +650,6 @@ extern TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
 
 TI_HANDLE roamingMngr_create(TI_HANDLE hOs)
 {
- //   TI_STATUS       status = TI_OK;
     roamingMngr_t   *pRoamingMngr;
     TI_UINT32          initVec;
 

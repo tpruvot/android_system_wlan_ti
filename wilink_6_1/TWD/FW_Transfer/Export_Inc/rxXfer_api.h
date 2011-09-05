@@ -54,7 +54,7 @@ TI_HANDLE			rxXfer_Create(TI_HANDLE hOs);
 void				rxXfer_Destroy(TI_HANDLE hRxXfer);
 
 void				rxXfer_Init( TI_HANDLE hRxXfer,
-								 TI_HANDLE hFwEvent,
+								 TI_HANDLE hFwEvent, 
 								 TI_HANDLE hReport,
                                  TI_HANDLE hTwIf,
                                  TI_HANDLE hRxQueue);

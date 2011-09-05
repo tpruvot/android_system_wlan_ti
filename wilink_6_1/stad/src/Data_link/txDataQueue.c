@@ -177,7 +177,6 @@ void txDataQ_Init (TStadHandlesList *pStadHandles)
                                                    TI_TRUE,
                                                    "TX_DATA",
                                                    sizeof("TX_DATA"));
-
 }
 
 
@@ -238,9 +237,6 @@ TI_STATUS txDataQ_Destroy (TI_HANDLE hTxDataQ)
     TI_STATUS  status = TI_OK;
     TI_UINT32  uQueId;
 
-    /* Dequeue and free all queued packets */
-    txDataQ_ClearQueues (hTxDataQ);
-
     /* Free Data queues */
     for (uQueId = 0 ; uQueId < pTxDataQ->uNumQueues ; uQueId++)
     {
@@ -284,17 +280,14 @@ void txDataQ_ClearQueues (TI_HANDLE hTxDataQ)
     /* Dequeue and free all queued packets */
     for (uQueId = 0 ; uQueId < pTxDataQ->uNumQueues ; uQueId++)
     {
-        while (1)
-        {
+        do {
             context_EnterCriticalSection (pTxDataQ->hContext);
             pPktCtrlBlk = (TTxCtrlBlk *) que_Dequeue (pTxDataQ->aQueues[uQueId]);
             context_LeaveCriticalSection (pTxDataQ->hContext);
-            if (pPktCtrlBlk == NULL) 
-            {
-                break;
+            if (pPktCtrlBlk != NULL) {
+                txCtrl_FreePacket (pTxDataQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
             }
-            txCtrl_FreePacket (pTxDataQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
-        }
+        } while (pPktCtrlBlk != NULL);
     }
 }
 
@@ -315,8 +308,6 @@ void txDataQ_ClearQueues (TI_HANDLE hTxDataQ)
  * \return TI_OK - if the packet was queued, TI_NOK - if the packet was dropped. 
  * \sa     txDataQ_Run
  */ 
-
-
 TI_STATUS txDataQ_InsertPacket (TI_HANDLE hTxDataQ, TTxCtrlBlk *pPktCtrlBlk, TI_UINT8 uPacketDtag)
 {
     TTxDataQ        *pTxDataQ = (TTxDataQ *)hTxDataQ;
@@ -592,6 +583,7 @@ void txDataQ_PrintModuleParams (TI_HANDLE hTxDataQ)
  */ 
 void txDataQ_PrintQueueStatistics (TI_HANDLE hTxDataQ)
 {
+#ifdef REPORT_LOG
 	TTxDataQ *pTxDataQ = (TTxDataQ *)hTxDataQ;
 	TI_UINT32      qIndex;
 
@@ -621,6 +613,7 @@ void txDataQ_PrintQueueStatistics (TI_HANDLE hTxDataQ)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uDroppedPacket));
 
 	WLAN_OS_REPORT(("--------------------------------------------------\n\n"));
+#endif
 }
 
 
@@ -825,6 +818,3 @@ static void txDataQ_TxSendPaceTimeout (TI_HANDLE hTxDataQ, TI_BOOL bTwdInitOccur
 
     txDataQ_RunScheduler (hTxDataQ);
 }
-
-
-

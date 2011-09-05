@@ -75,6 +75,9 @@ TI_TRACE_BUFFER ?= n
 ## Driver Compilation Directives
 ##
 ##
+ifeq "$(HOST_PLATFORM)" "omap2430"	
+	DK_DEFINES += -D HOST_PLATFORM_OMAP2430
+endif
 ifeq "$(HOST_PLATFORM)" "omap3430"
 	DK_DEFINES += -D HOST_PLATFORM_OMAP3430
 endif
@@ -101,6 +104,7 @@ ifeq ($(DEBUG),y)
     DK_DEFINES += -D TI_DBG
     DK_DEFINES += -D REPORT_LOG
     DK_DEFINES += -Os
+    DK_DEFINES += -D PRINTF_ROLLBACK
 else
     DK_DEFINES += -U REPORT_LOG
     DK_DEFINES += -Os
@@ -120,6 +124,9 @@ endif
 ifeq ($(BMTRACE),y)
    DK_DEFINES += -D TIWLAN_BMTRACE
 endif
+
+# WPS Support
+DK_DEFINES += -D SUPPL_WPS_SUPPORT
 
 ##
 ##

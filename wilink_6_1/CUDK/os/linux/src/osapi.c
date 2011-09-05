@@ -79,15 +79,15 @@ RETURN:         None
 VOID os_error_printf(S32 debug_level, const PS8 arg_list ,...)
 {
     static int g_debug_level = CU_MSG_ERROR;
+    S8 msg[MAX_HOST_MESSAGE_SIZE];
+    va_list ap;
+#ifdef OS_CLI_LOG_TO_FILE
     char file_name[30]="/data/misc/wifi/cli.log";
     FILE *ftmp;
-    va_list ap;
-    S8 msg[MAX_HOST_MESSAGE_SIZE];
+#endif
 
     if (debug_level < g_debug_level)
         return;
-
-    ftmp = fopen(file_name,"a");
 
     /* Format the message */
     va_start(ap, arg_list);
@@ -95,11 +95,15 @@ VOID os_error_printf(S32 debug_level, const PS8 arg_list ,...)
     va_end(ap);
 
     /* print the message */
+    fprintf(stderr, (char *)msg);
+
+#ifdef OS_CLI_LOG_TO_FILE
+    ftmp = fopen(file_name, "a");
     if(ftmp != NULL) {
         fprintf(ftmp,(char*)msg);
         fclose(ftmp);
     }
-    fprintf(stderr, (char*)msg);
+#endif
 }
 
 /****************************************************************************************
@@ -548,7 +552,7 @@ S32 os_getInputString(PS8 inbuf, S32 len)
         if (FD_ISSET(0, &read_set))
         {
             /* Data received from STDIN */
-            if ( fgets( (char*)inbuf, len, stdin ) <= NULL )
+            if ( fgets( (char*)inbuf, len, stdin ) == NULL )
                 return FALSE;
             else
                 return TRUE;

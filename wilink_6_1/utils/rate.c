@@ -727,17 +727,14 @@ RETURN:     None
 
 ************************************************************************/
 TI_STATUS rate_DrvBitmapToNetStrIncluding11n (TI_UINT32   uSuppRatesBitMap,
-
-          TI_UINT32   uBasicRatesBitMap,
-
-          TI_UINT8    *string,
-
-          TI_UINT32   *pFirstOfdmRate)
+											  TI_UINT32   uBasicRatesBitMap,
+											  TI_UINT8    *string,
+											  TI_UINT32   *pFirstOfdmRate)
 {
     TI_UINT32   i = 0;
 
 
-        rate_DrvBitmapToNetStr (uSuppRatesBitMap, uBasicRatesBitMap, string, &i, pFirstOfdmRate);
+	rate_DrvBitmapToNetStr (uSuppRatesBitMap, uBasicRatesBitMap, string, &i, pFirstOfdmRate);
 
     if (uSuppRatesBitMap & DRV_RATE_MASK_MCS_0_OFDM)
     {

@@ -46,7 +46,6 @@
 #include "ScanCncn.h"
 #include "DrvMainModules.h"
 
-
 /* site types */
 typedef enum
 {
@@ -145,7 +144,6 @@ typedef enum
     SCAN_RESULT_TABLE_CLEAR
 
 } EScanResultTableClear;
-
 
 TI_HANDLE   scanResultTable_Create (TI_HANDLE hOS, TI_UINT32 uEntriesNumber);
 void        scanResultTable_Init (TI_HANDLE hScanResultTable, TStadHandlesList *pStadHandles, EScanResultTableClear eClearTable);

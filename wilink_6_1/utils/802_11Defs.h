@@ -349,6 +349,9 @@ NOTE: We only support packets coming from within the DS (i.e. From DS = 0)
   Note: 1500 is the recommended size by the Motorola Standard team. TI recommendation is 700*/
 #define MAX_BEACON_BODY_LENGTH              1500 //IKSTABLEONE-1238 - port IKSHADOW-7661
 
+#define ASSOC_RESP_FIXED_DATA_LEN           6
+#define ASSOC_RESP_AID_MASK                 0x3FFF  /* The AID is only in 14 LS bits. */
+
 /* general mgmt frame structure */
 typedef struct
 {
@@ -920,6 +923,9 @@ typedef enum
 #define DELTS_ACTION                            0x02
 
 #define ADDTS_STATUS_CODE_SUCCESS               0x00
+#define ADDTS_STATUS_CODE_INVALID_PARAMS        0x01
+#define ADDTS_STATUS_CODE_REFUSED               0x03
+
 #define DELTS_CODE_SUCCESS                      0x00
  
 
@@ -1088,7 +1094,7 @@ typedef struct
     TI_UINT16 disconnReason;
 } disconnTemplate_t; /* Deauth or Disassoc */
 
-typedef struct 
+typedef struct
 {
     dot11_header_t   hdr;
     TI_UINT8  securityOverhead[AES_AFTER_HEADER_FIELD_SIZE];

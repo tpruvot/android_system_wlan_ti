@@ -39,13 +39,11 @@
 
 #include "cu_osapi.h"
 #include "TWDriver.h"
-#include "common.h"
 #include "config_ssid.h"
 #include "driver.h"
 #include "ipc_wpa.h"
 #include "wpa_core.h"
 #include "oserr.h"
-
 
 /* defines */
 /***********/
@@ -119,7 +117,7 @@ static VOID WpaCore_InitWpaParams(TWpaCore* pWpaCore)
 	  pWpaCore->WpaSupplParams.pair_wise = WPA_CIPHER_NONE;
 	  pWpaCore->WpaSupplParams.group = WPA_CIPHER_NONE; 
       pWpaCore->WpaSupplParams.anyWpaMode = 0;
-      #ifdef CONFIG_WPS
+#ifdef CONFIG_WPS
 	pWpaCore->WpaSupplParams.pWscPin = NULL;
 	pWpaCore->WpaSupplParams.WscMode = WSC_MODE_OFF;
 #endif
@@ -163,9 +161,12 @@ VOID WpaCore_Destroy(THandle hWpaCore)
 	TWpaCore* pWpaCore = (TWpaCore*)hWpaCore;
 
 #ifdef ANDROID
+	if(pWpaCore->hIpcWpa)
+	{
         /* Restore configuration back to AP_SCAN 1 for Android */
         IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"AP_SCAN 1", FALSE);
         IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"SAVE_CONFIG", FALSE);
+	}
 #endif
 
 	if(pWpaCore->hIpcWpa)
@@ -424,8 +425,14 @@ S32 WpaCore_GetDefaultKey(THandle hWpaCore, U32* pDefaultKeyIndex)
 S32 WpaCore_StartWpsPIN(THandle hWpaCore)
 {
 	TWpaCore* pWpaCore = (TWpaCore*)hWpaCore;
+	S8 cmd[100];
 
 	pWpaCore->WpaSupplParams.WscMode = WSC_MODE_PIN;
+
+#ifdef SUPPL_WPS_SUPPORT
+	os_sprintf(cmd, "WPS_PIN any");
+	IpcWpa_Command(pWpaCore->hIpcWpa, cmd, TRUE);
+#endif
 	
 	return OK;
 }
@@ -433,9 +440,15 @@ S32 WpaCore_StartWpsPIN(THandle hWpaCore)
 S32 WpaCore_StartWpsPBC(THandle hWpaCore)
 {
 	TWpaCore* pWpaCore = (TWpaCore*)hWpaCore;
+	S8 cmd[100];
 	
 	pWpaCore->WpaSupplParams.WscMode = WSC_MODE_PBC;
-	
+
+#ifdef SUPPL_WPS_SUPPORT
+	os_sprintf(cmd, (PS8)"WPS_PBC");
+	IpcWpa_Command(pWpaCore->hIpcWpa, cmd, TRUE);
+#endif
+
 	return OK;
 }
 

@@ -322,7 +322,7 @@ TI_STATUS cmdBld_CmdIeConfigureTemplateFrame (TI_HANDLE         hCmdBld,
         /* Truncate length to the template size limit */
         uFrameSize = MAX_TEMPLATES_SIZE;
     }
-    
+    /* WLAN_OS_REPORT(("DloadTempl type =%d size=%d\n", eTemplateType, uFrameSize)); */
     /* if pTemplate is NULL than it means that we just want to reserve place in Fw, and there is no need to copy */
     if (pTemplate != NULL)
     {

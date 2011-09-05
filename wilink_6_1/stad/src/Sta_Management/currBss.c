@@ -93,7 +93,7 @@
 /* Constants */
 #define TRIGGER_LOW_RSSI_PACING 1000
 #define TRIGGER_LOW_SNR_PACING 1000
-#define TRIGGER_BG_SCAN_PACING 10
+#define TRIGGER_BG_SCAN_PACING 1000
 #define TRIGGER_BG_SCAN_HYSTERESIS 3
 static const TI_UINT32 KEEP_ALIVE_NULL_DATA_INDEX = 3;
 
@@ -300,6 +300,7 @@ TI_STATUS currBSS_SetDefaults (TI_HANDLE hCurrBSS, TCurrBssInitParams *pInitPara
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_0, 0, (void*)currBSS_lowRssiThrCrossed, hCurrBSS);
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_1, 0, (void*)currBSS_lowSnrThrCrossed, hCurrBSS);
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_4, 0, (void*)currBSS_BackgroundScanQuality, hCurrBSS);
+        currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_7, 0, (void*)currBSS_BackgroundScanQuality, hCurrBSS);
 
         pCurrBSS->lowRssiThreshold = RSSI_DEFAULT_THRESHOLD;
         tTriggerCfg.index     = TRIGGER_EVENT_LOW_RSSI;
@@ -323,17 +324,29 @@ TI_STATUS currBSS_SetDefaults (TI_HANDLE hCurrBSS, TCurrBssInitParams *pInitPara
         tTriggerCfg.enable    = TI_TRUE;
         TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
 
-        pCurrBSS->highQualityForBkgrdScan = RSSI_DEFAULT_THRESHOLD;
         pCurrBSS->lowQualityForBkgrdScan = RSSI_DEFAULT_THRESHOLD;
         tTriggerCfg.index     = TRIGGER_EVENT_BG_SCAN;
         tTriggerCfg.threshold = pCurrBSS->lowQualityForBkgrdScan;
         tTriggerCfg.pacing    = TRIGGER_BG_SCAN_PACING;
-        tTriggerCfg.metric    = METRIC_EVENT_RSSI_DATA;
+        tTriggerCfg.metric    = METRIC_EVENT_RSSI_BEACON;
         tTriggerCfg.type      = RX_QUALITY_EVENT_EDGE;
         tTriggerCfg.direction = RSSI_EVENT_DIR_BIDIR;
         tTriggerCfg.hystersis = TRIGGER_BG_SCAN_HYSTERESIS;
         tTriggerCfg.enable    = TI_TRUE;
         TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
+
+
+		pCurrBSS->highQualityForBkgrdScan = RSSI_BG_SCAN_HIGH_THRESHOLD;
+		tTriggerCfg.index     = TRIGGER_EVENT_HIGH_BG_SCAN;
+		tTriggerCfg.threshold = pCurrBSS->highQualityForBkgrdScan;
+		tTriggerCfg.pacing    = TRIGGER_BG_SCAN_PACING;
+		tTriggerCfg.metric    = METRIC_EVENT_RSSI_BEACON;
+		tTriggerCfg.type      = RX_QUALITY_EVENT_EDGE;
+		tTriggerCfg.direction = RSSI_EVENT_DIR_BIDIR;
+		tTriggerCfg.hystersis = TRIGGER_BG_SCAN_HYSTERESIS;
+		tTriggerCfg.enable    = TI_TRUE;
+		TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
+
 
          /* Register for 'BSS-Loss' event */
         TWD_RegisterEvent (pCurrBSS->hTWD, TWD_OWN_EVENT_BSS_LOSE, (void *)currBSS_BssLost, pCurrBSS);
@@ -421,7 +434,22 @@ TI_STATUS currBSS_updateRoamingTriggers (TI_HANDLE hCurrBSS, roamingMngrThreshol
         tTriggerCfg.index     = TRIGGER_EVENT_BG_SCAN;
         tTriggerCfg.threshold = pCurrBSS->lowQualityForBkgrdScan;
         tTriggerCfg.pacing    = TRIGGER_BG_SCAN_PACING;
-        tTriggerCfg.metric    = METRIC_EVENT_RSSI_DATA;
+        tTriggerCfg.metric    = METRIC_EVENT_RSSI_BEACON;
+        tTriggerCfg.type      = RX_QUALITY_EVENT_EDGE;
+        tTriggerCfg.direction = RSSI_EVENT_DIR_BIDIR;
+        tTriggerCfg.hystersis = TRIGGER_BG_SCAN_HYSTERESIS;
+        tTriggerCfg.enable    = TI_TRUE;
+
+        TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
+    }
+
+	if (pCurrBSS->highQualityForBkgrdScan != params->normalQualityForBackgroungScanCondition) 
+    {
+		pCurrBSS->highQualityForBkgrdScan = params->normalQualityForBackgroungScanCondition;
+        tTriggerCfg.index     = TRIGGER_EVENT_HIGH_BG_SCAN;
+        tTriggerCfg.threshold = pCurrBSS->highQualityForBkgrdScan;
+        tTriggerCfg.pacing    = TRIGGER_BG_SCAN_PACING;
+        tTriggerCfg.metric    = METRIC_EVENT_RSSI_BEACON;
         tTriggerCfg.type      = RX_QUALITY_EVENT_EDGE;
         tTriggerCfg.direction = RSSI_EVENT_DIR_BIDIR;
         tTriggerCfg.hystersis = TRIGGER_BG_SCAN_HYSTERESIS;
@@ -447,7 +475,6 @@ TI_STATUS currBSS_updateRoamingTriggers (TI_HANDLE hCurrBSS, roamingMngrThreshol
         TWD_CfgMaxTxRetry (pCurrBSS->hTWD, &roamingTriggersParams);
     }
 
-    pCurrBSS->highQualityForBkgrdScan = params->normalQualityForBackgroungScanCondition;
     
     return TI_OK;
 }
@@ -769,7 +796,9 @@ TI_STATUS currBSS_beaconReceivedCallb(TI_HANDLE hCurrBSS,
     if (pCurrBSS->isConnected && (eCurrentBSSType == eFrameBssType))
     {
         TI_BOOL bFramePrivacy = 0, bCurrentSitePrivacy = 0;
-        /* if the bss type is ibss save set the current site privacy (the beacons transimted by STA) and set the privacy from the received frame, so that if the privacy is different there will be no connection */
+        /* if the bss type is ibss save set the current site privacy (the beacons transimted by STA)
+		   and set the privacy from the received frame, so that if the privacy is different there will
+		   be no connection */
         if (eFrameBssType == BSS_INDEPENDENT)
         {
             pParam->paramType = SITE_MGR_SITE_CAPABILITY_PARAM;
@@ -791,7 +820,9 @@ TI_STATUS currBSS_beaconReceivedCallb(TI_HANDLE hCurrBSS,
         }
     	else if (eFrameBssType == BSS_INDEPENDENT)
         {
-            /* Check if the Station sending the beacon uses privacy for the ibss and compare it to the self site. If privacy usage matches, merge ibss and if not continue using self site */
+           /* Check if the Station sending the beacon uses privacy for the ibss and
+			   compare it to the self site. If privacy usage mathces, merge ibss
+			   and if not continue using self site */
             if (bCurrentSitePrivacy == bFramePrivacy) 
             {
                 siteMgr_IbssMerge(pCurrBSS->hSiteMgr, desiredBSSID, *bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band);
@@ -1150,7 +1181,7 @@ static void currBSS_BackgroundScanQuality(TI_HANDLE hCurrBSS,
                                       TI_UINT8     dataLength)
 {
     currBSS_t *pCurrBSS = (currBSS_t *)hCurrBSS;
-    TI_UINT8 averageRssi = *data;
+    TI_INT8 averageRssi = *data;
     paramInfo_t *pParam;
 
     TRACE1(pCurrBSS->hReport, REPORT_SEVERITY_INFORMATION, "BackgroundScanQuality Event: RSSI = %d\n", averageRssi );
@@ -1160,9 +1191,13 @@ static void currBSS_BackgroundScanQuality(TI_HANDLE hCurrBSS,
     {
         apConn_reportRoamingEvent(pCurrBSS->hAPConn, ROAMING_TRIGGER_LOW_QUALITY_FOR_BG_SCAN, NULL);
     }
-    else
+	else if (averageRssi < pCurrBSS->highQualityForBkgrdScan)
     {
         apConn_reportRoamingEvent(pCurrBSS->hAPConn, ROAMING_TRIGGER_NORMAL_QUALITY_FOR_BG_SCAN, NULL); 
+    }
+    else
+    {
+        apConn_reportRoamingEvent(pCurrBSS->hAPConn, ROAMING_TRIGGER_HIGH_QUALITY_FOR_BG_SCAN, NULL); 
     }
 
     /* Update RSSI: */
@@ -1296,8 +1331,6 @@ static TI_STATUS currBss_HandleTriggerEvent(TI_HANDLE hCurrBSS, TI_UINT8 *data, 
     currBSS_t *pCurrBSS = (currBSS_t *)hCurrBSS;
 
     TRACE1(pCurrBSS->hReport ,REPORT_SEVERITY_INFORMATION,  "currBss_HandleTriggerEvent(). eventID =%d \n",eventID);
-
-
 
     if (eventID < MAX_NUM_OF_RSSI_SNR_TRIGGERS)
     {
@@ -1512,9 +1545,9 @@ TI_STATUS currBSS_getParam(TI_HANDLE hCurrBSS, paramInfo_t *pParam)
     return TI_NOK;
 }
 
-#ifdef TI_DBG
 void currBss_DbgPrintTriggersTable(TI_HANDLE hCurrBSS)
 {
+#ifdef REPORT_LOG
     int i=0;
     currBSS_t *pCurrBSS = (currBSS_t *)hCurrBSS;
 
@@ -1529,5 +1562,5 @@ void currBss_DbgPrintTriggersTable(TI_HANDLE hCurrBSS)
                         pCurrBSS->aTriggersDesc[i].WasRegisteredByApp));
     }
     WLAN_OS_REPORT(("\n --------------------------------------------------------------- \n"));
-}
 #endif
+}

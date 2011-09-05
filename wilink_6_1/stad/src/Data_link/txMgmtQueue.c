@@ -158,6 +158,26 @@ static void updateQueuesBusyMap (TTxMgmtQ *pTxMgmtQ, TI_UINT32 tidBitMap);
 ********************************************************************************/
 
 
+
+/** 
+ * \fn     txMgmtQ_GetConnState 
+ * \brief  Get the Conection SM current state
+ * 
+ * Get the Connection SM current state.
+ * 
+ * \note   
+ * \param  hTxMgmtQ - Handle of the Tx Mgmt Queue module 
+ * \return Connection SM current state
+ * \sa     
+ */ 
+ETxConnState  txMgmtQ_GetConnState (TI_HANDLE hTxMgmtQ)
+{
+    TTxMgmtQ *pTxMgmtQ = (TTxMgmtQ *)hTxMgmtQ;
+    
+    return pTxMgmtQ->eTxConnState;
+}
+
+
 /** 
  * \fn     txMgmtQ_Create
  * \brief  Create the module and its queues
@@ -270,16 +290,12 @@ TI_STATUS txMgmtQ_Destroy (TI_HANDLE hTxMgmtQ)
     TI_STATUS  eStatus = TI_OK;
     int        uQueId;
 
-    /* Dequeue and free all queued packets */
-    txMgmtQ_ClearQueues (hTxMgmtQ);
-
     /* free Mgmt queues */
     for (uQueId = 0 ; uQueId < NUM_OF_MGMT_QUEUES ; uQueId++)
     {
         if (que_Destroy(pTxMgmtQ->aQueues[uQueId]) != TI_OK)
 		{
-TRACE1(pTxMgmtQ->hReport, REPORT_SEVERITY_ERROR, "txMgmtQueue_unLoad: fail to free Mgmt Queue number: %d\n",uQueId);
-
+            TRACE1(pTxMgmtQ->hReport, REPORT_SEVERITY_ERROR, "txMgmtQueue_unLoad: fail to free Mgmt Queue number: %d\n",uQueId);
 			eStatus = TI_NOK;
 		}
     }
@@ -311,17 +327,14 @@ void txMgmtQ_ClearQueues (TI_HANDLE hTxMgmtQ)
     /* Dequeue and free all queued packets */
     for (uQueId = 0 ; uQueId < NUM_OF_MGMT_QUEUES ; uQueId++)
     {
-        while (1)
-        {
+        do {
             context_EnterCriticalSection (pTxMgmtQ->hContext);
             pPktCtrlBlk = (TTxCtrlBlk *) que_Dequeue (pTxMgmtQ->aQueues[uQueId]);
             context_LeaveCriticalSection (pTxMgmtQ->hContext);
-            if (pPktCtrlBlk == NULL) 
-            {
-                break;
+            if (pPktCtrlBlk != NULL) {
+                txCtrl_FreePacket (pTxMgmtQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
             }
-            txCtrl_FreePacket (pTxMgmtQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
-        }
+        } while (pPktCtrlBlk != NULL);
     }
 }
 
@@ -953,6 +966,7 @@ void txMgmtQ_PrintModuleParams (TI_HANDLE hTxMgmtQ)
  */ 
 void txMgmtQ_PrintQueueStatistics (TI_HANDLE hTxMgmtQ)
 {
+#ifdef REPORT_LOG
 	TTxMgmtQ *pTxMgmtQ = (TTxMgmtQ *)hTxMgmtQ;
 	TI_UINT32 uQueId;
 
@@ -980,6 +994,7 @@ void txMgmtQ_PrintQueueStatistics (TI_HANDLE hTxMgmtQ)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aDroppedPackets[uQueId]));
 
 	WLAN_OS_REPORT(("==========================================================\n\n"));
+#endif    
 }
 
 
@@ -1001,6 +1016,5 @@ void txMgmtQ_ResetQueueStatistics (TI_HANDLE hTxMgmtQ)
     os_memoryZero(pTxMgmtQ->hOs, (void *)&(pTxMgmtQ->tDbgCounters), sizeof(TDbgCount));
 }
 
-		
 #endif /* TI_DBG */
 	  

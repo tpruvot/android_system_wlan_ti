@@ -33,7 +33,6 @@
 
 /** \file MeasurementSrv.h
  *  \brief This file include definitions for the measurmeent SRV module debug print functions.
- *  \
  *  \date 23-december-2005
  */
 
@@ -76,7 +75,6 @@
  ***********************************************************************
  */
 /** 
- * \\n
  * \date 23-December-2005\n
  * \brief Prints a measurement request.\n
  *
@@ -87,7 +85,6 @@
 void measurementSRVPrintRequest( TI_HANDLE hMeasurementSRV, TMeasurementRequest *pMsrRequest );
 
 /** 
- * \\n
  * \date 23-December-2005\n
  * \brief Prints a measurement type request.\n
  *

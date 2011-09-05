@@ -46,7 +46,6 @@
 #include "CmdInterpretWext.h"
 #include "TI_IPC_Api.h"
 #include "WlanDrvIf.h"
-#include <linux/kernel.h>
 #include <linux/wireless.h>
 #include <linux/if_arp.h>
 #include <asm/uaccess.h>
@@ -62,7 +61,7 @@
 static TI_INT32 cmdInterpret_Event(IPC_EV_DATA* pData);
 static int cmdInterpret_setSecurityParams (TI_HANDLE hCmdInterpret);
 static int cmdInterpret_initEvents(TI_HANDLE hCmdInterpret);
-static int cmdInterpret_unregisterEvents(TI_HANDLE hCmdInterpret, TI_HANDLE hEvHandler);
+
 
 #define WEXT_FREQ_CHANNEL_NUM_MAX_VAL   1000
 #define WEXT_FREQ_KHZ_CONVERT           3
@@ -81,13 +80,10 @@ static const char *ieee80211_modes[] = {
 typedef struct
 {
 
-   TI_UINT8        *assocRespBuffer;
+    TI_UINT8        *assocRespBuffer;
     TI_UINT32       assocRespLen;
 } cckm_assocInformation_t;
 
-#define ASSOC_RESP_FIXED_DATA_LEN 6
-/* 1500 is the recommended size by the Motorola Standard team. TI recommendation is 700 */
-#define MAX_BEACON_BODY_LENGTH    1500
 #define BEACON_HEADER_FIX_SIZE    12
 #define CCKM_START_EVENT_SIZE     23 /* cckm-start string + timestamp + bssid + null */
 #endif
@@ -122,9 +118,6 @@ TI_HANDLE cmdInterpret_Create (TI_HANDLE hOs)
 TI_STATUS cmdInterpret_Destroy (TI_HANDLE hCmdInterpret, TI_HANDLE hEvHandler)
 {
     cmdInterpret_t * pCmdInterpret = (cmdInterpret_t *)hCmdInterpret;
-
-    /* Unregister events */
-	cmdInterpret_unregisterEvents ((TI_HANDLE)pCmdInterpret, hEvHandler);
 
     /* Release allocated memory */
     os_memoryFree (pCmdInterpret->hOs, pCmdInterpret, sizeof(cmdInterpret_t));
@@ -339,8 +332,9 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
         {
             struct iw_point *data = (struct iw_point *) cmdObj->buffer1;
             struct iw_range *range = (struct iw_range *) cmdObj->buffer2;
-            paramInfo_t Param2;
             int i;
+            ScanBssType_e smeDesiredBssType = BSS_ANY;
+            paramInfo_t *pParam2;
 
             /* Reset structure */
             data->length = sizeof(struct iw_range);
@@ -373,12 +367,16 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
             pParam->paramType = SITE_MGR_DESIRED_SUPPORTED_RATE_SET_PARAM;
             res = cmdDispatch_GetParam (pCmdInterpret->hCmdDispatch, pParam );
             CHECK_PENDING_RESULT(res,pParam)
-
-            Param2.paramType = SME_DESIRED_BSS_TYPE_PARAM;
-            Param2.paramLength = sizeof(ScanBssType_e);
-            res = cmdDispatch_GetParam(pCmdInterpret->hCmdDispatch, &Param2);
-            CHECK_PENDING_RESULT(res,(&Param2))
-
+            pParam2 = (paramInfo_t *)os_memoryAlloc(pCmdInterpret->hOs, sizeof(paramInfo_t));
+            if (pParam2)
+            {
+                pParam2->paramType = SME_DESIRED_BSS_TYPE_PARAM;
+                pParam2->paramLength = sizeof(ScanBssType_e);
+                res = cmdDispatch_GetParam(pCmdInterpret->hCmdDispatch, pParam2);
+                CHECK_PENDING_RESULT(res,pParam2)
+                smeDesiredBssType = pParam2->content.smeDesiredBSSType;
+                os_memoryFree(pCmdInterpret->hOs, pParam2, sizeof(paramInfo_t));
+            }
             /* Number of entries in the rates list */
             range->num_bitrates = pParam->content.siteMgrDesiredSupportedRateSet.len;  
             for (i=0; i<pParam->content.siteMgrDesiredSupportedRateSet.len; i++)
@@ -393,7 +391,7 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
                     case NET_RATE_MCS5:
                     case NET_RATE_MCS6:
                     case NET_RATE_MCS7:
-                         if (BSS_INDEPENDENT == Param2.content.smeDesiredBSSType)
+                         if (BSS_INDEPENDENT == smeDesiredBssType)
                              continue;
                     default:
                          range->bitrate[i] = CALCULATE_RATE_VALUE(pParam->content.siteMgrDesiredSupportedRateSet.ratesString[i] & 0x7F)
@@ -651,9 +649,10 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
         /* trigger scanning (list cells) */
     case SIOCSIWSCAN:
         {
-	    struct iw_scan_req scanReq;
-	    TScanParams scanParams;
-	    pParam->content.pScanParams = &scanParams;
+            struct iw_scan_req scanReq;
+            TScanParams scanParams;
+
+            pParam->content.pScanParams = &scanParams;
 
             /* Init the parameters in case the Supplicant doesn't support them*/
             pParam->content.pScanParams->desiredSsid.len = 0;
@@ -744,6 +743,11 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
 
             /* Allocate required memory */
             rate_list = os_memoryAlloc (pCmdInterpret->hOs, rates_allocated_size);
+            if (!rate_list) {
+                os_memoryFree (pCmdInterpret->hOs, my_list, allocated_size);
+                res = -ENOMEM;
+                goto cmd_end;
+            }
 
                         /* And retrieve the list */
             pParam->paramType = SCAN_CNCN_BSSID_RATE_LIST_PARAM;
@@ -774,7 +778,7 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
                 iwe.cmd = SIOCGIWAP;
                 iwe.u.ap_addr.sa_family = ARPHRD_ETHER;
                 iwe.len = IW_EV_ADDR_LEN;
-                os_memoryCopy(pCmdInterpret->hOs, iwe.u.ap_addr.sa_data, &my_current->MacAddress, ETH_ALEN);
+                os_memoryCopy(pCmdInterpret->hOs, iwe.u.ap_addr.sa_data, my_current->MacAddress, ETH_ALEN);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
                 event = iwe_stream_add_event(event, end_buf, &iwe, IW_EV_ADDR_LEN);
@@ -969,7 +973,7 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
                 while (length < wrqu->essid.length && extra[length])
                     length++;
 
-                os_memoryCopy(pCmdInterpret->hOs, &pParam->content.siteMgrCurrentSSID.str, cmdObj->buffer2, length);
+                os_memoryCopy(pCmdInterpret->hOs, pParam->content.siteMgrCurrentSSID.str, cmdObj->buffer2, length);
                 pParam->content.siteMgrCurrentSSID.len = length;
             }
 
@@ -998,7 +1002,7 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
 
             wrqu->essid.flags  = 1;
 
-            os_memoryCopy(pCmdInterpret->hOs, cmdObj->buffer2, &pParam->content.siteMgrCurrentSSID.str, pParam->content.siteMgrCurrentSSID.len );
+            os_memoryCopy(pCmdInterpret->hOs, cmdObj->buffer2, pParam->content.siteMgrCurrentSSID.str, pParam->content.siteMgrCurrentSSID.len );
 
             if(pParam->content.siteMgrCurrentSSID.len < MAX_SSID_LEN)
             {
@@ -1029,7 +1033,7 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
             struct iw_point *data = (struct iw_point *) cmdObj->buffer1;
 
             data->length = strlen(pCmdInterpret->nickName);
-            os_memoryCopy(pCmdInterpret->hOs, cmdObj->buffer2, &pCmdInterpret->nickName, data->length);
+            os_memoryCopy(pCmdInterpret->hOs, cmdObj->buffer2, pCmdInterpret->nickName, data->length);
 
             res = TI_OK;
         }
@@ -1230,16 +1234,15 @@ int cmdInterpret_convertAndExecute(TI_HANDLE hCmdInterpret, TConfigCommand *cmdO
 
 	case SIOCSIWGENIE:
         {
-		pParam->paramType = RSN_GENERIC_IE_PARAM;
-		pParam->content.rsnGenericIE.length = wrqu->data.length;
-		if (wrqu->data.length) {
-			os_memoryCopy(pCmdInterpret->hOs, &pParam->content.rsnGenericIE.data, cmdObj->param3, wrqu->data.length);
-		}
-		res = cmdDispatch_SetParam (pCmdInterpret->hCmdDispatch, pParam);
-		CHECK_PENDING_RESULT(res,pParam);
-
-            break;
+			pParam->paramType = RSN_GENERIC_IE_PARAM;
+			pParam->content.rsnGenericIE.length = wrqu->data.length;
+			if (wrqu->data.length) {
+				os_memoryCopy(pCmdInterpret->hOs, pParam->content.rsnGenericIE.data, cmdObj->param3, wrqu->data.length);
+			}
+			res = cmdDispatch_SetParam (pCmdInterpret->hCmdDispatch, pParam);
+			CHECK_PENDING_RESULT(res,pParam);
         }
+        break;
 
         /* Set Authentication */
     case SIOCSIWAUTH:
@@ -1607,25 +1610,6 @@ static int cmdInterpret_initEvents(TI_HANDLE hCmdInterpret)
 }
 
 
-/* Unregister events */
-static int cmdInterpret_unregisterEvents(TI_HANDLE hCmdInterpret, TI_HANDLE hEvHandler)
-{
-    cmdInterpret_t *pCmdInterpret = (cmdInterpret_t *)(hCmdInterpret);
-    IPC_EVENT_PARAMS evParams;
-    int i = 0;
-    os_setDebugOutputToLogger(TI_FALSE);
-
-    for (i=0; i<IPC_EVENT_MAX; i++)
-    {
-        evParams.uEventType =  i;
-        evParams.uEventID = pCmdInterpret->hEvents[i];
-        EvHandlerUnRegisterEvent (pCmdInterpret->hEvHandler, &evParams);
-    }
-
-    return TI_OK;
-}
-
-
 /* Handle driver events and convert to WEXT format */
 static TI_INT32 cmdInterpret_Event(IPC_EV_DATA* pData)
 {
@@ -1865,6 +1849,16 @@ event_end:
 
                 for (i=0; i<pCandList->NumCandidates; i++)
                 {
+
+                    os_printf ("Preauthentication list  BSSID: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x \n",
+                                pCandList->CandidateList[i].BSSID[0],
+                                pCandList->CandidateList[i].BSSID[1],
+                                pCandList->CandidateList[i].BSSID[2],
+                                pCandList->CandidateList[i].BSSID[3],
+                                pCandList->CandidateList[i].BSSID[4],
+                                pCandList->CandidateList[i].BSSID[5]
+                              );
+
                     os_memorySet (pCmdInterpret->hOs,&pcand, 0, sizeof(pcand));
                     pcand.flags |= IW_PMKID_CAND_PREAUTH;
 
@@ -2004,15 +1998,16 @@ static int cmdInterpret_setSecurityParams (TI_HANDLE hCmdInterpret)
 void *cmdInterpret_GetStat (TI_HANDLE hCmdInterpret)
 {
     cmdInterpret_t *pCmdInterpret = (cmdInterpret_t *)hCmdInterpret;
-    TI_STATUS res;
 
     /* Check if driver is initialized - If not - return empty statistics */
     if (hCmdInterpret)
     {
        paramInfo_t *pParam;
+        TI_STATUS res;
+
        pParam = (paramInfo_t *)os_memoryAlloc(pCmdInterpret->hOs, sizeof(paramInfo_t));
        if (!pParam)
-          return (void*)NULL;
+            return NULL;
 
        pParam->paramType = SITE_MGR_GET_STATS;
        res = cmdDispatch_GetParam ( pCmdInterpret->hCmdDispatch, pParam );

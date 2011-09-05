@@ -300,5 +300,3 @@ static void updateQueuesStates (TTxPortObj *pTxPort)
 	}
 }
 
-
-

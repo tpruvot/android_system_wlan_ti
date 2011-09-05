@@ -847,7 +847,7 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
 	request.startTime = 0;	/* ignored by MeasurementSRV for now - for .11k */
 	request.numberOfTypes = 0;
 
-TRACE1(pMeasurementMgr->hReport, REPORT_SEVERITY_INFORMATION, ": Measured Channel = %d\n", pMeasurementMgr->measuredChannelID);
+    TRACE1(pMeasurementMgr->hReport, REPORT_SEVERITY_INFORMATION, ": Measured Channel = %d\n", pMeasurementMgr->measuredChannelID);
 
 	pParam->paramType = REGULATORY_DOMAIN_GET_SCAN_CAPABILITIES;
 	pParam->content.channelCapabilityReq.channelNum = pMeasurementMgr->measuredChannelID;

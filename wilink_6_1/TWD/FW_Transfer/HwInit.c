@@ -200,6 +200,7 @@ extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, Fw
         case TXN_STATUS_PENDING:                                \
              return TXN_STATUS_PENDING;                         \
         default:                                                \
+            if(phwinit != NULL)                                 \
              TWD_FinalizeOnFailure (phwinit->hTWD);             \
              return TXN_STATUS_ERROR;                           \
     }
@@ -603,6 +604,7 @@ TI_STATUS hwInit_Boot (TI_HANDLE hHwInit)
 
     tBootAttr.MacClock = pWlanParams->MacClock;
     tBootAttr.ArmClock = pWlanParams->ArmClock;
+    tBootAttr.FirmwareDebug = TI_FALSE;
 
     /*
      * Initialize the status of download to  pending 
@@ -739,7 +741,7 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         /* Then, move it 4 places to the right, to alter Fref relevant bits in register 0x2c */
         clkVal = pHwInit->aHwInitTxn[pHwInit->uTxnIndex].uData;
         pHwInit->uTxnIndex = 0; /* Reset index only after getting the last read value! */
-        clkVal |= ((pGenParams->RefClk & 0x3)<< 1) << 4;
+        clkVal |= ((pGenParams->RefClk & 0x3) << 1) << 4;
         if ((pGenParams->GeneralSettings & DRPw_MASK_CHECK) > 0)
         {
             clkVal |= DRPw_MASK_SET;
@@ -2353,7 +2355,7 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
 * RETURNS: None
 ****************************************************************************/
 #ifdef DOWNLOAD_TIMER_REQUIERD
- static void hwInit_StallTimerCb (TI_HANDLE hHwInit, TI_BOOL bTwdInitOcccured)
+ static void hwInit_StallTimerCb (TI_HANDLE hHwInit, TI_BOOL bTwdInitOccured)
 {
         hwInit_FinalizeDownloadSm(hHwInit);
 }

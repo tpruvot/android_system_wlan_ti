@@ -94,6 +94,9 @@ VOID CuCmd_DisableRxDataFilters(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_AddRxDataFilter(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_RemoveRxDataFilter(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_GetRxDataFiltersStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
+VOID CuCmd_SetBaPolicy(THandle hCuCmd, ConParm_t parm[], U16 nParms);
+VOID CuCmd_ClearBaPolicy(THandle hCuCmd, ConParm_t parm[], U16 nParms);
+VOID CuCmd_PsTrafficPeriod(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 
 VOID CuCmd_ShowStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_ShowTxStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
@@ -139,7 +142,6 @@ VOID CuCmd_RoamingLowSnrThreshold(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_RoamingLowQualityForBackgroungScanCondition(THandle hCuCmd, ConParm_t parm[], U16 nParms); 
 VOID CuCmd_RoamingNormalQualityForBackgroungScanCondition(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_RoamingGetConfParams(THandle hCuCmd, ConParm_t parm[], U16 nParms);
-
 VOID CuCmd_CurrBssUserDefinedTrigger(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 
 VOID CuCmd_AddTspec(THandle hCuCmd, ConParm_t parm[], U16 nParms);
@@ -194,6 +196,7 @@ VOID CuCmd_GetRateMngDebug(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 
 
 VOID CuCmd_SetArpIPFilter (THandle hCuCmd, ConParm_t parm[], U16 nParms);
+VOID CuCmd_SdioValidation(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_ShowAbout(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_Quit(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 

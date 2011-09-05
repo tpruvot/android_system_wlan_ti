@@ -44,6 +44,7 @@
 #include "osApi.h"
 #include "timer.h"
 #include "DataCtrl_Api.h"
+#include "Ctrl.h"
 #include "802_11Defs.h"
 #include "Ethernet.h" 
 #include "report.h"
@@ -76,6 +77,9 @@
 #define RX_DATA_FILTER_ETHERNET_HEADER_BOUNDARY 14
 
 #define PADDING_ETH_PACKET_SIZE                 2
+
+#define MSDU_DATA_LEN_LIMIT                     5000  /* some arbitrary big number to protect from buffer overflow */
+  
 
 /* CallBack for recieving packet from rxXfer */
 static void rxData_ReceivePacket (TI_HANDLE   hRxData,  void  *pBuffer);
@@ -818,7 +822,6 @@ static TI_STATUS rxData_addRxDataFilter (TI_HANDLE hRxData, TRxDataFilterRequest
                                 lenFieldPatterns, 
                                 fieldPatterns);
 
-   
 }
 
 /***************************************************************************
@@ -983,8 +986,14 @@ void rxData_receivePacketFromWlan (TI_HANDLE hRxData, void *pBuffer, TRxAttr* pR
             break;
         }
 
+		/* in case of BA event no need to pass it to the network stack - we just free the buffer */
+	case TAG_CLASS_BA_EVENT:
+        TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, " rxData_receivePacketFromWlan(): Received BA event packet type - free the buffer \n");
+        RxBufFree(pRxData->hOs, pBuffer); 
+        break;
+
     default:
-        TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, " rxData_receivePacketFromWlan(): Received unspecified packet type !!! \n");
+        TRACE0(pRxData->hReport, REPORT_SEVERITY_ERROR, " rxData_receivePacketFromWlan(): Received unspecified packet type !!! \n");
         RxBufFree(pRxData->hOs, pBuffer); 
         break;
     }
@@ -1177,8 +1186,6 @@ static void rxData_rcvPacketInOpenNotify (TI_HANDLE hRxData, void *pBuffer, TRxA
 
     TRACE0(pRxData->hReport, REPORT_SEVERITY_ERROR, " rxData_rcvPacketInOpenNotify: receiving data packet while in rx port status is open notify\n");
 
-    TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, "rxData_rcvPacketInOpenNotify: ERROR !!! receiving data packet while in rx port status is open notify\n");
-    
     pRxData->rxDataDbgCounters.rcvUnicastFrameInOpenNotify++;
 
     /* free Buffer */
@@ -1231,10 +1238,8 @@ static void rxData_rcvPacketData(TI_HANDLE hRxData, void *pBuffer, TRxAttr* pRxA
 {
     rxData_t *pRxData = (rxData_t *)hRxData;
     TEthernetHeader *pEthernetHeader;
-    TI_UINT16 EventMask = 0;        
-
-
-    TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, " rxData_rcvPacketData() : Received DATA frame tranferred to OS\n");
+    TI_UINT16 EventMask = 0;
+    TFwInfo *pFwInfo;
 
     TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, " rxData_rcvPacketData() : Received DATA frame tranferred to OS\n");
 
@@ -1260,6 +1265,21 @@ static void rxData_rcvPacketData(TI_HANDLE hRxData, void *pBuffer, TRxAttr* pRxA
             /* free Buffer */
             TRACE0(pRxData->hReport, REPORT_SEVERITY_WARNING, " rxData_rcvPacketData() : exclude broadcast unencrypted is TI_TRUE & packet encryption is OFF\n");
 
+            RxBufFree(pRxData->hOs, pBuffer);
+            return;
+        }
+
+        /*
+         * Discard multicast/broadcast frames that we sent ourselves.
+         * Per IEEE 802.11-2007 section 9.2.7: "STAs shall filter out
+         * broadcast/multicast messages that contain their address as
+         * the source address."
+         */
+        pFwInfo = TWD_GetFWInfo (pRxData->hTWD);
+        if (MAC_EQUAL(pFwInfo->macAddress, pEthernetHeader->src))
+        {
+            pRxData->rxDataDbgCounters.excludedFrameCounter++;
+            /* free Buffer */
             RxBufFree(pRxData->hOs, pBuffer);
             return;
         }
@@ -1356,7 +1376,6 @@ static void rxData_rcvPacketIapp(TI_HANDLE hRxData, void *pBuffer, TRxAttr* pRxA
 * 
 * RETURNS:      TI_OK/TI_NOK
 ***************************************************************************/
-
 static TI_STATUS rxData_convertWlanToEthHeader (TI_HANDLE hRxData, void *pBuffer, TI_UINT16 * etherType)
 {
     TEthernetHeader      EthHeader;
@@ -1502,6 +1521,13 @@ static TI_STATUS rxData_ConvertAmsduToEthPackets (TI_HANDLE hRxData, void *pBuff
     /* if we have another packet at the AMSDU */
     while((uDataLen < uAmsduDataLen) && (uAmsduDataLen > ETHERNET_HDR_LEN + FCS_SIZE))  
     {
+        if ((uDataLen < WLAN_SNAP_HDR_LEN) || (uDataLen > MSDU_DATA_LEN_LIMIT))
+        {
+            TRACE1(pRxData->hReport, REPORT_SEVERITY_ERROR, "rxData_ConvertAmsduToEthPackets(): MSDU Length out of bounds = %d\n",uDataLen);
+            rxData_discardPacket (hRxData, pBuffer, pRxAttr);
+            return TI_NOK;
+        }
+
         /* allocate a new buffer */
         /* RxBufAlloc() add an extra word for alignment the MAC payload */
         rxData_RequestForBuffer (hRxData, &pDataBuf, sizeof(RxIfDescriptor_t) + WLAN_SNAP_HDR_LEN + ETHERNET_HDR_LEN + uDataLen, 0, TAG_CLASS_AMSDU);
@@ -1539,7 +1565,8 @@ static TI_STATUS rxData_ConvertAmsduToEthPackets (TI_HANDLE hRxData, void *pBuff
         lengthDelta = ETHERNET_HDR_LEN + uDataLen;
 
         /* copy the packet payload */
-        os_memoryCopy (pRxData->hOs, 
+        if (uDataLen > WLAN_SNAP_HDR_LEN)
+            os_memoryCopy (pRxData->hOs,
                        (((TI_UINT8*)pEthHeader) + ETHERNET_HDR_LEN), 
                        ((TI_UINT8*)pMsduEthHeader) + ETHERNET_HDR_LEN + WLAN_SNAP_HDR_LEN, 
                        uDataLen - WLAN_SNAP_HDR_LEN);
@@ -1832,6 +1859,7 @@ void rxData_resetDbgCounters(TI_HANDLE hRxData)
 ***************************************************************************/
 void rxData_printRxCounters (TI_HANDLE hRxData)
 {
+#ifdef REPORT_LOG
     rxData_t *pRxData = (rxData_t *)hRxData;
 
     if (pRxData) 
@@ -1851,11 +1879,13 @@ void rxData_printRxCounters (TI_HANDLE hRxData)
         WLAN_OS_REPORT(("rxWrongBssIdCounter = %d\n", pRxData->rxDataDbgCounters.rxWrongBssIdCounter));
         WLAN_OS_REPORT(("rcvUnicastFrameInOpenNotify = %d\n", pRxData->rxDataDbgCounters.rcvUnicastFrameInOpenNotify));        
     }
+#endif
 }
 
 
 void rxData_printRxBlock(TI_HANDLE hRxData)
 {
+#ifdef REPORT_LOG
     rxData_t *pRxData = (rxData_t *)hRxData;
 
     WLAN_OS_REPORT(("hCtrlData = 0x%X\n", pRxData->hCtrlData));
@@ -1875,6 +1905,7 @@ void rxData_printRxBlock(TI_HANDLE hRxData)
     WLAN_OS_REPORT(("rxDataPortStatus = %d\n", pRxData->rxDataPortStatus));
     WLAN_OS_REPORT(("rxDataExcludeUnencrypted = %d\n", pRxData->rxDataExcludeUnencrypted));
     WLAN_OS_REPORT(("rxDataEapolDestination = %d\n", pRxData->rxDataEapolDestination));
+#endif
 }
 
 

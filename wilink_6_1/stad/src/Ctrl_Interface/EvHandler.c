@@ -93,7 +93,7 @@ TI_UINT32 EvHandlerUnload (TI_HANDLE hEvHandler)
 TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT32 Length)
 {
     TEvHandlerObj *pEvHandler;
-	IPC_EVENT_PARAMS*    pEvParams;
+    IPC_EVENT_PARAMS *pEvParams;
     TI_UINT32  ModuleIndex;
 
     if( (hEvHandler==NULL) || (pData == NULL)){
@@ -109,10 +109,8 @@ TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT3
 #endif
 
     pEvHandler  = (TEvHandlerObj *)hEvHandler;
-
 	pEvParams = (IPC_EVENT_PARAMS*)pData;
 
-    
     PRINTF(DBG_INIT_LOUD, (" EvHandlerRegisterEvent EventType = %d \n",pEvParams->uEventType));
 
     /* used to be: if ( sizeof(IPC_EVENT_PARAMS) != Length)     
@@ -124,7 +122,7 @@ TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT3
         return (TI_UINT32)STATUS_INVALID_PARAMETER;
     }
 
-    if( pEvParams->uEventType >= IPC_EVENT_MAX){
+    if (pEvParams->uEventType >= IPC_EVENT_MAX){
         PRINTF(DBG_INIT_ERROR, (" EvHandlerRegisterEvent Error - Invalid Event Type = %d \n",
               pEvParams->uEventType));
         return (TI_UINT32)STATUS_INVALID_PARAMETER;
@@ -132,18 +130,17 @@ TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT3
 
     ModuleIndex = 0;
 
-    while ( ( ModuleIndex < MAX_REGISTERED_MODULES)
-            && (pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID != NULL)    )
+    while ((ModuleIndex < MAX_REGISTERED_MODULES) &&
+       (pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID != NULL))
     {
         ModuleIndex++; 
     }
 
     if(ModuleIndex == MAX_REGISTERED_MODULES)
     {
-        PRINTF(DBG_INIT_WARNING, (" EvHandlerRegisterEvent %d"
+        PRINTF(DBG_INIT_WARNING, (" EvHandlerRegisterEvent %d "
 								  "Registration queue full or event already registered!\n",
 								  pEvParams->uEventType));
-
 		return (TI_UINT32)STATUS_INVALID_PARAMETER;
     }
 
@@ -155,7 +152,6 @@ TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT3
     pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID = pEvParams->uEventID;
 
     PRINT(DBG_INIT_LOUD, " EvHandlerRegisterEvent Out \n");
-
     return STATUS_SUCCESS;
 
 }
@@ -164,15 +160,15 @@ TI_UINT32 EvHandlerRegisterEvent(TI_HANDLE hEvHandler, TI_UINT8* pData, TI_UINT3
 TI_UINT32 EvHandlerUnRegisterEvent(TI_HANDLE hEvHandler, TI_HANDLE uEventID)
 {
     TEvHandlerObj *pEvHandler;
-	IPC_EVENT_PARAMS*    pEvParams;
+    IPC_EVENT_PARAMS *pEvParams;
     TI_UINT32  ModuleIndex;
 
-    #ifdef EV_HANDLER_DEBUG
+#ifdef EV_HANDLER_DEBUG
       if (ghEvHandler !=  hEvHandler )
     {
           return TI_NOK;
     }
-    #endif
+#endif
 
     if (uEventID == NULL) 
     {
@@ -181,7 +177,6 @@ TI_UINT32 EvHandlerUnRegisterEvent(TI_HANDLE hEvHandler, TI_HANDLE uEventID)
 
     pEvHandler = (TEvHandlerObj *)hEvHandler;
     pEvParams  = (IPC_EVENT_PARAMS*)uEventID;
-
 
     PRINTF(DBG_INIT_LOUD, (" EvHandlerUnRegisterEvent EventType = %d \n",pEvParams->uEventType));
 
@@ -193,21 +188,19 @@ TI_UINT32 EvHandlerUnRegisterEvent(TI_HANDLE hEvHandler, TI_HANDLE uEventID)
 
     ModuleIndex = 0;
 
-    while ( ( ModuleIndex < MAX_REGISTERED_MODULES) 
-            && (pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID != pEvParams->uEventID )    )
+    while ((ModuleIndex < MAX_REGISTERED_MODULES) &&
+           (pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID != pEvParams->uEventID))
     {
         ModuleIndex++; 
     }
 
     if(ModuleIndex == MAX_REGISTERED_MODULES)
     {
-        PRINTF(DBG_INIT_ERROR, (" EvHandlerUnRegisterEvent %d"
+        PRINTF(DBG_INIT_ERROR, (" EvHandlerUnRegisterEvent %d "
                                "Registration queue doesn't hold this event!\n",
                                pEvParams->uEventType ));
-
 		return (TI_UINT32)STATUS_INVALID_PARAMETER;
     }
-
     pEvHandler->RegistrationArray[pEvParams->uEventType][ModuleIndex].uEventID = NULL;
 
     return STATUS_SUCCESS;

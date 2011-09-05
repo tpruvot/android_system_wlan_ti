@@ -102,6 +102,8 @@ TI_STATUS ctrlData_getParamPreamble(TI_HANDLE hCtrlData, EPreamble *preamble);
 
 TI_STATUS ctrlData_getParamBssid(TI_HANDLE hCtrlData, EInternalParam paramVal, TMacAddr bssid);
 
+TI_STATUS ctrlData_getParamMacAddr(TI_HANDLE hCtrlData, TMacAddr bssid);
+
 TI_STATUS rxData_getParam(TI_HANDLE hRxData, paramInfo_t *pParamInfo);  
 
 TI_STATUS rxData_setParam(TI_HANDLE hRxData, paramInfo_t *pParamInfo);  

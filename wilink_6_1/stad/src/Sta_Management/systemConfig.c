@@ -133,6 +133,7 @@ typedef enum
 
 #define MAX_GB_MODE_CHANEL		14
 
+#define MAX_RSN_DATA_SIZE       512
 /* RSSI values boundaries and metric values for best, good, etc  signals */
 #define SELECT_RSSI_BEST_LEVEL      (-22)
 #define SELECT_RSSI_GOOD_LEVEL      (-38)
@@ -225,7 +226,6 @@ siteEntry_t *addSelfSite(TI_HANDLE hSiteMgr)
         pSite->bssType = BSS_INDEPENDENT;
 
 	return pSite;
-	
 }
 
 /***********************************************************************
@@ -424,13 +424,15 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
 	dot11_ACParameters_t *p_ACParametersDummy = NULL;
     TtxCtrlHtControl tHtControl;
 
-    curRsnData = os_memoryAlloc(pSiteMgr->hOs, 256);
+    TI_UINT8 eCipherSuite = 0;
+
+    curRsnData = os_memoryAlloc(pSiteMgr->hOs, MAX_RSN_DATA_SIZE);
     if (!curRsnData)
         return TI_NOK;
 
     pParam = (paramInfo_t *)os_memoryAlloc(pSiteMgr->hOs, sizeof(paramInfo_t));
     if (!pParam) {
-        os_memoryFree(pSiteMgr->hOs, curRsnData, 256);
+        os_memoryFree(pSiteMgr->hOs, curRsnData, MAX_RSN_DATA_SIZE);
         return TI_NOK;
     }
 
@@ -539,7 +541,6 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
 		pParam->content.ctrlDataCurrentPreambleType = PREAMBLE_LONG;
 	ctrlData_setParam(pSiteMgr->hCtrlData, pParam);
 
-
     /* Mutual Rates Matching */
 	StaTotalRates = pSiteMgr->pDesiredParams->siteMgrCurrentDesiredRateMask.basicRateMask |
 					pSiteMgr->pDesiredParams->siteMgrCurrentDesiredRateMask.supportedRateMask;
@@ -613,17 +614,29 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
      /* verify that WME flag enable */
      qosMngr_GetWmeEnableFlag (pSiteMgr->hQosMngr, &bWmeEnable); 
 
+     /* Privacy - Used later on HT */
+     pParam->paramType = RSN_ENCRYPTION_STATUS_PARAM;
+     status = rsn_getParam(pSiteMgr->hRsn, pParam);
+
+     if (status == TI_OK)
+     {
+         eCipherSuite = pParam->content.rsnEncryptionStatus;
+     }  
+
      if ((b11nEnable != TI_FALSE) &&
          (bWmeEnable != TI_FALSE) &&
          (pPrimarySite->tHtCapabilities.tHdr[0] != TI_FALSE) && 
          (pPrimarySite->tHtInformation.tHdr[0] != TI_FALSE))
      {
+       if ((eCipherSuite != TWD_CIPHER_TKIP) && (eCipherSuite != TWD_CIPHER_WEP) && (eCipherSuite != TWD_CIPHER_WEP104))
+       {
          TWD_CfgSetFwHtCapabilities (pSiteMgr->hTWD, &pPrimarySite->tHtCapabilities, TI_TRUE);
          TWD_CfgSetFwHtInformation (pSiteMgr->hTWD, &pPrimarySite->tHtInformation);
 
          /* the FW not supported in HT control field in TX */
          tHtControl.bHtEnable = TI_FALSE;
          txCtrlParams_SetHtControl (pSiteMgr->hTxCtrl, &tHtControl);
+       }
      }
      else
      {
@@ -691,10 +704,9 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
     measurementMgr_setMeasurementMode(pSiteMgr->hMeasurementMgr, capabilities, 
 									pIeBuffer, PktLength);
 
-    os_memoryFree(pSiteMgr->hOs, curRsnData, 256);
+    os_memoryFree(pSiteMgr->hOs, curRsnData, MAX_RSN_DATA_SIZE);
     os_memoryFree(pSiteMgr->hOs, pParam, sizeof(paramInfo_t));
     
 	return TI_OK;
 }
-
 

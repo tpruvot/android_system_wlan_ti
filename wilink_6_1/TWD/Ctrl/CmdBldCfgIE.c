@@ -1868,10 +1868,9 @@ TI_STATUS cmdBld_CfgIeRadioParams (TI_HANDLE hCmdBld, IniFileRadioParam *pIniFil
     }
 
     pTestCmd->testCmdId = TEST_CMD_INI_FILE_RADIO_PARAM;
-    
+
     os_memoryCopy(pCmdBld->hOs, &pTestCmd->testCmd_u.IniFileRadioParams, pIniFileRadioParams, sizeof(IniFileRadioParam));
 
-   
     status = cmdQueue_SendCommand (pCmdBld->hCmdQueue,
                              CMD_TEST, 
                              (void *)pTestCmd, 
@@ -1884,6 +1883,7 @@ TI_STATUS cmdBld_CfgIeRadioParams (TI_HANDLE hCmdBld, IniFileRadioParam *pIniFil
     return status;
 }
 
+
 /**
  * \fn     cmdBld_CfgIeExtendedRadioParams
  * \brief  configure extended radio parameters setting in the
@@ -1894,12 +1894,9 @@ TI_STATUS cmdBld_CfgIeRadioParams (TI_HANDLE hCmdBld, IniFileRadioParam *pIniFil
  * \sa
  */
 TI_STATUS cmdBld_CfgIeExtendedRadioParams (TI_HANDLE hCmdBld,
-
-   IniFileExtendedRadioParam *pIniFileExtRadioParams,
-
-   void *fCb,
-
-   TI_HANDLE hCb)
+										   IniFileExtendedRadioParam *pIniFileExtRadioParams,
+										   void *fCb,
+										   TI_HANDLE hCb)
 {
     TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
     TI_STATUS status = TI_NOK;
@@ -1914,7 +1911,7 @@ TI_STATUS cmdBld_CfgIeExtendedRadioParams (TI_HANDLE hCmdBld,
     pTestCmd->testCmdId = TEST_CMD_INI_FILE_RF_EXTENDED_PARAM;
 
     os_memoryCopy(pCmdBld->hOs, &pTestCmd->testCmd_u.IniFileExtendedRadioParams,
-                                  pIniFileExtRadioParams, sizeof(IniFileExtendedRadioParam));
+				  pIniFileExtRadioParams, sizeof(IniFileExtendedRadioParam));
 
     status = cmdQueue_SendCommand (pCmdBld->hCmdQueue,
                              CMD_TEST,
@@ -1926,6 +1923,7 @@ TI_STATUS cmdBld_CfgIeExtendedRadioParams (TI_HANDLE hCmdBld,
     os_memoryFree(pCmdBld->hOs, pTestCmd, sizeof(TTestCmd));
     return status;
 }
+
 
 TI_STATUS cmdBld_CfgPlatformGenParams (TI_HANDLE hCmdBld, IniFileGeneralParam *pGenParams, void *fCb, TI_HANDLE hCb)
 {
@@ -1955,8 +1953,6 @@ TI_STATUS cmdBld_CfgPlatformGenParams (TI_HANDLE hCmdBld, IniFileGeneralParam *p
 }
 
 
-
-
 /****************************************************************************
  *                      cmdBld_CfgIeBurstMode()
  ****************************************************************************
@@ -1965,7 +1961,7 @@ TI_STATUS cmdBld_CfgPlatformGenParams (TI_HANDLE hCmdBld, IniFileGeneralParam *p
  * INPUTS:  hCmdBld     - handle to command builder object
  *          bEnabled    - is enabled flag
  *          fCB         - callback function for command complete
- *          hCb         - handle to be apssed to callback function    
+ *          hCb         - handle to be apssed to callback function
  *
  * OUTPUT:  None
  *
@@ -1987,6 +1983,7 @@ TI_STATUS cmdBld_CfgIeBurstMode (TI_HANDLE hCmdBld, TI_BOOL bEnabled, void *fCb,
 	/* send the command to the FW */
 	return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
 }
+
 
 /****************************************************************************
  *                      cmdBld_CfgIeDcoItrimParams()
@@ -2016,6 +2013,3 @@ TI_STATUS cmdBld_CfgIeDcoItrimParams (TI_HANDLE hCmdBld, TI_BOOL enable, TI_UINT
 
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(ACXDCOItrimParams_t), fCb, hCb, NULL);
 }
-
-
-

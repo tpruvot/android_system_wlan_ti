@@ -89,7 +89,8 @@ void      fwDbg_Destroy     (TI_HANDLE hFwDebug);
 
 void      fwDbg_Init	    (TI_HANDLE hFwDebug,
                              TI_HANDLE hReport,
-                             TI_HANDLE hTwif);
+                             TI_HANDLE hTwif,
+                             TI_HANDLE hFwEvent);
 
 TI_STATUS fwDbg_WriteAddr   (TI_HANDLE hFwDebug,
                              TI_UINT32 Address,
@@ -112,6 +113,9 @@ TI_BOOL fwDbg_isValidMemoryAddr    (TI_HANDLE hFwDebug,
 TI_BOOL fwDbg_isValidRegAddr    (TI_HANDLE hFwDebug,
                              TI_UINT32 Address,
                              TI_UINT32 Length);
+
+
+TI_STATUS fwDbg_ValidateSdio(TI_HANDLE hFwDebug, TI_UINT32 uNumOfLoops, TI_UINT32 uTxnSize);
 
 
 #endif /* _FW_DEBUG_API_H */

@@ -60,8 +60,8 @@ typedef void (* TEndOfHwInitCb) (TI_HANDLE handle);
 
 TI_HANDLE hwInit_Create (TI_HANDLE hOs);
 TI_STATUS hwInit_Init   (TI_HANDLE hHwInit,
-                         TI_HANDLE hReport,
-			 TI_HANDLE hTimer,
+                         TI_HANDLE hReport, 
+                         TI_HANDLE hTimer, 
                          TI_HANDLE hTWD, 
                          TI_HANDLE hFinalizeDownload, 
                          TFinalizeCb fFinalizeDownload, 

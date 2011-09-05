@@ -56,21 +56,21 @@
 #define MAX_NAME_SIZE   16  /* Maximum client's name string size */
 
 #ifdef TI_DBG
-typedef struct 
+typedef struct
 {
     TI_UINT32       uSize;                  /* Clients' name string size */
     char            sName [MAX_NAME_SIZE];  /* Clients' name string      */
-} TClientName;	
+} TClientName;
 #endif /* TI_DBG */
 
 /* context module structure */
-typedef struct 
+typedef struct
 {
 	TI_HANDLE        hOs;
 	TI_HANDLE        hReport; 
 
     TI_BOOL          bContextSwitchRequired;       /* Indicate if the driver should switch to its  */
-                                                   /*   own context or not before handling events  */ 
+                                                   /*   own context or not before handling events  */
     TI_HANDLE        hProtectionLock;              /* Handle of protection lock used by context clients */
     TI_UINT32        uNumClients;                  /* Number of registered clients      */
     TContextCbFunc   aClientCbFunc [MAX_CLIENTS];  /* Clients' callback functions       */
@@ -84,9 +84,7 @@ typedef struct
     TI_UINT32        aInvokeCount  [MAX_CLIENTS];  /* Clients' invocations counter      */
 #endif
 
-} TContext;	
-
-
+} TContext;
 
 
 /** 
@@ -221,7 +219,7 @@ TI_UINT32 context_RegisterClient (TI_HANDLE       hContext,
     TI_UINT32 uClientId = pContext->uNumClients;
 
     /* If max number of clients is exceeded, report error and exit. */
-    if (uClientId == MAX_CLIENTS) 
+    if (uClientId == MAX_CLIENTS)
     {
         TRACE0(pContext->hReport, REPORT_SEVERITY_ERROR , "context_RegisterClient() MAX_CLIENTS limit exceeded!!\n");
         return 0;
@@ -234,15 +232,15 @@ TI_UINT32 context_RegisterClient (TI_HANDLE       hContext,
     pContext->aClientPending[uClientId] = TI_FALSE;
 
 #ifdef TI_DBG
-    if (uNameSize <= MAX_NAME_SIZE) 
+    if (uNameSize <= MAX_NAME_SIZE)
     {
-        os_memoryCopy(pContext->hOs, 
+        os_memoryCopy(pContext->hOs,
                       (void *)(pContext->aClientName[uClientId].sName),
-                      (void *)sName, 
+                      (void *)sName,
                       uNameSize);
         pContext->aClientName[uClientId].uSize = uNameSize;
     }
-    else 
+    else
     {
         TRACE0(pContext->hReport, REPORT_SEVERITY_ERROR , "context_RegisterClient() MAX_NAME_SIZE limit exceeded!\n");
     }
@@ -292,10 +290,10 @@ void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
      */
     if (pContext->bContextSwitchRequired)
     {
-        if(os_RequestSchedule(pContext->hOs) != TI_OK)
+        if (os_RequestSchedule(pContext->hOs) != TI_OK)
             os_wake_unlock(pContext->hOs);
     }
-    else 
+    else
     {
         context_DriverTask (hContext);
         os_wake_unlock(pContext->hOs);
@@ -332,10 +330,10 @@ void context_DriverTask (TI_HANDLE hContext)
         /* If client is pending and enabled */
         if (pContext->aClientPending[i]  &&  pContext->aClientEnabled[i])
         {
-            #ifdef TI_DBG
-                pContext->aInvokeCount[i]++; 
-                TRACE1(pContext->hReport, REPORT_SEVERITY_INFORMATION , "Invoking - Client=, ID=%d\n", i);
-            #endif /* TI_DBG */
+#ifdef TI_DBG
+            pContext->aInvokeCount[i]++;
+            TRACE1(pContext->hReport, REPORT_SEVERITY_INFORMATION , "Invoking - Client=, ID=%d\n", i);
+#endif /* TI_DBG */
 
             /* Clear client's pending flag */
             pContext->aClientPending[i] = TI_FALSE;
@@ -392,12 +390,12 @@ void context_EnableClient (TI_HANDLE hContext, TI_UINT32 uClientId)
          */
         if (pContext->bContextSwitchRequired)
         {
-            if(os_RequestSchedule(pContext->hOs) != TI_OK)
+            if (os_RequestSchedule(pContext->hOs) != TI_OK)
                 os_wake_unlock(pContext->hOs);
         }
-        else 
+        else
         {
-            context_DriverTask (hContext);
+            context_DriverTask(hContext);
             os_wake_unlock(pContext->hOs);
         }
     }
@@ -470,6 +468,7 @@ void context_LeaveCriticalSection (TI_HANDLE hContext)
 
 void context_Print(TI_HANDLE hContext)
 {
+#ifdef REPORT_LOG
 	TContext *pContext = (TContext *)hContext;
     TI_UINT32 i;
 
@@ -489,8 +488,7 @@ void context_Print(TI_HANDLE hContext)
                         pContext->aRequestCount[i],
                         pContext->aInvokeCount[i] ));
 	}
+#endif
 }
 
 #endif /* TI_DBG */
-
-

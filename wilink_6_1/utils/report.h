@@ -53,9 +53,9 @@
  * The report flags of all severities  are indicated in a bit map Table which is contained in the report module handle	\n
  */
 
-/* in order to work without the driver logger use that definition here */ 
-#define PRINTF_ROLLBACK
-
+/* in order to work without the driver logger use that definition here  
+ * #define PRINTF_ROLLBACK
+ */
 
 #include "osApi.h"
 #include "commonTypes.h"

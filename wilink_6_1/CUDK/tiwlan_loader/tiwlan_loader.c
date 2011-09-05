@@ -87,8 +87,7 @@ S32 init_driver( PS8 adapter_name, PS8 eeprom_file_name,
         eeprom_image_length = os_getFileSize(f1);
         if (-1 == eeprom_image_length)
         {
-            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get eeprom image file length <%s>\n", 
-                            eeprom_file_name);
+            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get eeprom image file length <%s>\n", eeprom_file_name);
             goto init_driver_end;
         }
     }
@@ -99,8 +98,7 @@ S32 init_driver( PS8 adapter_name, PS8 eeprom_file_name,
         firmware_image_length = os_getFileSize(f2);
         if (-1 == firmware_image_length)
         {
-            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get firmware image file length <%s>\n",
-                            firmware_file_name);
+            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get firmware image file length <%s>\n", firmware_file_name);
             goto init_driver_end;
         }
     }
@@ -111,8 +109,7 @@ S32 init_driver( PS8 adapter_name, PS8 eeprom_file_name,
         init_file_length = os_getFileSize(f3);
         if (-1 == init_file_length)
         {
-            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get init file length <%s>\n",
-                            init_file_name);
+            os_error_printf(CU_MSG_ERROR, (PS8)"Cannot get init file length <%s>\n", init_file_name);
             goto init_driver_end;
         }
     }
@@ -129,23 +126,20 @@ S32 init_driver( PS8 adapter_name, PS8 eeprom_file_name,
     init_info->uFwFileLength  = firmware_image_length;
     init_info->uIniFileLength = init_file_length;
     
-    if (!f1 || 
-        (eeprom_image_length &&
+    if (!f1 || (eeprom_image_length &&
         os_fread(&init_info->data[0], 1, eeprom_image_length, f1)<eeprom_image_length))
     {
     }else
         os_error_printf(CU_MSG_INFO1, (PS8)"****  nvs file found %s **** \n", eeprom_file_name);
 
-    if (!f2 ||
-        (firmware_image_length &&
+    if (!f2 || (firmware_image_length &&
         os_fread(&init_info->data[eeprom_image_length], 1, firmware_image_length, f2)<firmware_image_length))
     {
         os_error_printf(CU_MSG_ERROR, (PS8)"Error reading firmware image %s - Aborting...\n", firmware_file_name);
         goto init_driver_end;
     }
 
-    if (!f3 ||
-        (init_file_length &&
+    if (!f3 || (init_file_length &&
         os_fread(&init_info->data[eeprom_image_length+firmware_image_length], 1, init_file_length, f3)<init_file_length))
     {
         os_error_printf(CU_MSG_ERROR, (PS8)"Warning: Error in reading init_file %s - Using defaults\n", init_file_name);

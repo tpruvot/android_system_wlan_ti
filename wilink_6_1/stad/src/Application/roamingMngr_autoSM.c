@@ -797,4 +797,3 @@ static void roamingMngr_smStartIdle(void *pData)
     }
 }
 
-

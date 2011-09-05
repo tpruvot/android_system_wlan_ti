@@ -84,6 +84,8 @@ typedef struct
 	TI_HANDLE					hTimer;
 	TI_HANDLE					hTWD;
 	TI_HANDLE					hTxCtrl;
+	TI_HANDLE					hRoamMng;
+	TI_HANDLE					hEvHandler;
 
 	TI_HANDLE			        hAdmCtrlTimer[MAX_NUM_OF_AC];
 	TI_UINT8				    currentState[MAX_NUM_OF_AC];
@@ -117,6 +119,8 @@ TI_STATUS trafficAdmCtrl_config (TI_HANDLE hTrafficAdmCtrl,
     						     TI_HANDLE hTimer,
     						     TI_HANDLE hTWD,
                                  TI_HANDLE hTxCtrl,
+                                 TI_HANDLE hRoamMng,
+                                 TI_HANDLE hEvHandler,
     						     trafficAdmCtrlInitParams_t	*pTrafficAdmCtrlInitParams);
 
 TI_STATUS trafficAdmCtrl_setParam(TI_HANDLE hTrafficAdmCtrl, paramInfo_t	*pParam);

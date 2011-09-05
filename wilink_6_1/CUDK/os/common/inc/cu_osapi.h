@@ -44,16 +44,26 @@
 #define IF_NAME_SIZE    16
 
 
+
+/* Macros */
+#define PRINT_FORMAT_S8_VAL(signedVal) \
+(((U8)signedVal > 127) ? (0xFFFFFF00 | signedVal) : signedVal)
+/***********/
+
+
 /* 
  * supp declares its OS abstarction with primitive types, so these must
  * be specifically declared here, and only if they weren't defined before by someone
  * including common.h
  */
-#ifndef ANDROID
+#ifndef COMMON_H
 typedef unsigned char   u8;
 typedef unsigned short u16;
 typedef unsigned long   u32;
 typedef unsigned long long u64;
+#ifndef BIT
+#define BIT(x) (1 << (x))
+#endif
 #endif
 
 #ifndef NULL

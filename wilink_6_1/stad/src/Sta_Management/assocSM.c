@@ -483,7 +483,7 @@ TI_STATUS assoc_recv(TI_HANDLE hAssoc, mlmeFrameInfo_t *pFrame)
         dot11_RSN_t *pRsnIe;
         TI_UINT8       curRsnData[255];
         TI_UINT8       rsnAssocIeLen;
-        TI_UINT8        length = 0;
+        TI_UINT32      length = 0;
 
 
         TRACE0(pHandle->hReport, REPORT_SEVERITY_SM, "ASSOC_SM: DEBUG Success associating to AP \n");
@@ -689,8 +689,8 @@ TI_STATUS assoc_getParam(TI_HANDLE hAssoc, paramInfo_t *pParam)
             /* Copy the association request information */
             pParam->content.assocAssociationInformation.Length = sizeof(OS_802_11_ASSOCIATION_INFORMATION);
             pParam->content.assocAssociationInformation.AvailableRequestFixedIEs = OS_802_11_AI_REQFI_CAPABILITIES | OS_802_11_AI_REQFI_LISTENINTERVAL;
-            pParam->content.assocAssociationInformation.RequestFixedIEs.Capabilities = *(TI_UINT16*)&(pHandle->assocReqBuffer[0]);
-            pParam->content.assocAssociationInformation.RequestFixedIEs.ListenInterval = *(TI_UINT16*)(&pHandle->assocReqBuffer[2]);
+            COPY_WLAN_WORD(&(pParam->content.assocAssociationInformation.RequestFixedIEs.Capabilities), &(pHandle->assocReqBuffer[0]));
+            COPY_WLAN_WORD(&(pParam->content.assocAssociationInformation.RequestFixedIEs.ListenInterval), &(pHandle->assocReqBuffer[2]));
 
             pParam->content.assocAssociationInformation.RequestIELength = RequestIELength; 
             pParam->content.assocAssociationInformation.OffsetRequestIEs = 0;
@@ -701,9 +701,9 @@ TI_STATUS assoc_getParam(TI_HANDLE hAssoc, paramInfo_t *pParam)
             /* Copy the association response information */
             pParam->content.assocAssociationInformation.AvailableResponseFixedIEs = 
                 OS_802_11_AI_RESFI_CAPABILITIES | OS_802_11_AI_RESFI_STATUSCODE | OS_802_11_AI_RESFI_ASSOCIATIONID;
-            pParam->content.assocAssociationInformation.ResponseFixedIEs.Capabilities = *(TI_UINT16*)&(pHandle->assocRespBuffer[0]);
-            pParam->content.assocAssociationInformation.ResponseFixedIEs.StatusCode = *(TI_UINT16*)&(pHandle->assocRespBuffer[2]);
-            pParam->content.assocAssociationInformation.ResponseFixedIEs.AssociationId = *(TI_UINT16*)&(pHandle->assocRespBuffer[4]);
+            COPY_WLAN_WORD(&(pParam->content.assocAssociationInformation.ResponseFixedIEs.Capabilities), &(pHandle->assocRespBuffer[0]));
+            COPY_WLAN_WORD(&(pParam->content.assocAssociationInformation.ResponseFixedIEs.StatusCode), &(pHandle->assocRespBuffer[2]));
+            COPY_WLAN_WORD(&(pParam->content.assocAssociationInformation.ResponseFixedIEs.AssociationId), &(pHandle->assocRespBuffer[4]));
             pParam->content.assocAssociationInformation.ResponseIELength = ResponseIELength;
             pParam->content.assocAssociationInformation.OffsetResponseIEs = 0;
             if (ResponseIELength > 0)
@@ -880,7 +880,9 @@ TI_STATUS assoc_smSuccessWait(assoc_t *pAssoc)
 TI_STATUS assoc_smFailureWait(assoc_t *pAssoc)
 {
     TI_STATUS       status;
-    TI_UINT16           uRspStatus = *(TI_UINT16*)&(pAssoc->assocRespBuffer[2]);
+    TI_UINT16       uRspStatus;
+
+    COPY_WLAN_WORD(&uRspStatus, &(pAssoc->assocRespBuffer[2]));
 
     status = assoc_smStopTimer(pAssoc);
 
@@ -922,7 +924,7 @@ TI_STATUS assoc_smMaxRetryWait(assoc_t *pAssoc)
 TI_STATUS assoc_smSendAssocReq(assoc_t *pAssoc)
 {
     TI_UINT8           *assocMsg;
-    TI_UINT32               msgLen;
+    TI_UINT32           msgLen;
     TI_STATUS           status;
     dot11MgmtSubType_e  assocType=ASSOC_REQUEST;
 
@@ -935,15 +937,19 @@ TI_STATUS assoc_smSendAssocReq(assoc_t *pAssoc)
     if (pAssoc->reAssoc)
     {
         assocType = RE_ASSOC_REQUEST;
+        TRACE0(pAssoc->hReport, REPORT_SEVERITY_INFORMATION, "assoc_smSendAssocReq() - Re-association. \n");
     }
 
     status = assoc_smRequestBuild(pAssoc, assocMsg, &msgLen);
-    if (status == TI_OK) {
+
+    if (status == TI_OK) 
+    {
         /* Save the association request message */
         assoc_saveAssocReqMessage(pAssoc, assocMsg, msgLen);
         status = mlmeBuilder_sendFrame(pAssoc->hMlme, assocType, assocMsg, msgLen, 0);
     }
     os_memoryFree(pAssoc->hOs, assocMsg, MAX_ASSOC_MSG_LENGTH);
+
     return status;
 }
 
@@ -1048,10 +1054,6 @@ TI_STATUS assoc_smStopTimer(assoc_t *pAssoc)
     
     tmr_StopTimer (pAssoc->hAssocSmTimer);
 
-	/* If the timer was stopped it means the association is over,
-	   so we can clear the generic IE */
-	rsn_clearGenInfoElement(pAssoc->hRsn);
-
     return TI_OK;
 }
 
@@ -1070,7 +1072,7 @@ TI_STATUS assoc_smCapBuild(assoc_t *pCtx, TI_UINT16 *cap)
     TI_UINT8            ratesBuf[DOT11_MAX_SUPPORTED_RATES];
     TI_UINT32           len = 0, ofdmIndex = 0;
     TI_BOOL             b11nEnable, bWmeEnable;
-
+    ECipherSuite        rsnEncryption;
     *cap = 0;
 
     /* Bss type */
@@ -1091,13 +1093,16 @@ TI_STATUS assoc_smCapBuild(assoc_t *pCtx, TI_UINT16 *cap)
     /* Privacy */
     param.paramType = RSN_ENCRYPTION_STATUS_PARAM;
     status =  rsn_getParam(pCtx->hRsn, &param);
+    rsnEncryption = param.content.rsnEncryptionStatus;
     if (status == TI_OK)
     {
         if (param.content.rsnEncryptionStatus != TWD_CIPHER_NONE)
         {
             *cap |= DOT11_CAPS_PRIVACY;
         }
-    } else {
+    }
+    else
+    {
         return TI_NOK;
     }
 
@@ -1176,25 +1181,28 @@ TI_STATUS assoc_smCapBuild(assoc_t *pCtx, TI_UINT16 *cap)
             *cap |= DOT11_CAPS_SHORT_SLOT_TIME;
 */
     }
-
-    /* Primary Site support HT ? */
-    param.paramType = SITE_MGR_PRIMARY_SITE_HT_SUPPORT;
-    siteMgr_getParam(pCtx->hSiteMgr, &param);
-
-    if (param.content.bPrimarySiteHtSupport == TI_TRUE)
+    if (rsnEncryption != TWD_CIPHER_TKIP &&
+        rsnEncryption != TWD_CIPHER_WEP &&
+        rsnEncryption != TWD_CIPHER_WEP104)
     {
-        /* Immediate Block Ack subfield - (is WME on?) AND (is HT Enable?) */
-        /* verify 11n_Enable and Chip type */
-        StaCap_IsHtEnable (pCtx->hStaCap, &b11nEnable);
-        /* verify that WME flag enable */
-        qosMngr_GetWmeEnableFlag (pCtx->hQosMngr, &bWmeEnable); 
-    
-        if ((b11nEnable != TI_FALSE) && (bWmeEnable != TI_FALSE))
-        {
-            *cap |= DOT11_CAPS_IMMEDIATE_BA;
-        }
-    }
+    	/* Primary Site support HT ? */
+    	param.paramType = SITE_MGR_PRIMARY_SITE_HT_SUPPORT;
+    	siteMgr_getParam(pCtx->hSiteMgr, &param);
 
+    	if (param.content.bPrimarySiteHtSupport == TI_TRUE)
+    	{
+        	/* Immediate Block Ack subfield - (is WME on?) AND (is HT Enable?) */
+        	/* verify 11n_Enable and Chip type */
+        	StaCap_IsHtEnable (pCtx->hStaCap, &b11nEnable);
+        	/* verify that WME flag enable */
+        	qosMngr_GetWmeEnableFlag (pCtx->hQosMngr, &bWmeEnable); 
+    
+        	if ((b11nEnable != TI_FALSE) && (bWmeEnable != TI_FALSE))
+        	{
+            		*cap |= DOT11_CAPS_IMMEDIATE_BA;
+        	}
+    	}
+    }
     return TI_OK;
 }
 
@@ -1368,12 +1376,11 @@ TI_STATUS assoc_smRequestBuild(assoc_t *pCtx, TI_UINT8* reqBuf, TI_UINT32* reqLe
     pRequest = reqBuf;
     *reqLen = 0;
 
-
     /* insert capabilities */
     status = assoc_smCapBuild(pCtx, &capabilities);
     if (status == TI_OK)
     {
-        *(TI_UINT16*)pRequest = capabilities;
+        COPY_WLAN_WORD(pRequest, &capabilities);
     }
     else
         return TI_NOK;
@@ -1386,8 +1393,10 @@ TI_STATUS assoc_smRequestBuild(assoc_t *pCtx, TI_UINT8* reqBuf, TI_UINT32* reqLe
     status =  TWD_GetParam (pCtx->hTWD, &tTwdParam);
     if (status == TI_OK)
     {
-        *(TI_UINT16*)pRequest = ENDIAN_HANDLE_WORD((TI_UINT16)tTwdParam.content.halCtrlListenInterval);
-    } else {
+        COPY_WLAN_WORD(pRequest, &(tTwdParam.content.halCtrlListenInterval));
+    } 
+    else 
+    {
         return TI_NOK;
     }
     
@@ -1544,7 +1553,10 @@ TI_STATUS assoc_smRequestBuild(assoc_t *pCtx, TI_UINT8* reqBuf, TI_UINT32* reqLe
     siteMgr_getParam(pCtx->hSiteMgr, &param);
 
     /* Disallow TKIP with HT Rates: If this is the case - discard HT rates from Association Request */
-    if((TI_TRUE == param.content.bPrimarySiteHtSupport) && (eCipherSuite != TWD_CIPHER_TKIP))
+    if((TI_TRUE == param.content.bPrimarySiteHtSupport) &&
+       ( (eCipherSuite != TWD_CIPHER_TKIP) && 
+         (eCipherSuite != TWD_CIPHER_WEP) && 
+         (eCipherSuite != TWD_CIPHER_WEP104)  )             )
     {
         status = StaCap_GetHtCapabilitiesIe (pCtx->hStaCap, pRequest, &len);
     	if (status != TI_OK)

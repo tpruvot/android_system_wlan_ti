@@ -526,6 +526,9 @@ TI_STATUS admCtrlWpa2_getInfoElement(admCtrl_t *pAdmCtrl, TI_UINT8 *pIe, TI_UINT
     if (pIe==NULL)
     {
         *pLength = 0;
+
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_WARNING, "admCtrlWpa2_getInfoElement() - IE is NULL. Return TI_NOK. \n");
+
         return TI_NOK;
     }
 
@@ -533,6 +536,9 @@ TI_STATUS admCtrlWpa2_getInfoElement(admCtrl_t *pAdmCtrl, TI_UINT8 *pIe, TI_UINT
     if (!broadcastCipherSuiteValidity[pAdmCtrl->networkMode][pAdmCtrl->broadcastSuite])
     {
         *pLength = 0;
+
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_WARNING, "admCtrlWpa2_getInfoElement() - Invalid cipher suit. Return TI_NOK. \n");
+
         return TI_NOK;
     }
 
@@ -557,6 +563,9 @@ TI_STATUS admCtrlWpa2_getInfoElement(admCtrl_t *pAdmCtrl, TI_UINT8 *pIe, TI_UINT
     SET_WLAN_WORD(&pWpa2IePacket->authKeyMngSuiteCnt,ENDIAN_HANDLE_WORD(0x0001));
     length += 2;
     os_memoryCopy(pAdmCtrl->hOs, (void *)pWpa2IePacket->authKeyMngSuite, wpa2IeOuiIe, 3);    
+
+    TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_getInfoElement() - externalAuthMode = %d. \n", pAdmCtrl->externalAuthMode);
+
     switch (pAdmCtrl->externalAuthMode)
     {
     case RSN_EXT_AUTH_MODE_OPEN:
@@ -593,30 +602,52 @@ TI_STATUS admCtrlWpa2_getInfoElement(admCtrl_t *pAdmCtrl, TI_UINT8 *pIe, TI_UINT
     /* build Capabilities */
     SET_WLAN_WORD(&pWpa2IePacket->capabilities,ENDIAN_HANDLE_WORD(admCtrlWpa2_buildCapabilities(pAdmCtrl)));
     length += 2;
+
+    TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_getInfoElement() - pAdmCtrl->preAuthSupport = %d. \n", pAdmCtrl->preAuthSupport);
+
     /* build PMKID list: we support no more than 1 PMKSA per AP, */
     /* so no more than 1 PMKID can be sent in the RSN IE         */
     if(pAdmCtrl->preAuthSupport && 
        (pAdmCtrl->pRsn->paeConfig.authProtocol == RSN_EXT_AUTH_MODE_WPA2))
     {
+
+        TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_getInfoElement() - authProtocol is RSN_EXT_AUTH_MODE_WPA2, externalAuthMode = %d. \n", pAdmCtrl->externalAuthMode);
+
         /* Init value of PMKID count is 0 */
         SET_WLAN_WORD(&pWpa2IePacket->pmkIdCnt,ENDIAN_HANDLE_WORD(0));
         length += 2;
         status = ctrlData_getParamBssid(pAdmCtrl->pRsn->hCtrlData, CTRL_DATA_CURRENT_BSSID_PARAM, pBssid);
 		MAC_COPY(assocBssid, pBssid);
+
         TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_getInfoElement - find PMKID \n");
+
         status = admCtrlWpa2_findPMKID(pAdmCtrl, &assocBssid, &pmkId, &index);
+
         if(status == TI_OK)
         {
             TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_getInfoElement - PMKID was found! \n");
+
             SET_WLAN_WORD(&pWpa2IePacket->pmkIdCnt,ENDIAN_HANDLE_WORD(1));
-            os_memoryCopy(pAdmCtrl->hOs, (TI_UINT8 *)pWpa2IePacket->pmkId, 
-                      (TI_UINT8 *)pmkId, PMKID_VALUE_SIZE);
+
+            os_memoryCopy( pAdmCtrl->hOs, 
+                           (TI_UINT8 *)pWpa2IePacket->pmkId, 
+                           (TI_UINT8 *)pmkId, 
+                           PMKID_VALUE_SIZE
+                         );
+
             length += PMKID_VALUE_SIZE;
         }
+        else
+        {
+            TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_WARNING, "admCtrlWpa2_getInfoElement() - admCtrlWpa2_findPMKID() has not found the desired BSSID in the pmkid_cache list. \n");
+        }
     }   
+
     pWpa2IePacket->length = length;    /* RSN IE length without IEid and length field */
     *pLength              = length+2;  /* The whole length of the RSN IE */
+
     TRACE_INFO_HEX(pAdmCtrl->hReport, pIe, *pLength);
+
     return TI_OK;
 
 }
@@ -842,7 +873,6 @@ TI_STATUS admCtrlWpa2_evalSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TRsnSite
     {
         return TI_NOK;
     }
-
 
 	/* Get Simple-Config state */
     siteMgr_getParamWSC(pAdmCtrl->pRsn->hSiteMgr, &wscMode); /* SITE_MGR_SIMPLE_CONFIG_MODE */
@@ -1372,10 +1402,11 @@ TI_STATUS admCtrlWpa2_findPMKID (admCtrl_t * pAdmCtrl, TMacAddr *pBSSID,
                                  pmkidValue_t *pPMKID, TI_UINT8  *cacheIndex)
 {
 
-    TI_UINT8           i     = 0;
-    TI_BOOL            found = TI_FALSE;
+    TI_UINT8    i      = 0;
+    TI_BOOL     found  = TI_FALSE;    
+    TI_STATUS   status = TI_NOK;
     TMacAddr    entryMac;
-    TI_STATUS       status = TI_NOK;
+
 
     while(!found && (i < ADMCTRL_PMKID_CACHE_SIZE) && 
                     (i <= pAdmCtrl->pmkid_cache.entriesNumber))
@@ -1396,7 +1427,9 @@ TI_STATUS admCtrlWpa2_findPMKID (admCtrl_t * pAdmCtrl, TMacAddr *pBSSID,
     }
 
     if(found)
+    {
         status = TI_OK;
+    }
 
     return status;
 
@@ -1506,6 +1539,8 @@ TI_STATUS admCtrlWpa2_addPMKID (admCtrl_t * pAdmCtrl, TMacAddr *pBSSID, pmkidVal
                     (void*)&pAdmCtrl->pmkid_cache.pmkidTbl[cacheIndex].pmkId,
                     pmkID, PMKID_VALUE_SIZE);
        /*pAdmCtrl->pmkid_cache.pmkidTbl[cacheIndex].generationTs = os_timeStampMs(pAdmCtrl->hOs); */
+
+       TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "RSN - admCtrlWpa2_addPMKID() - The BSSID was FOUND in the list and PMKID was UPDATED in index %d\n", cacheIndex);
    }
    else
    {
@@ -1525,6 +1560,8 @@ TI_STATUS admCtrlWpa2_addPMKID (admCtrl_t * pAdmCtrl, TMacAddr *pBSSID, pmkidVal
 
        if(pAdmCtrl->pmkid_cache.entriesNumber < ADMCTRL_PMKID_CACHE_SIZE)
           pAdmCtrl->pmkid_cache.entriesNumber ++;
+
+       TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "RSN - admCtrlWpa2_addPMKID() - The BSSID was NOT found in the list and PMKID was ADDED in index %d\n", cacheIndex);
    }
 
         TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "RSN   Add PMKID   Entry index is %d \n", cacheIndex);
@@ -1572,6 +1609,9 @@ TI_STATUS admCtrlWpa2_setPMKIDList (admCtrl_t * pAdmCtrl, OS_802_11_PMKID *pmkid
     if(pmkidList->BSSIDInfoCount == 0)
     {
         admCtrlWpa2_resetPMKIDCache(pAdmCtrl);
+
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION , "admCtrlWpa2_setPMKIDList() - Cleaning PMKID cache. Returning...\n");
+
         return TI_OK;
     }
 
@@ -1585,6 +1625,9 @@ TI_STATUS admCtrlWpa2_setPMKIDList (admCtrl_t * pAdmCtrl, OS_802_11_PMKID *pmkid
         TRACE3(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "RSN: Set PMKID list - no enough room for %d entries Needed length is %d. Supplied length is %d .\n", NumOfEntries, neededLength,pmkidList->Length);
         return TI_NOK;
     }
+
+
+    TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION , "admCtrlWpa2_setPMKIDList() - Num Of Entries = %d.\n", NumOfEntries);
 
     /*  Write  the PMKID to the PMKID cashe */
     pmkidList->BSSIDInfoCount = NumOfEntries;
@@ -1611,6 +1654,9 @@ TI_STATUS admCtrlWpa2_setPMKIDList (admCtrl_t * pAdmCtrl, OS_802_11_PMKID *pmkid
         {
            TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_WARNING , "admCtrlWpa2_setPMKIDList: number of candidates was already zero...\n");
         }
+
+        TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION , "admCtrlWpa2_setPMKIDList() - Calling admCtrlWpa2_addPMKID. Index = %d.\n", i);
+
         admCtrlWpa2_addPMKID(pAdmCtrl,&macAddr, (TI_UINT8 *)pmkidList->osBSSIDInfo[i].PMKID);
     }
 
@@ -1669,26 +1715,35 @@ TI_STATUS admCtrlWpa2_resetPMKIDCache (admCtrl_t *pAdmCtrl)
 
 static void admCtrlWpa2_buildAndSendPMKIDCandList (TI_HANDLE hHandle, TBssidList4PreAuth *apList)
 {
-
-    admCtrl_t         *pAdmCtrl = (admCtrl_t *)hHandle;
-    TI_UINT8             candIndex =0, apIndex = 0, size =0;
     paramInfo_t       *pParam;
-    OS_802_11_PMKID_CANDIDATELIST  *pCandList;
-    TI_UINT8             memBuff[PMKID_CAND_LIST_MEMBUFF_SIZE + sizeof(TI_UINT32)];
+    admCtrl_t         *pAdmCtrl = (admCtrl_t *)hHandle;
     dot11_RSN_t       *rsnIE = 0;
+    TI_UINT8           candIndex = 0;
+    TI_UINT8           apIndex   = 0;
+    TI_UINT8           size      = 0;
+    TI_STATUS          status    = TI_NOK;
     wpa2IeData_t      wpa2Data;
-    TI_STATUS         status = TI_NOK;
+    TI_UINT8           memBuff[PMKID_CAND_LIST_MEMBUFF_SIZE + sizeof(TI_UINT32)];
+    
+    OS_802_11_PMKID_CANDIDATELIST  *pCandList;
+
 
     pParam = (paramInfo_t *)os_memoryAlloc(pAdmCtrl->hOs, sizeof(paramInfo_t));
     if (!pParam)
     {
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_ERROR, "admCtrlWpa2_buildAndSendPMKIDCandList() - Allocation for Param failed!!! \n");
+
         return;
     }
 
     /* Get SSID that the STA is accociated with    */
     pParam->paramType = SME_DESIRED_SSID_ACT_PARAM;
     status          = sme_GetParam (pAdmCtrl->pRsn->hSmeSm, pParam);
-    if(status != TI_OK) {
+    
+    if(status != TI_OK) 
+    {
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_buildAndSendPMKIDCandList() - GetParam failed!!! \n");
+
         os_memoryFree(pAdmCtrl->hOs, pParam, sizeof(paramInfo_t));
         return;
     }
@@ -1701,6 +1756,8 @@ static void admCtrlWpa2_buildAndSendPMKIDCandList (TI_HANDLE hHandle, TBssidList
           (TI_UINT8 *) pParam->content.smeDesiredSSID.str,
                           pAdmCtrl->pmkid_cache.ssid.len) != 0))
     {
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_buildAndSendPMKIDCandList () - Calling admCtrlWpa2_resetPMKIDCache(). \n");
+
         admCtrlWpa2_resetPMKIDCache(pAdmCtrl);
 
         os_memoryCopy(pAdmCtrl->hOs, (void *)pAdmCtrl->pmkid_cache.ssid.str, 
@@ -1717,11 +1774,15 @@ static void admCtrlWpa2_buildAndSendPMKIDCandList (TI_HANDLE hHandle, TBssidList
     */
     os_memoryFree(pAdmCtrl->hOs, pParam, sizeof(paramInfo_t));
     if((apList == NULL) || (apList->NumOfItems == 0))
+    {
+        TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_buildAndSendPMKIDCandList () - apList NULL or empty. \n");
+
         return;
+    }
         
     TRACE0(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_buildAndSendPMKIDCandList - Entry \n");
 
-    /* fill the PMKID candidate list */
+    /* Fill the PMKID candidate list */
     pCandList = (OS_802_11_PMKID_CANDIDATELIST *)(memBuff + sizeof(TI_UINT32));
     pCandList->Version = 1;
     for (apIndex=0; apIndex<pAdmCtrl->pmkid_cache.entriesNumber; apIndex++)
@@ -1757,13 +1818,15 @@ static void admCtrlWpa2_buildAndSendPMKIDCandList (TI_HANDLE hHandle, TBssidList
 		}
 
         if(status == TI_OK)
+        {
            status = admCtrlWpa2_parseIe(pAdmCtrl, (TI_UINT8 *)rsnIE, &wpa2Data);
+        }
 
         TRACE1(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "admCtrlWpa2_buildAndSendPMKIDCandList - parseIe status = %d \n", status);
         if(status == TI_OK)
         {   
-            TI_BOOL        preAuthStatus;
-            TI_UINT8               cacheIndex;
+            TI_BOOL     preAuthStatus;
+            TI_UINT8    cacheIndex;
 
             preAuthStatus = admCtrlWpa2_getPreAuthStatus(pAdmCtrl, &apList->bssidList[apIndex].bssId, &cacheIndex);
 
@@ -1779,8 +1842,7 @@ static void admCtrlWpa2_buildAndSendPMKIDCandList (TI_HANDLE hHandle, TBssidList
  
             if(pAdmCtrl->preAuthSupport && (wpa2Data.preAuthentication))
             {
-               pCandList->CandidateList[candIndex].Flags = 
-                                 OS_802_11_PMKID_CANDIDATE_PREAUTH_ENABLE;
+               pCandList->CandidateList[candIndex].Flags = OS_802_11_PMKID_CANDIDATE_PREAUTH_ENABLE;
             }
             else
             {

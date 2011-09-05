@@ -334,9 +334,9 @@ IP&Port classification table  */
 #define  QOS_TX_BLKS_THRESHOLD_VO_DEF_WIFI_MODE 30
 /* In performance-boost, optimize for Rx throughput on expense of Tx QoS */
 #define  QOS_TX_BLKS_THRESHOLD_BK_DEF_BOOST_MODE 0
-#define  QOS_TX_BLKS_THRESHOLD_BE_DEF_BOOST_MODE 10
-#define  QOS_TX_BLKS_THRESHOLD_VI_DEF_BOOST_MODE 10
-#define  QOS_TX_BLKS_THRESHOLD_VO_DEF_BOOST_MODE 10
+#define  QOS_TX_BLKS_THRESHOLD_BE_DEF_BOOST_MODE 0
+#define  QOS_TX_BLKS_THRESHOLD_VI_DEF_BOOST_MODE 0
+#define  QOS_TX_BLKS_THRESHOLD_VO_DEF_BOOST_MODE 0
 
 /* HW Rx mem-blocks Number */
 #define  RX_MEM_BLKS_NUM_MIN                    20
@@ -497,6 +497,11 @@ IP&Port classification table  */
 #define QOS_CW_CWMAX_MIN                        QOS_CWMAX_MIN
 #define QOS_CW_CWMAX_MAX                        QOS_CWMAX_MAX
 #define QOS_CW_CWMAX_DEF                        CW_MAX_DEF
+
+/*Auto Rx Streaming */
+#define QOS_PS_TRAFFIC_RATE_MIN                        0
+#define QOS_PS_TRAFFIC_RATE_MAX                        50
+#define QOS_PS_TRAFFIC_RATE_DEF                        20
 
 /*
  * 802.11n HT settion
@@ -1326,7 +1331,7 @@ IP&Port classification table  */
 #define RATE_MNG_RATE_CHECK_DOWN_MIN       0
 #define RATE_MNG_RATE_CHECK_DOWN_MAX       256
 
-#define RATE_MNG_RATE_RETRY_POLICY_DEF_TABLE  "1,1,1,3,3,3,6,6,6,6,9,9,9"
+#define RATE_MNG_RATE_RETRY_POLICY_DEF_TABLE  "0,0,0,0,0,0,0,0,0,0,0,0,0"
 #define RATE_MNG_MAX_RETRY_POLICY_PARAMS_LEN  13
 #define RATE_MNG_MAX_STR_LEN  255
 
@@ -1490,8 +1495,10 @@ typedef enum
 typedef enum 
 {
     POWER_MANAGER_USER_PRIORITY,           /**< indicates the default user priority. */
+    POWER_MANAGER_VOIP_PRIORITY,           /**< indicates the default VoIP priority. */
     POWER_MANAGER_SG_PRIORITY,             /**< Indicate the Soft Gemini priority */
     POWER_MANAGER_REAUTH_PRIORITY,         /**< Indicate 802.1x reauthentication priority */
+	POWER_MANAGER_WPS_PRIORITY=3,         /**< Indicate WPS priority */
     POWER_MANAGER_PS_POLL_FAILURE_PRIORITY,/**< After receiving the PsPoll failure event */
     POWER_MANAGER_MAX_PRIORITY                                                      
 }PowerMgr_Priority_e;
@@ -1539,17 +1546,17 @@ enum PowerMgr_registryDefinitions
     ENTER_TO_802_11_POWER_SAVE_RETRIES_MAX_VALUE = 50,
     ENTER_TO_802_11_POWER_SAVE_RETRIES_DEF_VALUE = 5,
 
-    AUTO_POWER_MODE_INTERVAL_MIN_VALUE = 100,
+    AUTO_POWER_MODE_INTERVAL_MIN_VALUE = 30,
     AUTO_POWER_MODE_INTERVAL_MAX_VALUE = 30000,
-    AUTO_POWER_MODE_INTERVAL_DEF_VALUE = 1000,
+    AUTO_POWER_MODE_INTERVAL_DEF_VALUE = 40,
 
-    AUTO_POWER_MODE_ACTIVE_TH_MIN_VALUE = 2,
+    AUTO_POWER_MODE_ACTIVE_TH_MIN_VALUE = 0,
     AUTO_POWER_MODE_ACTIVE_TH_MAX_VALUE = 30000,
-    AUTO_POWER_MODE_ACTIVE_TH_DEF_VALUE = 15,
+    AUTO_POWER_MODE_ACTIVE_TH_DEF_VALUE = 0,
 
-    AUTO_POWER_MODE_DOZE_TH_MIN_VALUE = 1,
+    AUTO_POWER_MODE_DOZE_TH_MIN_VALUE = 0,
     AUTO_POWER_MODE_DOZE_TH_MAX_VALUE = 30000,
-    AUTO_POWER_MODE_DOZE_TH_DEF_VALUE = 8,
+    AUTO_POWER_MODE_DOZE_TH_DEF_VALUE = 0,
 
     AUTO_POWER_MODE_DOZE_MODE_MIN_VALUE = POWER_MODE_SHORT_DOZE,
     AUTO_POWER_MODE_DOZE_MODE_MAX_VALUE = POWER_MODE_LONG_DOZE,

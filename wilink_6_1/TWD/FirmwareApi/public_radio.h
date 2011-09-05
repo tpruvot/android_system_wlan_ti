@@ -435,8 +435,8 @@ typedef enum RADIO_CHANNEL_INDEX_ENMT
 
 }RADIO_CHANNEL_INDEX_ENM;
 
-#define NUMBER_OF_2_4_G_CHANNELS    (NUMBER_OF_2_4_G_CHANNEL_INDICES_E + 1)
-#define NUMBER_OF_5G_CHANNELS       (NUMBER_OF_RADIO_CHANNEL_INDEXS_E - NUMBER_OF_2_4_G_CHANNELS)
+#define NUMBER_OF_2_4_G_CHANNELS    	(NUMBER_OF_2_4_G_CHANNEL_INDICES_E + 1)
+#define NUMBER_OF_5G_CHANNELS       	(NUMBER_OF_RADIO_CHANNEL_INDEXS_E - NUMBER_OF_2_4_G_CHANNELS)
 #define HALF_NUMBER_OF_2_4_G_CHANNELS   (NUMBER_OF_2_4_G_CHANNELS / 2)
 #define HALF_NUMBER_OF_5G_CHANNELS      ((NUMBER_OF_5G_CHANNELS + 1) / 2)
 
@@ -713,7 +713,7 @@ typedef enum
 /*	0x23	*/	TEST_CMD_SMART_REFLEX,
 /*	0x24	*/	TEST_CMD_CHANNEL_RESPONSE,
 /*	0x25	*/	TEST_CMD_DCO_ITRIM_FEATURE,
-/*      0x26    */      TEST_CMD_INI_FILE_RF_EXTENDED_PARAM,
+/*	0x26	*/	TEST_CMD_INI_FILE_RF_EXTENDED_PARAM,
 
     MAX_TEST_CMD_ID = 0xFF	/* Dummy - must be last!!! (make sure that Enum variables are type of int) */
         
@@ -1203,7 +1203,7 @@ typedef struct
 {
 	uint16 	Length;			       	/* TLV length in bytes */
 	uint8 	Buffer[MAX_TLV_LENGTH]; /* TLV buffer content to be burned */
-    uint8     Type;                                                    /* TLV Type Index */ 
+    uint8   Type;                   /* TLV Type Index */ 
 	uint8   padding;
 }TNvsStruct;
 
@@ -1523,7 +1523,7 @@ typedef struct
 	int8  TxPerRatePowerLimits_2_4G_Normal[NUMBER_OF_RATE_GROUPS_E];							
 	int8  TxPerRatePowerLimits_2_4G_Degraded[NUMBER_OF_RATE_GROUPS_E];							
 	int8    TxPerRatePowerLimits_2_4G_Extreme[NUMBER_OF_RATE_GROUPS_E];
-	int8  TxPerChannelPowerLimits_2_4G_11b[NUMBER_OF_2_4_G_CHANNELS];	
+	int8  	TxPerChannelPowerLimits_2_4G_11b[NUMBER_OF_2_4_G_CHANNELS];	
 	int8  TxPerChannelPowerLimits_2_4G_OFDM[NUMBER_OF_2_4_G_CHANNELS];	
 	int8  TxPDVsRateOffsets_2_4G[NUMBER_OF_RATE_GROUPS_E];												
 	uint8 TxIbiasTable_2_4G[NUMBER_OF_RATE_GROUPS_E];														
@@ -1557,9 +1557,9 @@ typedef struct
 
 typedef struct
 {
-        int8  TxPerChannelPowerCompensation_2_4G[HALF_NUMBER_OF_2_4_G_CHANNELS]; /* 7 */
-        int8  TxPerChannelPowerCompensation_5G_OFDM[HALF_NUMBER_OF_5G_CHANNELS]; /* 18 */
-        uint8 Padding[3];
+	int8  TxPerChannelPowerCompensation_2_4G[HALF_NUMBER_OF_2_4_G_CHANNELS]; /* 7 */	
+	int8  TxPerChannelPowerCompensation_5G_OFDM[HALF_NUMBER_OF_5G_CHANNELS]; /* 18 */
+	uint8 Padding[3];
 
 }IniFileExtendedRadioParam;
 
@@ -1627,15 +1627,15 @@ typedef struct
 		RadioRxStatistics				Statistics;
 		TFWVerisons						fwVersions;
 		TTestCmdRunCalibration			RunCalibration;
-                IniFileRadioParam			IniFileRadioParams;
-                IniFileExtendedRadioParam               IniFileExtendedRadioParams;
+        IniFileRadioParam				IniFileRadioParams;
+		IniFileExtendedRadioParam		IniFileExtendedRadioParams;
         IniFileGeneralParam				IniFileGeneralParams;
 		EfuseParameters_t				EfuseParams;
 		TestToneParams_t				TestToneParams;
 		TTestCmdPowerMode				powerMode;
         TTestCmdFreeRSSI                freeRSSI;
 		TTestCmdCLPCCommands			clpcCommands;
-        TTestCmdDCOItrimOnOff              DCOitrimFeatureOnOff;
+		TTestCmdDCOItrimOnOff           DCOitrimFeatureOnOff;
 
 		TTestCmdDebug					testDebug;
     }testCmd_u;

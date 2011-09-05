@@ -658,69 +658,45 @@ typedef enum
 																														* GET Bit: ON	\n
 																														* SET Bit: OFF	\n
 																														*/
-
-
     SCAN_CNCN_BSSID_LIST_PARAM                  =   GET_BIT |           SCAN_CNCN_PARAM | 0x08,                         /**< Scan Concentrator BSSID List Parameter (Scan Concentrator Module Get Command): \n
 																														* Used for retrieving the application scan result table\n
-
-
-
-* Done Sync with no memory allocation\n
-																														* Parameter Number:	0x08	\n
+																														* Done Sync with no memory allocation\n 
+																														* Parameter Number:	0x07	\n
 																														* Module Number: Scan Concentrator Module Number \n
 																														* Async Bit: OFF	\n
 																														* Allocate Bit: OFF	\n
 																														* GET Bit: ON 	\n
 																														* SET Bit: OFF  \n
 																														*/
-
     SCAN_CNCN_BSSID_RATE_LIST_PARAM             =   GET_BIT |           SCAN_CNCN_PARAM | 0x09,                         /**< Scan Concentrator Rate List Parameter (Scan Concentrator Module Get Command): \n  
 																														* Used for retrieving the application scan rates result table\n
-
-
-
-* Done Sync with no memory allocation\n
-																														* Parameter Number:	0x09	\n
+																														* Done Sync with no memory allocation\n 
+																														* Parameter Number:	0x08	\n
 																														* Module Number: Scan Concentrator Module Number \n
 																														* Async Bit: OFF	\n
 																														* Allocate Bit: OFF	\n
 																														* GET Bit: ON	\n
-																														* SET Bit: OFF   \n
+																														* SET Bit: OFF	\n
+																														*/
+    SCAN_CNCN_SET_SRA                           =   SET_BIT |           SCAN_CNCN_PARAM | 0x0A,                         /**< Scan Concentrator set scan result aging (Scan Concentrator Module Get Command): \n
+																														* Used for aging threshold\n
+																														* Parameter Number:	0x09	\n
+																														* Module Number: Scan Concentrator Module Number \n
+																														* Async Bit: OFF	\n
+																														* Allocate Bit: OFF	\n
+																														* GET Bit: OFF	\n
+																														* SET Bit: ON	\n
 																														*/
 
-    SCAN_CNCN_SET_SRA                           =   SET_BIT |           SCAN_CNCN_PARAM | 0x0A,                         /**< Scan Concentrator set scan result aging (Scan Concentrator Module Get Command): \n
-
-
-
-* Used for aging threshold\n
-
-
-
-* Parameter Number:     0x0A   \n
-                                                                                                                                                                                                                                                * Module Number: Scan Concentrator Module Number \n
-                                                                                                                                                                                                                                                * Async Bit: OFF        \n
-
-
-
-* Allocate Bit: OFF     \n
-                                                                                                                                                                                                                                                * GET Bit: OFF  \n
-                                                                                                                                                                                                                                                * SET Bit: ON   \n
-                                                                                                                                                                                                                                                */
-
-
     SCAN_CNCN_SET_RSSI                          =   SET_BIT |           SCAN_CNCN_PARAM | 0x0B,                         /**< Scan Concentrator set rssi filter threshold (Scan Concentrator Module Get Command): \n
-                                                                                                                                                                                                                                                * Used for rssi threshold\n
-                                                                                                                                                                                                                                                * Parameter Number:     0x0B    \n
-                                                                                                                                                                                                                                                * Module Number: Scan Concentrator Module Number \n
-                                                                                                                                                                                                                                                * Async Bit: OFF        \n
-
-
-
-* Allocate Bit: OFF     \n
-                                                                                                                                                                                                                                                * GET Bit: OFF  \n
-                                                                                                                                                                                                                                                * SET Bit: ON   \n
-                                                                                                                                                                                                                                                */
-
+																														* Used for rssi threshold\n
+																														* Parameter Number:	0x0A	\n
+																														* Module Number: Scan Concentrator Module Number \n
+																														* Async Bit: OFF	\n
+																														* Allocate Bit: OFF	\n
+																														* GET Bit: OFF	\n
+																														* SET Bit: ON	\n
+																														*/
 
 	/* Scan Manager module */
     SCAN_MNGR_SET_CONFIGURATION                 =	SET_BIT |           SCAN_MNGR_PARAM | 0x01 | ALLOC_NEEDED_PARAM,	/**< Scan Manager Set Configuration Parameter (Scan Manager Module Set Command): \n  
@@ -930,8 +906,11 @@ typedef enum
 																																* SET Bit: OFF	\n
 																																*/
 
+       POWER_MGR_SET_VOICE_POWER_POLICY                            =       SET_BIT | POWER_MANAGER_PARAM | 0x0B,                                                       /**< Power Manager Power Mode Parameter (Power Manager Module Set Command): \n */
+ 
+       POWER_MGR_CANCEL_VOICE_POWER_POLICY                         =       SET_BIT | POWER_MANAGER_PARAM | 0x0C,                                                       /**< Power Manager Power Mode Parameter (Power Manager Module Set Command): \n */
 
-
+       POWER_MGR_DTIM_LISTEN_INTERVAL                   =            GET_BIT | POWER_MANAGER_PARAM | 0x0A,
 
 	/* Robust Security NW (RSN) section */
 	RSN_ENCRYPTION_STATUS_PARAM						=	SET_BIT | GET_BIT | RSN_MODULE_PARAM | 0x04,							/**< Robust Security NW (RSN) Encryption Status Parameter (RSN Module Set/Get Command): \n  
@@ -1275,6 +1254,29 @@ typedef enum
 																									* SET Bit: ON	\n
 																									*/
 
+	QOS_MNGR_BA_POLICY							=	SET_BIT | GET_BIT | QOS_MANAGER_PARAM | 0x1a,	/**< QoS Manager Set BA policy Parameter (QoS Module Set/Get Command): \n  
+																									* Used for getting BA policy or setting BA policy to FW and in QoS Module\n
+																									* Done Sync with no memory allocation\n 
+																									* Parameter Number:	0x1a	\n
+																									* Module Number: QoS Module Number \n
+																									* Async Bit: OFF	\n
+																									* Allocate Bit: OFF	\n
+																									* GET Bit: ON	\n
+																									* SET Bit: ON	\n
+																									*/
+
+	QOS_MNGR_PS_TRAFFIC_PERIOID					= SET_BIT | GET_BIT | QOS_MANAGER_PARAM | 0x1b,	    /**< QoS Manager ps traffic Parameter (QoS Module Set/Get Command): \n  
+																									* Used for set ps traffic period for the auto rx streaming option in QoS Module\n
+																									* Done Sync with no memory allocation\n 
+																									* Parameter Number:	0x1b	\n
+																									* Module Number: QoS Module Number \n
+																									* Async Bit: OFF	\n
+																									* Allocate Bit: OFF	\n
+																									* GET Bit: ON	\n
+																									* SET Bit: ON	\n
+																									*/
+
+
     /* Soft Gemini params */
 	SOFT_GEMINI_SET_ENABLE						=	SET_BIT |           SOFT_GEMINI_PARAM	| 0x01,	/**< Soft Gimini Parameters Set Enable Parameter (Soft Gimini Parameters Module Set Command): \n  
 																									* Used for configuring Soft Gimini enable Mode (Enable|Disable|Auto) in FW\n
@@ -1549,6 +1551,18 @@ typedef enum
                                                                                                     * SET Bit: ON	\n
                                                                                                     */
 
+
+    FW_DEBUG_SDIO_VALIDATION                    = SET_BIT | TWD_MODULE_PARAM | TWD_SDIO_VALIDATION_PARAMS_ID,	 /**< SDIO validation mechanism: \n  
+                                                                                                                 * Used for testing SDIO lines\n
+                                                                                                                 * Done Sync with no memory allocation\n
+                                                                                                                 * Parameter Number:	TWD_SDIO_VALIDATION_PARAMS_ID   \n
+                                                                                                                 * Module Number: TWD Control Module Number \n
+                                                                                                                 * Async Bit: OFF	\n
+                                                                                                                 * Allocate Bit: OFF	\n
+                                                                                                                 * GET Bit: OFF	\n
+                                                                                                                 * SET Bit: ON	\n
+                                                                                                                 */
+    
 	LAST_CMD									=	0x00	/**< Last External Parameter - Dummy, Should always stay Last	*/													
 
 }   EExternalParam;

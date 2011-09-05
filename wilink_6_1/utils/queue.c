@@ -177,12 +177,16 @@ TI_STATUS que_Destroy (TI_HANDLE hQue)
 {
     TQueue *pQue = (TQueue *)hQue;
 
-    if (pQue->uCount)
-    {
-        TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING, "que_Destroy() Queue Not Empty!!");
+    if (pQue)
+	{
+        /* Alert if the queue is unloaded before it was cleared from items */
+        if (pQue->uCount)
+        {
+            TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING, "que_Destroy() Queue Not Empty!!");
+        }
+        /* free Queue object */
+        os_memoryFree (pQue->hOs, pQue, sizeof(TQueue));
     }
-    /* free Queue object */
-	os_memoryFree (pQue->hOs, pQue, sizeof(TQueue));
 	
     return TI_OK;
 }
@@ -229,44 +233,45 @@ TI_STATUS que_Enqueue (TI_HANDLE hQue, TI_HANDLE hItem)
 	TQueue      *pQue = (TQueue *)hQue;
     TQueNodeHdr *pQueNodeHdr;  /* the Node-Header in the given item */
 
-    
-    /* Check queue limit */
-	if(pQue->uCount < pQue->uLimit)
+    if (pQue)
 	{
-        /* Find NodeHeader in the given item */
-        pQueNodeHdr = (TQueNodeHdr *)((TI_UINT8*)hItem + pQue->uNodeHeaderOffset);
-
-        /* Verify that pNext is NULL --> Sanity check that this item is not already linked to a queue */
-        if (pQueNodeHdr->pNext)
-        {
-            /* Not an error since we have a case where a timer may expire twice in a row (in TxDataQueue) */
-            TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING, "que_Enqueue(): Trying to enqueue an item that is already enqueued!!");
-            return TI_NOK;
-        }
-
-        /* Enqueue item and increment items counter */
-		AddToHead (pQueNodeHdr, &pQue->tHead);
-		pQue->uCount++;
-
+            /* Check queue limit */
+            if(pQue->uCount < pQue->uLimit)
+            {
+                /* Find NodeHeader in the given item */
+                pQueNodeHdr = (TQueNodeHdr *)((TI_UINT8*)hItem + pQue->uNodeHeaderOffset);
+        
+                /* Verify that pNext is NULL --> Sanity check that this item is not already linked to a queue */
+                if (pQueNodeHdr->pNext)
+                {
+                    /* Not an error since we have a case where a timer may expire twice in a row (in TxDataQueue) */
+                    TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING, "que_Enqueue(): Trying to enqueue an item that is already enqueued!!");
+                    return TI_NOK;
+                }
+        
+                /* Enqueue item and increment items counter */
+                AddToHead (pQueNodeHdr, &pQue->tHead);
+                pQue->uCount++;
+        
 #ifdef TI_DBG
-        if (pQue->uCount > pQue->uMaxCount)
-        {
-            pQue->uMaxCount = pQue->uCount;
-        }
-        TRACE0(pQue->hReport, REPORT_SEVERITY_INFORMATION , "que_Enqueue(): Enqueued Successfully\n");
+                    if (pQue->uCount > pQue->uMaxCount)
+                    {
+                        pQue->uMaxCount = pQue->uCount;
+                    }
+                    TRACE0(pQue->hReport, REPORT_SEVERITY_INFORMATION , "que_Enqueue(): Enqueued Successfully\n");
 #endif
+        
+                return TI_OK;
+            }
 
-        return TI_OK;
-	}
-	
-	/* 
-	 *  Queue is overflowed, return TI_NOK.
-	 */
+        /* 
+         *  Queue is overflowed, return TI_NOK.
+         */
 #ifdef TI_DBG
-	pQue->uOverflow++;
-    TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING , "que_Enqueue(): Queue Overflow\n");
+        pQue->uOverflow++;
+        TRACE0(pQue->hReport, REPORT_SEVERITY_WARNING , "que_Enqueue(): Queue Overflow\n");
 #endif
-	
+    }
 	return TI_NOK;
 }
 
@@ -286,23 +291,26 @@ TI_HANDLE que_Dequeue (TI_HANDLE hQue)
 {
     TQueue   *pQue = (TQueue *)hQue;
 	TI_HANDLE hItem;
- 
-    if (pQue->uCount)
-    {
-        /* Queue is not empty, take packet from the queue tail */
 
-        /* find pointer to the node entry */
-         hItem = (TI_HANDLE)((TI_UINT8*)pQue->tHead.pPrev - pQue->uNodeHeaderOffset); 
-        
-         DelFromTail (pQue->tHead.pPrev);    /* remove node from the queue */
-         pQue->uCount--;
+    if (pQue)
+    {
+        if (pQue->uCount)
+        {
+            /* Queue is not empty, take packet from the queue tail */
+    
+            /* find pointer to the node entry */
+            hItem = (TI_HANDLE)((TI_UINT8*)pQue->tHead.pPrev - pQue->uNodeHeaderOffset); 
+
+            DelFromTail (pQue->tHead.pPrev);    /* remove node from the queue */
+            pQue->uCount--;
 
 #ifdef TI_DBG
-        /* Clear the pNext so we can do a sanity check when enqueuing this structre in the future */
-        ((TQueNodeHdr *)((TI_UINT8*)hItem + pQue->uNodeHeaderOffset))->pNext = NULL;
+            /* Clear the pNext so we can do a sanity check when enqueuing this structre in the future */
+            ((TQueNodeHdr *)((TI_UINT8*)hItem + pQue->uNodeHeaderOffset))->pNext = NULL;
 #endif
 
-         return (hItem);
+            return (hItem);
+        }
     }
     
 	/* Queue is empty */
@@ -356,6 +364,7 @@ TRACE0(pQue->hReport, REPORT_SEVERITY_INFORMATION , "que_Requeue(): Requeued suc
 		return TI_OK;
     }
     
+
 	/* 
 	 *  Queue is overflowed, return TI_NOK.
 	 *  Note: This is not expected in the current design, since Tx packet may be requeued
@@ -405,14 +414,13 @@ TI_UINT32 que_Size (TI_HANDLE hQue)
 
 void que_Print(TI_HANDLE hQue)
 {
+#ifdef REPORT_LOG
 	TQueue *pQue = (TQueue *)hQue;
 
     WLAN_OS_REPORT(("que_Print: Count=%u MaxCount=%u Limit=%u Overflow=%u NodeHeaderOffset=%u Next=0x%x Prev=0x%x\n",
                     pQue->uCount, pQue->uMaxCount, pQue->uLimit, pQue->uOverflow, 
                     pQue->uNodeHeaderOffset, pQue->tHead.pNext, pQue->tHead.pPrev));
+#endif
 }
 
 #endif /* TI_DBG */
-
-
-

@@ -842,7 +842,6 @@ TI_STATUS admCtrlWpa_setSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TI_UINT8 *
         pAdmCtrl->externalAuthMode = RSN_EXT_AUTH_MODE_OPEN;
         break;
     }
-
       
 
 #ifdef XCC_MODULE_INCLUDED
@@ -1073,7 +1072,6 @@ TI_STATUS admCtrlWpa_evalSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TRsnSiteP
         *pEvaluation = admCtrlWpa_validity.evaluation;
     }
 
-
 	/* Check privacy bit if not in mixed mode */
     if (!pAdmCtrl->mixedMode)
     {   /* There's no mixed mode, so make sure that the privacy Bit matches the privacy mode*/
@@ -1095,7 +1093,6 @@ TI_STATUS admCtrlWpa_evalSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TRsnSiteP
         pAdmCtrl->broadcastSuite = TWD_CIPHER_NONE;
         pAdmCtrl->unicastSuite = TWD_CIPHER_NONE;
     }
-
 
 	/* always return TI_OK */
     return TI_OK;
@@ -1238,6 +1235,7 @@ TI_STATUS admCtrlWpa_parseIe(admCtrl_t *pAdmCtrl, TI_UINT8 *pWpaIe, wpaIeData_t 
             TRACE2(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "Wpa_IE: authKeyMng %x , keyMng %x \n", curWpaIe[3], curKeyMngSuite);
 
             if ((curKeyMngSuite>maxKeyMngSuite) && (curKeyMngSuite!=WPA_IE_KEY_MNG_NA)
+				&& (curKeyMngSuite != TWD_CIPHER_UNKNOWN)
 				&& (curKeyMngSuite!=WPA_IE_KEY_MNG_CCKM))
             {
                 maxKeyMngSuite =  curKeyMngSuite;
@@ -1250,7 +1248,8 @@ TI_STATUS admCtrlWpa_parseIe(admCtrl_t *pAdmCtrl, TI_UINT8 *pWpaIe, wpaIeData_t 
             curWpaIe +=4; 
 
             /* Include all AP key management supported suites in the wpaData structure */
-            pWpaData->KeyMngSuite[index+1] = curKeyMngSuite;
+    	    if ((index+1) < MAX_WPA_KEY_MNG_SUITES)
+                pWpaData->KeyMngSuite[index+1] = curKeyMngSuite;
 
         }
         pWpaData->KeyMngSuite[0] = maxKeyMngSuite;

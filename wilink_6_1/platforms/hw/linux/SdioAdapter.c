@@ -2,9 +2,8 @@
  * SdioAdapter.c
  *
  * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.
- * Copyright(c) 2008 - 2009 Google, Inc. All rights reserved.
- * All rights reserved.
- *
+ * All rights reserved.                                                  
+ *                                                                       
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -32,6 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+ 
 /** \file   SdioAdapter.c
  *  \brief  The SDIO driver adapter. Platform dependent.
  *
@@ -46,213 +46,6 @@
  *     CR/Bug#      CoreID  Date            Description
  *     IKSHADOW-3982  rqwt36  04/21/2010       Sdio communication failure for cmd5
  */
-
-#ifdef CONFIG_MMC_EMBEDDED_SDIO
-#include <linux/kernel.h>
-#include <linux/mutex.h>
-#include <linux/mmc/core.h>
-#include <linux/mmc/card.h>
-#include <linux/mmc/sdio_func.h>
-#include <linux/mmc/sdio_ids.h>
-#include "TxnDefs.h"
-
-#define TI_SDIO_DEBUG
-
-#define TIWLAN_MMC_MAX_DMA                 8192
-
-int wifi_set_carddetect( int on );
-
-static struct sdio_func *tiwlan_func = NULL;
-static struct completion sdio_wait;
-
-ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
-                                    unsigned int  uHwAddr,
-                                    void *        pHostAddr,
-                                    unsigned int  uLength,
-                                    unsigned int  bDirection,
-                                    unsigned int  bMore);
-
-static int sdio_wifi_probe(struct sdio_func *func,
-                           const struct sdio_device_id *id)
-{
-        int rc;
-
-        printk("%s: %d\n", __FUNCTION__, func->class);
-
-        if (func->class != SDIO_CLASS_WLAN)
-                return -EINVAL;
-
-        sdio_claim_host(func);
-
-        rc = sdio_enable_func(func);
-        if (rc)
-                goto err1;
-        rc = sdio_set_block_size(func, 512);
-
-        if (rc) {
-                printk("%s: Unable to set blocksize\n", __FUNCTION__);
-                goto err2;
-        }
-
-        tiwlan_func = func;
-        complete(&sdio_wait);
-        return 0;
-err2:
-        sdio_disable_func(func);
-err1:
-        sdio_release_host(func);
-        complete(&sdio_wait);
-        return rc;
-}
-
-static void sdio_wifi_remove(struct sdio_func *func)
-{
-}
-
-static const struct sdio_device_id sdio_wifi_ids[] = {
-        { SDIO_DEVICE_CLASS(SDIO_CLASS_WLAN)    },
-        {                                       },
-};
-
-MODULE_DEVICE_TABLE(sdio, sdio_wifi_ids);
-
-static struct sdio_driver sdio_wifi_driver = {
-        .probe          = sdio_wifi_probe,
-        .remove         = sdio_wifi_remove,
-        .name           = "sdio_wifi",
-        .id_table       = sdio_wifi_ids,
-};
-
-ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
-                                    unsigned int  uHwAddr,
-                                    void *        pHostAddr,
-                                    unsigned int  uLength,
-                                    unsigned int  bDirection,
-                                    unsigned int  bMore);
-
-int sdioAdapt_ConnectBus (void *        fCbFunc,
-                          void *        hCbArg,
-                          unsigned int  uBlkSizeShift,
-                          unsigned int  uSdioThreadPriority,
-                          unsigned char **pTxDmaSrcAddr)
-{
-	int rc;
-
-	init_completion(&sdio_wait);
-	wifi_set_carddetect( 1 );
-	rc = sdio_register_driver(&sdio_wifi_driver);
-	if (rc < 0) {
-		printk(KERN_ERR "%s: Fail to register sdio_wifi_driver\n", __func__);
-		return rc;
-	}
-	if (!wait_for_completion_timeout(&sdio_wait, msecs_to_jiffies(10000))) {
-		printk(KERN_ERR "%s: Timed out waiting for device detect\n", __func__);
-		sdio_unregister_driver(&sdio_wifi_driver);
-		return -ENODEV;
-	}
-	/* Provide the DMA buffer address to the upper layer so it will use it as the transactions host buffer. */
-	if (pTxDmaSrcAddr) { /* Dm: check what to do with it */
-		*pTxDmaSrcAddr = kmalloc(TIWLAN_MMC_MAX_DMA, GFP_ATOMIC | GFP_DMA);
-	}
-	return 0;
-}
-
-int sdioAdapt_DisconnectBus (void)
-{
-	if (tiwlan_func) {
-		sdio_disable_func( tiwlan_func );
-		sdio_release_host( tiwlan_func );
-	}
-	wifi_set_carddetect( 0 );
-	sdio_unregister_driver(&sdio_wifi_driver);
-	return 0;
-}
-
-ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
-                                    unsigned int  uHwAddr,
-                                    void *        pHostAddr,
-                                    unsigned int  uLength,
-                                    unsigned int  bDirection,
-                                    unsigned int  bMore)
-{
-	unsigned char *pData = pHostAddr;
-	unsigned int i;
-	int rc = 0, final_rc = 0;
-
-	for (i = 0; i < uLength; i++) {
-		if( bDirection ) {
-			if (uFuncId == 0)
-				*pData = (unsigned char)sdio_f0_readb(tiwlan_func, uHwAddr, &rc);
-			else
-				*pData = (unsigned char)sdio_readb(tiwlan_func, uHwAddr, &rc);
-		}
-		else {
-			if (uFuncId == 0)
-				sdio_f0_writeb(tiwlan_func, *pData, uHwAddr, &rc);
-			else
-				sdio_writeb(tiwlan_func, *pData, uHwAddr, &rc);
-		}
-		if( rc ) {
-			final_rc = rc;
-		}
-#ifdef TI_SDIO_DEBUG
-		printk(KERN_INFO "%c52: [0x%x](%u) %c 0x%x\n", (bDirection ? 'R' : 'W'), uHwAddr, uLength, (bDirection ? '=' : '<'), (unsigned)*pData);
-#endif
-		uHwAddr++;
-		pData++;
-	}
-	/* If failed return ERROR, if succeeded return COMPLETE */
-	if (final_rc) {
-		return TXN_STATUS_ERROR;
-	}
-	return TXN_STATUS_COMPLETE;
-}
-
-ETxnStatus sdioAdapt_Transact (unsigned int  uFuncId,
-                               unsigned int  uHwAddr,
-                               void *        pHostAddr,
-                               unsigned int  uLength,
-                               unsigned int  bDirection,
-                               unsigned int  bBlkMode,
-                               unsigned int  bFixedAddr,
-                               unsigned int  bMore)
-{
-	int rc;
-
-	if (uFuncId == 0)
-		return sdioAdapt_TransactBytes (uFuncId, uHwAddr, pHostAddr,
-						uLength, bDirection, bMore);
-	if (bDirection) {
-		if (bFixedAddr)
-			rc = sdio_memcpy_fromio(tiwlan_func, pHostAddr, uHwAddr, uLength);
-		else
-			rc = sdio_readsb(tiwlan_func, pHostAddr, uHwAddr, uLength);
-
-	}
-	else {
-		if (bFixedAddr)
-			rc = sdio_memcpy_toio(tiwlan_func, uHwAddr, pHostAddr, uLength);
-		else
-			rc = sdio_writesb(tiwlan_func, uHwAddr, pHostAddr, uLength);
-	}
-#ifdef TI_SDIO_DEBUG
-	if (uLength == 1)
-	        printk(KERN_INFO "%c53: [0x%x](%u) %c 0x%x\n", (bDirection ? 'R' : 'W'), uHwAddr, uLength, (bDirection ? '=' : '<'), (unsigned)(*(char *)pHostAddr));
-	else if (uLength == 2)
-	        printk(KERN_INFO "%c53: [0x%x](%u) %c 0x%x\n", (bDirection ? 'R' : 'W'), uHwAddr, uLength, (bDirection ? '=' : '<'), (unsigned)(*(short *)pHostAddr));
-	else if (uLength == 4)
-	        printk(KERN_INFO "%c53: [0x%x](%u) %c 0x%x\n", (bDirection ? 'R' : 'W'), uHwAddr, uLength, (bDirection ? '=' : '<'), (unsigned)(*(long *)pHostAddr));
-	else
-		printk(KERN_INFO "%c53: [0x%x](%u) F[%d] B[%d] I[%d] = %d\n", (bDirection ? 'R' : 'W'), uHwAddr, uLength, uFuncId, bBlkMode, bFixedAddr, rc);
-#endif
-	/* If failed return ERROR, if succeeded return COMPLETE */
-	if (rc) {
-		return TXN_STATUS_ERROR;
-	}
-	return TXN_STATUS_COMPLETE;
-}
-
-#else
 
 #include "SdioDrvDbg.h"
 #include "TxnDefs.h"
@@ -289,9 +82,6 @@ int g_ssd_debug_level=4;
 #define FN0_FBR2_REG_108                    0x210
 #define FN0_FBR2_REG_108_BIT_MASK           0xFFF 
 
-int sdioDrv_clk_enable(void);
-void sdioDrv_clk_disable(void);
-
 int sdioAdapt_ConnectBus (void *        fCbFunc,
                           void *        hCbArg,
                           unsigned int  uBlkSizeShift,
@@ -319,38 +109,42 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     if (pDmaBufAddr == 0) /* allocate only once (in case this function is called multiple times) */
     {
         pDmaBufAddr = kmalloc (MAX_BUS_TXN_SIZE, GFP_ATOMIC | GFP_DMA);
-        if (pDmaBufAddr == 0) { return -1; }
-    }
+		if (pDmaBufAddr == 0)
+		{
+			iStatus = -1;
+			goto fail;
+        }
+	}
     *pRxDmaBufAddr = *pTxDmaBufAddr = pDmaBufAddr;
     *pRxDmaBufLen  = *pTxDmaBufLen  = MAX_BUS_TXN_SIZE;
 
     /* Init SDIO driver and HW */
     iStatus = sdioDrv_ConnectBus (fCbFunc, hCbArg, uBlkSizeShift, uSdioThreadPriority);
-	if (iStatus) { return iStatus; }
+	if (iStatus) { goto fail; }
 
   
     /* Send commands sequence: 0, 5, 3, 7 */
     iStatus = sdioDrv_ExecuteCmd (SD_IO_GO_IDLE_STATE, 0, MMC_RSP_NONE, &uByte, sizeof(uByte));
     if (iStatus) {
-       printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_GO_IDLE_STATE);
-       return iStatus;
+        printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_GO_IDLE_STATE);
+		goto fail;
     }
     
     iStatus = sdioDrv_ExecuteCmd (SDIO_CMD5, VDD_VOLTAGE_WINDOW, MMC_RSP_R4, &uByte, sizeof(uByte));
 	
     if (iStatus) {
         printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SDIO_CMD5);
-        return iStatus; 
+		goto fail;
     }
     iStatus = sdioDrv_ExecuteCmd (SD_IO_SEND_RELATIVE_ADDR, 0, MMC_RSP_R6, &uLong, sizeof(uLong));
     if (iStatus) {
-       printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_SEND_RELATIVE_ADDR);
-       return iStatus; 
+        printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_SEND_RELATIVE_ADDR);
+		goto fail;
     }
     iStatus = sdioDrv_ExecuteCmd (SD_IO_SELECT_CARD, uLong, MMC_RSP_R6, &uByte, sizeof(uByte));
     if (iStatus) {
-       printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_SELECT_CARD);
-       return iStatus; 
+        printk("%s %d command number: %d failed\n", __FUNCTION__, __LINE__, SD_IO_SELECT_CARD);
+		goto fail;
     }
 
     /* NOTE:
@@ -368,13 +162,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     {
         uByte = SDIO_BITS_CODE;
         iStatus = sdioDrv_WriteSyncBytes (TXN_FUNC_ID_CTRL, CCCR_BUS_INTERFACE_CONTOROL, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_BUS_INTERFACE_CONTOROL, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
         
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         uCount++;
 
@@ -388,13 +182,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     {
         uByte = 4;
         iStatus = sdioDrv_WriteSyncBytes (TXN_FUNC_ID_CTRL, CCCR_IO_ENABLE, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_IO_ENABLE, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
         
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         uCount++;
 
@@ -409,13 +203,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     {
         uByte = 3;
         iStatus = sdioDrv_WriteSyncBytes (TXN_FUNC_ID_CTRL, CCCR_INT_ENABLE, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_INT_ENABLE, &uByte, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
         
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         uCount++;
 
@@ -431,13 +225,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     {
         uLong = uBlkSize;
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, FN0_FBR2_REG_108, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         iStatus = sdioDrv_ReadSync (TXN_FUNC_ID_CTRL, FN0_FBR2_REG_108, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
         
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
-        if (iStatus) { return iStatus; }
+		if (iStatus) { goto fail; }
 
         uCount++;
 
@@ -447,9 +241,10 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
     if (uCount >= MAX_RETRIES)
     {
         /* Failed to write CMD52_WRITE to function 0 */
-        return (int)uCount;
+		iStatus = (int)uCount;
     }
 
+fail:
     /* Disable the clocks for now */
     sdioDrv_clk_disable();
 
@@ -537,11 +332,11 @@ ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
                                     unsigned int  bDirection,
                                     unsigned int  bMore)
 {
-    static unsigned int lastMore = 0;
     int iStatus;
 
-    if ((bMore == 1) || (lastMore == bMore))
+    if(bMore == 1)
     {
+        sdioDrv_cancel_inact_timer();
         sdioDrv_clk_enable();
     }
 
@@ -557,9 +352,8 @@ ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
 
     if(bMore == 0)
     {
-        sdioDrv_clk_disable();
+        sdioDrv_start_inact_timer();
     }
-    lastMore = bMore;
 
     /* If failed return ERROR, if succeeded return COMPLETE */
     if (iStatus) 
@@ -568,4 +362,4 @@ ETxnStatus sdioAdapt_TransactBytes (unsigned int  uFuncId,
     }
     return TXN_STATUS_COMPLETE;
 }
-#endif
+

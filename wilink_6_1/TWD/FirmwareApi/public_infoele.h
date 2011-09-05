@@ -120,7 +120,7 @@ typedef enum
     ACX_PEER_HT_CAP             = 0x0057,
     ACX_HT_BSS_OPERATION        = 0x0058,
     ACX_COEX_ACTIVITY           = 0x0059,
-    ACX_BURST_MODE		= 0x005C,
+	ACX_BURST_MODE				= 0x005C,
 
     ACX_SET_RATE_MAMAGEMENT_PARAMS = 0x005D,
     ACX_GET_RATE_MAMAGEMENT_PARAMS = 0x005E,
@@ -1570,26 +1570,26 @@ typedef struct
 
 /** \struct TSoftGeminiParams
  * \brief Soft Gemini Parameters
- * 
+ *
  * \par Description
  * Used for Setting/Printing Soft Gemini Parameters
- * 
+ *
  * \sa
- */ 
+ */
 
 typedef enum
-{   
+{
 	SOFT_GEMINI_BT_PER_THRESHOLD = 0,
 	SOFT_GEMINI_HV3_MAX_OVERRIDE,
 	SOFT_GEMINI_BT_NFS_SAMPLE_INTERVAL,
 	SOFT_GEMINI_BT_LOAD_RATIO,
-	SOFT_GEMINI_AUTO_PS_MODE,	
+	SOFT_GEMINI_AUTO_PS_MODE,
 	SOFT_GEMINI_AUTO_SCAN_PROBE_REQ,
 	SOFT_GEMINI_ACTIVE_SCAN_DURATION_FACTOR_HV3,
 	SOFT_GEMINI_ANTENNA_CONFIGURATION,
 	SOFT_GEMINI_BEACON_MISS_PERCENT,
 	SOFT_GEMINI_RATE_ADAPT_THRESH,
-	SOFT_GEMINI_RATE_ADAPT_SNR, 
+	SOFT_GEMINI_RATE_ADAPT_SNR,
     SOFT_GEMINI_WLAN_PS_BT_ACL_MASTER_MIN_BR,
     SOFT_GEMINI_WLAN_PS_BT_ACL_MASTER_MAX_BR,
     SOFT_GEMINI_WLAN_PS_MAX_BT_ACL_MASTER_BR,
@@ -1632,7 +1632,7 @@ typedef enum
 } softGeminiParams;
 
 typedef struct
-{	
+{
   uint32   coexParams[SOFT_GEMINI_PARAMS_MAX];
   uint8    paramIdx;       /* the param index which the FW should update, if it equals to 0xFF - update all */ 
   uint8       padding[3];
@@ -2348,7 +2348,6 @@ typedef struct
 	uint16 MaxPer;
 	uint8 InverseCuriosityFactor;
 	uint8 TxFailLowTh;
-
 	uint8 TxFailHighTh;
 	uint8 PerAlphaShift;
 	uint8 PerAddShift;
@@ -2356,13 +2355,13 @@ typedef struct
 	uint8 PerBeta2Shift;
 	uint8 RateCheckUp;
 	uint8 RateCheckDown;
-	uint8 RateRetryPolicy[13]; 
+	uint8 RateRetryPolicy[13];
 }AcxRateMangeParams;
 
 /******************************************************************************
     Name:   ACX_GET_RATE_MAMAGEMENT_PARAMS
     Desc:   read the configurable parameters of rate management module.
-    Type:   
+    Type:
     Access: read
     Length: 8 bytes
 

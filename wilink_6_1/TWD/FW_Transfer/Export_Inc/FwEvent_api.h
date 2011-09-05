@@ -148,6 +148,22 @@ TI_STATUS       fwEvent_Stop                (TI_HANDLE hFwEvent);
 TI_UINT32       fwEvent_TranslateToFwTime (TI_HANDLE hFwEvent, TI_UINT32 uHostTime);
 
 
+
+/*
+ * \brief	Mask all interrupts
+ * 
+ * \param  hFwEvent  - FwEvent Driver handle
+ * \return void
+ * 
+ * \par Description
+ *
+ * Masks all interrupts from FW.
+ * 
+ * \sa
+ */
+void fwEvent_MaskAllFwInterrupts(TI_HANDLE hFwEvent);
+
+
 /*
  * \brief	Disable the FwEvent client of the context thread handler
  * 
