@@ -83,7 +83,7 @@ static TWlanDrvIfObj *pDrvStaticHandle;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT			(0xFFFFFFFF)	/* assume OS never reach that limit */
 
-
+MODULE_AUTHOR("Texas Instruments Inc - built by CyanogenDefy");
 MODULE_DESCRIPTION("TI WLAN Embedded Station Driver");
 MODULE_LICENSE("GPL");
 
