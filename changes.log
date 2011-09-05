@@ -1,0 +1,3828 @@
+commit 3b2d55a379e28daa12128e8bb9b6dcac26eb52e7
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Fri Oct 15 11:03:47 2010 -0700
+
+    TQ-RFMD allign QOS_wmePsMode
+    
+    Change-Id: I2bdc2270d64d65aa9614ecc925603090749df063
+
+commit 7dca82329d979fe2d274030f30353dea87af11bc
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Aug 17 08:51:48 2010 -0500
+
+    IKSTABLETWO-3546 : Workaround for SoftAP Panic : OMAPS00222634
+
+commit 5ad3502b9afccf534e377cd4882499d23eea4832
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Wed Sep 29 11:37:16 2010 -0700
+
+    IKSTABLETWOV-1056 RFMD tiwlan_rfmd.ini change as per factory FCC failure
+    
+    Change-Id: Icda6e9a2310d38b45341caeffc110d0bdaf19f17
+
+commit 24dec9811c7e783ccac4c599a17eaa867b8c13df
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Tue Sep 14 17:35:23 2010 -0700
+
+    IKSTABLETWO-6491 Integrate factory recomended changes for  tiwlan_rfmd.ini
+
+commit 12ec8f6b5fc704cbca67b2a548dc9c03ec0740d9
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Mon Aug 30 17:13:04 2010 -0700
+
+    IKSTABLETWO-6491 Integrate New WIFI RFMD FW and tiwlan.ini
+    
+    Change-Id: I9be3b18f9f458f1620f8f14594f5df0cfc124241
+
+commit 5292c432e0b6303343f2973354d94c85499f3b90
+Author: Thai Leav <w18918@motorola.com>
+Date:   Mon Aug 9 10:39:01 2010 -0500
+
+    IKSTABLEONE-1172 : High current drain fix with wake lock : OMAPS00222147
+
+commit e69f5e1275d22c199e207c301b668f8e5a5bc49e
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Thu Aug 5 15:36:27 2010 -0700
+
+    IKSTABLEONE-3404 WIFI tiwlan.ini change reviewed by Tony Kokab
+    
+    Change-Id: If04dcc1be42bdfe4eba34da9a0f80de98d7fa98d
+    Reviewed-on: http://gerrit.blurdev.com/14200
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit cc2f3c6c058922bf9ec42417363b791510f1724d
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 30 11:19:14 2010 +0530
+
+    IKSTABLEONE-2846 WiFi IOT improvements based on DroidX Forum feedback
+    
+    Change-Id: I6a2030c333b071400c5e45875d6505d62a52a0ac
+    Reviewed-on: http://gerrit.blurdev.com/12990
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit 0468631ed2da3424289153ac4b7e194929aeddaa
+Author: Tony Kokab <e11370@motorola.com>
+Date:   Sat Jul 24 14:01:10 2010 -0700
+
+    IKSTABLEONE-1605 WiFi Data Connectivity Improvements
+    
+    Change-Id: I919c0cbbde8f519e8cc02eaef8326504e5d66ad8
+    Reviewed-on: http://gerrit.blurdev.com/11894
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit a02d6bcc303a13354260c965d726b64faf1e9252
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 23 12:48:11 2010 +0530
+
+    IKSTABLEONE-2326 : Add a preventive null check to avoid kernel panic on low memory alloc failure
+    
+    Change-Id: Ie6a3add048935302a8536272ed7f2c2fdefb4e28
+    Reviewed-on: http://gerrit.blurdev.com/11603
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit 13b31df417da86607843814a8a75efba1ac7386c
+Author: Thai Leav <w18918@motorola.com>
+Date:   Thu Jul 15 13:52:04 2010 -0500
+
+    IKSTABLEONE-1603 : Fix SDIO failures seen on Shadow : OMAPS00221330
+    
+    Change-Id: I5eef7905dca978ab755ed4a2a474dd1cc1ec66f8
+    Reviewed-on: http://gerrit.blurdev.com/9996
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit bb2d83edafa6ce1a9c83aa36bc334d359b92c3d0
+Author: Thai Leav <w18918@motorola.com>
+Date:   Thu Jul 15 14:45:43 2010 -0500
+
+    IKSTABLEONE-1860 : WiFi wake lock code is missing : Port IKMAP-9555
+    
+    Change-Id: I08ef83f764d53d94f9237338138956b3bceea81b
+    Reviewed-on: http://gerrit.blurdev.com/9984
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit 8ec5e2796812db664f885b64a74e8335bfa8d053
+Author: Ishwara J A <dpn473@motorola.com>
+Date:   Wed Jul 14 18:47:29 2010 +0530
+
+    IKSTABLEONE-1616, dpn473 , Enhancement for Faster WiFi Wakeup
+    
+    Change-Id: Ic4617689040b97c826ec0a84a271af91d06e129a
+    Reviewed-on: http://gerrit.blurdev.com/9611
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit fddfe87c05362f35ead086fdab23cb7eacda9877
+Author: Sreenivas Rao <MKB386@motorola.com>
+Date:   Sat Jul 10 16:50:10 2010 +0530
+
+    IKSTABLEONE-1127 mkb386 :mergingshadowchangestostable-dev1
+    
+    Change-Id: I10a080241010ed060f7a4f33e5dd428e68a1d872
+    Reviewed-on: http://gerrit.blurdev.com/9073
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit ee1a9cb7ad676034706bd6060c08f8eaea531c63
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 9 15:40:53 2010 +0530
+
+    IKSTABLEONE-1238 : Port IKMAPFOUR-1448
+    
+    Change-Id: Ia890d42bc0172b2804ff4d0c717fd8edfc9a9c37
+    Reviewed-on: http://gerrit.blurdev.com/8888
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit 4dc1f2cd7b8f7bdc04f1f6a131b24bde1acd4c7a
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 9 14:15:35 2010 +0530
+
+    IKSTABLEONE-1238: Propagate IKSHADOW-7661
+    
+    Change-Id: I75aaecbc466b38e3d4fca74e362da05b231604e5
+    Reviewed-on: http://gerrit.blurdev.com/8876
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit cdcb5d350c34ac690290865ba0dbd8d4df38c244
+Author: Fred Fettinger <fred.fettinger@motorola.com>
+Date:   Wed Jun 30 16:27:18 2010 -0500
+
+    IKSTABLEONE-629: wpa_supplicant_lib: fix linker error
+    
+    CONFIG_ANDROID_LOG must be defined for both the executable
+    wpa_supplicant and the static library libCustomWifi. Before this
+    change, this depended on the order in which the following makefiles
+    were found by the build system:
+    
+    system/wlan/ti/wilink_6_1/wpa_supplicant_lib/Android.mk
+    external/wpa_supplicant_6/wpa_supplicant/Android.mk
+    
+    Change-Id: I6d1515167b70e402e9e948566c58c2d3138da3c7
+    Signed-off-by: Fred Fettinger <fred.fettinger@motorola.com>
+    Reviewed-on: http://gerrit.blurdev.com/7225
+    Reviewed-by: David Ding <dding@motorola.com>
+    Reviewed-by: Joseph Swantek <w98568@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+    Reviewed-by: Julien Brongniart <jbro01@motorola.com>
+
+commit 5c387a4600f627cef53b3e475da8fc9554c680de
+Author: Tony Kokab <e11370@motorola.com>
+Date:   Thu Jun 24 13:10:05 2010 -0700
+
+    IKSTABLEONE-12 - WiFi Froyo Merges
+    Update to Latest TI WiFi Driver and add AP Mode WiFi Driver
+    
+    Change-Id: I0b3ad2a3f543f9e39e760e9dd44e9a0bb727e4c3
+    Reviewed-on: http://gerrit.blurdev.com/6338
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+    Reviewed-by: Julien Brongniart <jbro01@motorola.com>
+
+commit 739678eea9bbfe023270af89b323106b55402c23
+Author: Tony Kokab <e11370@motorola.com>
+Date:   Wed Jun 9 20:56:56 2010 -0700
+
+    IKMPSTHREEV-65
+    Update WiFi Driver to use wpa supplicant version 6
+    Change in location of supplicant in froyo (external/wpa_supplicant_6)
+    
+    Change-Id: Ia16826b3ff6f4efa4fcb427637262c426f9777d3
+    Reviewed-on: http://gerrit.blurdev.com/4645
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+    Reviewed-by: Julien Brongniart <jbro01@motorola.com>
+
+commit 6aba40da35d24d4055e55261c128757dccb0aa05
+Author: tony kokab <e11370@motorola.com>
+Date:   Tue Jun 1 20:22:52 2010 -0700
+
+    ikmpsthreev-13_ca25_e11370_wifi_froyo
+    
+    Change-Id: I3e0e55d61f3e1b8c089a61111ad359f5c9e7f21a
+    Reviewed-on: http://gerrit.blurdev.com/3804
+    Reviewed-by: Hai-Feng Xu <w19978@motorola.com>
+    Reviewed-by: Julien Brongniart <jbro01@motorola.com>
+
+commit 3baca6cc248e0d9a852c25b214c92bc856ae03ea
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Mar 23 13:03:34 2010 -0700
+
+    tnetw1271: Fix NULL pointer exception in Timer functions
+    
+    Change-Id: I4108dd500304ad708b2244f9e1aa845f3f217221
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ebbf3c4d16536e401fdaf0389d592590c4bae83d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Mar 15 14:14:11 2010 -0700
+
+    tnetw1271: Check for NULL pointer in txCtrlBlk_Free()
+    
+    Change-Id: I9bbfcc38abefd311da1b807b0954d763b233ad1c
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 1bf55343ee55f1d7c0d7b379c0d9adf4727872b6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Mar 10 18:16:27 2010 -0800
+
+    wl1271: Fix Association order and clean scan cache after "driver stop"
+    
+    Change-Id: I433773112c7c2cba8cfac0de0e32df2e35dab184
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f7c47550d6288ca571693d14a8df3de044a30bbe
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Mon Mar 8 18:05:26 2010 -0800
+
+    Add an empty CleanSpec.mk
+    
+    Change-Id: I4d77ee966700b0429cc0a57c841712b45f0b8b8e
+
+commit 13e37eb8fc6cce3adab7940df9ce1716d8163639
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Mar 3 10:07:17 2010 -0800
+
+    wl1271: Change Active mode packet parameters
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 7132f80698e36219dd156e42e722e24b457c200b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Feb 25 11:30:09 2010 -0800
+
+    wl1271: Fix suppressing additional DISASSOCIATE events
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit dd3a45e0b76921bc4aeabd1fdc9f84c2ae3ef8c7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Feb 24 14:05:04 2010 -0800
+
+    wl1251: Prevent system from sleeping for 1 sec after new packet arrival
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit dc1e3dffadd6bae6b8f9c29a3bd00c59ab59c7bd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Feb 24 14:01:54 2010 -0800
+
+    wl1271: Prevent system from sleeping for 1 sec after new packet arrival
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 7fc3d51bf5e021223d56304b6ac047f05acfc7bd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Feb 19 16:00:07 2010 -0800
+
+    wl1271: Clear signal field after freeing the object
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 1e288e68a3d13d00a3014c0c0e0ddf308b1caabd
+Author: Vishal Mahaveer <vishalm@ti.com>
+Date:   Fri Feb 12 16:16:09 2010 -0800
+
+    iFixes Manual Mode issue (endless loop oftransmition of Auth packets)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a9765b523fbd66c698172bd6140e454ffa397842
+Merge: d05e827 98a4fb3
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Feb 5 14:22:48 2010 -0800
+
+    am 98a4fb39: am 47d39e43: reconcile main tree with open-source eclair
+    
+    Merge commit '98a4fb393659f9df9a12452fe25c345fbd026ff9'
+    
+    * commit '98a4fb393659f9df9a12452fe25c345fbd026ff9':
+      android-2.1_r1 snapshot
+
+commit 98a4fb393659f9df9a12452fe25c345fbd026ff9
+Merge: fcdec39 47d39e4
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Feb 5 08:48:21 2010 -0800
+
+    am 47d39e43: reconcile main tree with open-source eclair
+    
+    Merge commit '47d39e439b2caac66ca425b4eeeded8569e5ff4d' into eclair-plus-aosp
+    
+    * commit '47d39e439b2caac66ca425b4eeeded8569e5ff4d':
+      android-2.1_r1 snapshot
+
+commit 47d39e439b2caac66ca425b4eeeded8569e5ff4d
+Merge: bca3fd8 3a5c358
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Feb 5 08:09:42 2010 -0800
+
+    reconcile main tree with open-source eclair
+
+commit d05e827b5bdc80384035d87391d066434677d34f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Feb 3 16:41:53 2010 -0800
+
+    wl1251: Use in vmalloc_to_unity() exported functions
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 5adcb14c585e7932a27644bcb97dc15f3cf61ecf
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Feb 3 12:36:37 2010 -0800
+
+    wl1251: Fix calibration data export for newer kernel
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit e4146880d238485c65a3c7d8866bd5fcdd7bcf15
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Feb 1 16:14:46 2010 -0800
+
+    wl1251: Add kernel 2.6.32 support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3a5c358e48a07b902a58d010c2415cf66ea84d00
+Merge: bca3fd8 904e223
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Jan 29 14:10:05 2010 -0800
+
+    reconcile android-2.1_r1 snapshot
+
+commit ab5d2dca2394fe5ded549ce5c8768d073511434b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jan 21 12:43:34 2010 -0800
+
+    wl1251: Set FCC regulatory domain by default
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit e6b30fd0e9546f36ce355a0a42d993bc8538f83e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jan 21 12:42:28 2010 -0800
+
+    wl1271: Set FCC regulatory domain by default
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9b3da433c530331aa650193732160d8981ad6c8b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jan 21 12:39:34 2010 -0800
+
+    wl1271: Add kernel 2.6.32 compatibility
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 904e22377b2ae9c70672febadebaaa7d5586c92d
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Jan 12 15:19:30 2010 -0800
+
+    android-2.1_r1 snapshot
+
+commit b71131dc3c237346545cbd6ac05774b12323ffbb
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jan 6 16:45:14 2010 -0800
+
+    Fix wpa_supplicant 0.6.X driver layer (set_mode)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 75cbe234b4beaa0669b673f6539ca33840e518bf
+Author: Doug Kwan <dougkwan@google.com>
+Date:   Tue Dec 15 15:06:10 2009 -0800
+
+    Add missing shared library in linker command.  Currently this library is used
+    in the main executable but not listed in the linker command.  It is implicitly
+    added via a dependency of another shared library.
+
+commit bd86a84bf25a2a5680c621ad1bfbed5ebf5d6fca
+Merge: bfebdf0 fcdec39
+Author: Android Git Automerger <android-git-automerger@android.com>
+Date:   Tue Dec 15 00:44:02 2009 -0800
+
+    Merge commit 'goog/eclair-plus-aosp'
+
+commit bfebdf0ea8b8657de0b8a993a50c427add3a065d
+Merge: 949ad2d dd9faa9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Dec 10 06:59:19 2009 -0800
+
+    am dd9faa94: (-s ours) am d8cec50a: am bca3fd8d: (-s ours) tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+    
+    Merge commit 'dd9faa94a93b0a9831ae654c172f467b31328c4e'
+    
+    * commit 'dd9faa94a93b0a9831ae654c172f467b31328c4e':
+      tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+
+commit dd9faa94a93b0a9831ae654c172f467b31328c4e
+Merge: 4150d16 d8cec50
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Dec 9 15:51:04 2009 -0800
+
+    am d8cec50a: am bca3fd8d: (-s ours) tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+    
+    Merge commit 'd8cec50ad5f27320c7192cdac004bd857b4be736' into eclair-mr2-plus-aosp
+    
+    * commit 'd8cec50ad5f27320c7192cdac004bd857b4be736':
+      tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+
+commit fcdec39a6813d2843855eb3ea81cbcd13931d8f5
+Merge: a1758ae bca3fd8
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Dec 8 13:44:09 2009 -0800
+
+    am bca3fd8d: tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+    
+    Merge commit 'bca3fd8dcf16fed7aa8d55ce4a9968fb3e05dcad' into eclair-plus-aosp
+    
+    * commit 'bca3fd8dcf16fed7aa8d55ce4a9968fb3e05dcad':
+      tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+
+commit d8cec50ad5f27320c7192cdac004bd857b4be736
+Merge: f1b3733 bca3fd8
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Dec 8 13:44:01 2009 -0800
+
+    am bca3fd8d: (-s ours) tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+    
+    Merge commit 'bca3fd8dcf16fed7aa8d55ce4a9968fb3e05dcad' into eclair-mr2
+    
+    * commit 'bca3fd8dcf16fed7aa8d55ce4a9968fb3e05dcad':
+      tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+
+commit bca3fd8dcf16fed7aa8d55ce4a9968fb3e05dcad
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Dec 8 11:13:01 2009 -0800
+
+    tnetw1271: Add "HANGED" processing (b/2310372) (DO NOT MERGE)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 949ad2d858f0e499a8b3641218aff2bb8a243a7c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Dec 4 10:20:23 2009 -0800
+
+    wpa_supplicant 0.6.X: Fix WPS compilation
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 4fc9091541ba2c38a3a28b5f959c2677d581db45
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Dec 2 09:23:31 2009 -0800
+
+    tnetw1271: Add wpa_supplicant 0.6.X support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 14452a4c5d7ababa734496b68771f3217231afeb
+Merge: bdccea9 00ce79b
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Tue Dec 1 11:23:12 2009 -0800
+
+    Merge change I00ce79b9
+    
+    * changes:
+      tnetw1251: Force using of wpa_supplicant 0.5.X version
+
+commit 00ce79b970491ea6a3cf79c05092a9fa499cfad4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Dec 1 11:22:05 2009 -0800
+
+    tnetw1251: Force using of wpa_supplicant 0.5.X version
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit bdccea915679fb5e4d7dcdd99b1a5cb57027db31
+Merge: 1514919 4150d16
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 24 10:41:23 2009 -0800
+
+    am 4150d16e: am f1b37334: tnetw1271: Set interface down in case of "driver stop" command
+    
+    Merge commit '4150d16e73987c35d189e6993d6e9eca45b36ff2'
+    
+    * commit '4150d16e73987c35d189e6993d6e9eca45b36ff2':
+      tnetw1271: Set interface down in case of "driver stop" command
+
+commit 4150d16e73987c35d189e6993d6e9eca45b36ff2
+Merge: 4a37ed9 f1b3733
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 24 10:39:08 2009 -0800
+
+    am f1b37334: tnetw1271: Set interface down in case of "driver stop" command
+    
+    Merge commit 'f1b3733463ecda60caff3759a3d0ee4cc4bbeb18' into eclair-mr2-plus-aosp
+    
+    * commit 'f1b3733463ecda60caff3759a3d0ee4cc4bbeb18':
+      tnetw1271: Set interface down in case of "driver stop" command
+
+commit f1b3733463ecda60caff3759a3d0ee4cc4bbeb18
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 24 10:36:00 2009 -0800
+
+    tnetw1271: Set interface down in case of "driver stop" command
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 1514919a5d81d42c028e8037acde43db9f55c380
+Merge: 9411648 4a37ed9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Nov 18 17:53:33 2009 -0800
+
+    am 4a37ed94: am 1052ba99: tnetw1271: Add scan timeout handling
+    
+    Merge commit '4a37ed949c6f6793d5539a5fb22c389e2a023f8b'
+    
+    * commit '4a37ed949c6f6793d5539a5fb22c389e2a023f8b':
+      tnetw1271: Add scan timeout handling
+
+commit 4a37ed949c6f6793d5539a5fb22c389e2a023f8b
+Merge: 626f7e6 1052ba9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Nov 18 14:41:44 2009 -0800
+
+    am 1052ba99: tnetw1271: Add scan timeout handling
+    
+    Merge commit '1052ba997c27cbcc03baee9026c3e2366b8a07db' into eclair-mr2-plus-aosp
+    
+    * commit '1052ba997c27cbcc03baee9026c3e2366b8a07db':
+      tnetw1271: Add scan timeout handling
+
+commit 1052ba997c27cbcc03baee9026c3e2366b8a07db
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Nov 18 14:35:52 2009 -0800
+
+    tnetw1271: Add scan timeout handling
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9411648b74d6f08947228975ebe2d687dff87c55
+Merge: da76907 626f7e6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 17 16:12:55 2009 -0800
+
+    am 626f7e65: am c6a5b78e: tnetw1271: Wait for command completion with 10 sec timeout
+    
+    Merge commit '626f7e6596023c5a099a2bfd051d1994d79162d3'
+    
+    * commit '626f7e6596023c5a099a2bfd051d1994d79162d3':
+      tnetw1271: Wait for command completion with 10 sec timeout
+
+commit 626f7e6596023c5a099a2bfd051d1994d79162d3
+Merge: 5d66156 c6a5b78
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 17 16:06:02 2009 -0800
+
+    am c6a5b78e: tnetw1271: Wait for command completion with 10 sec timeout
+    
+    Merge commit 'c6a5b78e93ceba2e2039393ea7cc8964da7ea2a5' into eclair-mr2-plus-aosp
+    
+    * commit 'c6a5b78e93ceba2e2039393ea7cc8964da7ea2a5':
+      tnetw1271: Wait for command completion with 10 sec timeout
+
+commit c6a5b78e93ceba2e2039393ea7cc8964da7ea2a5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 17 14:36:01 2009 -0800
+
+    tnetw1271: Wait for command completion with 10 sec timeout
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit da76907a152159a3140621ba2d827347d9ba2a51
+Merge: 165e8d7 5d66156
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sun Nov 15 15:08:28 2009 -0800
+
+    am 5d661560: merge from open-source master
+    
+    Merge commit '5d6615609f696dd8e61ad9eff6a98bc68d99f538'
+    
+    * commit '5d6615609f696dd8e61ad9eff6a98bc68d99f538':
+      eclair snapshot
+
+commit 5d6615609f696dd8e61ad9eff6a98bc68d99f538
+Merge: b28346f a1758ae
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sun Nov 15 14:55:32 2009 -0800
+
+    merge from open-source master
+
+commit a1758ae0a953eb51e1029c27ae69be8fcc078466
+Merge: 33ee17f 53d5524
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sun Nov 15 14:06:58 2009 -0800
+
+    merge from open-source master
+    
+    Merge commit 'goog/stage-korg-master' into HEAD
+
+commit 53d5524e63f2f61b2c933a99c0c3f9acda69b2db
+Merge: a7db066 9b213f5
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sun Nov 15 12:07:14 2009 -0800
+
+    merge from eclair
+
+commit 165e8d74f712b925da7d87efaae055bef852f4eb
+Merge: b044b5b b28346f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Nov 15 10:33:13 2009 -0800
+
+    am b28346f0: am ca962b51: tnetw1271: Remove unnecessary files
+    
+    Merge commit 'b28346f0c3c28a856262f570559f2bd7799351d8'
+    
+    * commit 'b28346f0c3c28a856262f570559f2bd7799351d8':
+      tnetw1271: Remove unnecessary files
+
+commit b28346f0c3c28a856262f570559f2bd7799351d8
+Merge: cabee83 ca962b5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Nov 15 10:25:42 2009 -0800
+
+    am ca962b51: tnetw1271: Remove unnecessary files
+    
+    Merge commit 'ca962b5139004bd071108844ee429cedfc632342' into eclair-mr2-plus-aosp
+    
+    * commit 'ca962b5139004bd071108844ee429cedfc632342':
+      tnetw1271: Remove unnecessary files
+
+commit ca962b5139004bd071108844ee429cedfc632342
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Nov 15 10:16:59 2009 -0800
+
+    tnetw1271: Remove unnecessary files
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9b213f53c0858384d639ce002fec21f3f82a2ca1
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Thu Nov 12 18:46:24 2009 -0800
+
+    eclair snapshot
+
+commit b044b5bc247cd1413b514882bafaad2146f2be0a
+Merge: 1d3e731 cabee83
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 15:07:53 2009 -0800
+
+    am cabee833: am a90753b2: am 846ab564: tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit 'cabee8336de70650a2e5d3d4bece6f6ea7468a9a'
+    
+    * commit 'cabee8336de70650a2e5d3d4bece6f6ea7468a9a':
+      tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit cabee8336de70650a2e5d3d4bece6f6ea7468a9a
+Merge: 1a02757 a90753b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:23:24 2009 -0800
+
+    am a90753b2: am 846ab564: tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit 'a90753b25ce9d5558e30e49dbe2769a52d99658e' into eclair-mr2-plus-aosp
+    
+    * commit 'a90753b25ce9d5558e30e49dbe2769a52d99658e':
+      tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit 33ee17f1d8c70e79b6f689e0539d87e6ec8dcf12
+Merge: f348d14 846ab56
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:22:04 2009 -0800
+
+    am 846ab564: tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '846ab564179d28a39ac88e3fba6813c8ae520aff' into eclair-plus-aosp
+    
+    * commit '846ab564179d28a39ac88e3fba6813c8ae520aff':
+      tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit a90753b25ce9d5558e30e49dbe2769a52d99658e
+Merge: 35a4fd4 846ab56
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:21:17 2009 -0800
+
+    am 846ab564: tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '846ab564179d28a39ac88e3fba6813c8ae520aff' into eclair-mr2
+    
+    * commit '846ab564179d28a39ac88e3fba6813c8ae520aff':
+      tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit 846ab564179d28a39ac88e3fba6813c8ae520aff
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:08:55 2009 -0800
+
+    tnetw1251: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 1d3e7317c87a5fc1db8b4d3bd1386dee6edb0ea0
+Merge: fbf1144 1a02757
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:13:56 2009 -0800
+
+    am 1a02757b: am 35a4fd40: am 41a0b799: tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '1a02757bda09d2794e0b0c6090e82b8d82e06e5e'
+    
+    * commit '1a02757bda09d2794e0b0c6090e82b8d82e06e5e':
+      tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit 1a02757bda09d2794e0b0c6090e82b8d82e06e5e
+Merge: add8ef1 35a4fd4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:12:01 2009 -0800
+
+    am 35a4fd40: am 41a0b799: tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '35a4fd4022471e98e5cb29e4b087f2eb51dde0ee' into eclair-mr2-plus-aosp
+    
+    * commit '35a4fd4022471e98e5cb29e4b087f2eb51dde0ee':
+      tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit 35a4fd4022471e98e5cb29e4b087f2eb51dde0ee
+Merge: 42bc7ae 41a0b79
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:09:53 2009 -0800
+
+    am 41a0b799: tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '41a0b79959b6dd47cd62b042b1e40e815191bd88' into eclair-mr2
+    
+    * commit '41a0b79959b6dd47cd62b042b1e40e815191bd88':
+      tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit f348d14b39e0a290d1ef61e4e99a2ebe45e00be0
+Merge: 8e39d9b 41a0b79
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 14:09:17 2009 -0800
+
+    am 41a0b799: tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Merge commit '41a0b79959b6dd47cd62b042b1e40e815191bd88' into eclair-plus-aosp
+    
+    * commit '41a0b79959b6dd47cd62b042b1e40e815191bd88':
+      tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+
+commit 41a0b79959b6dd47cd62b042b1e40e815191bd88
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Nov 10 13:57:05 2009 -0800
+
+    tnetw1271: Add 500 ms expired wakelock to deliver the message (b/2245483)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit fbf1144135989f975e29b55c2251dc73b8174702
+Merge: 3e73216 add8ef1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 23:48:49 2009 -0700
+
+    am add8ef15: am 42bc7ae1: am d60e69ac: Check SSID length before association (http://b/issue?id=2198151)
+    
+    Merge commit 'add8ef1554033c76917c5a48d3ba386cbd9e2a3d'
+    
+    * commit 'add8ef1554033c76917c5a48d3ba386cbd9e2a3d':
+      Check SSID length before association (http://b/issue?id=2198151)
+
+commit 3e73216e5af5e6bef6a12e19dd629020e3ff3643
+Merge: 74f703a ccaf115
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 23:48:44 2009 -0700
+
+    am ccaf1159: am cd434989: am 13a77412: Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+    
+    Merge commit 'ccaf1159003e724af6b158fd10870297af4fedeb'
+    
+    * commit 'ccaf1159003e724af6b158fd10870297af4fedeb':
+      Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+
+commit add8ef1554033c76917c5a48d3ba386cbd9e2a3d
+Merge: ccaf115 42bc7ae
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 10:42:42 2009 -0700
+
+    am 42bc7ae1: am d60e69ac: Check SSID length before association (http://b/issue?id=2198151)
+    
+    Merge commit '42bc7ae1bcff471dee92ab2419b232eade724691' into eclair-mr2-plus-aosp
+    
+    * commit '42bc7ae1bcff471dee92ab2419b232eade724691':
+      Check SSID length before association (http://b/issue?id=2198151)
+
+commit ccaf1159003e724af6b158fd10870297af4fedeb
+Merge: 65c6aca cd43498
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 10:42:37 2009 -0700
+
+    am cd434989: am 13a77412: Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+    
+    Merge commit 'cd43498901155042b215caad44f2632e1181756d' into eclair-mr2-plus-aosp
+    
+    * commit 'cd43498901155042b215caad44f2632e1181756d':
+      Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+
+commit 42bc7ae1bcff471dee92ab2419b232eade724691
+Merge: cd43498 d60e69a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 10:29:25 2009 -0700
+
+    am d60e69ac: Check SSID length before association (http://b/issue?id=2198151)
+    
+    Merge commit 'd60e69ac3931c3cf0f594670f8a0e0c7065b9b7f' into eclair-mr2
+    
+    * commit 'd60e69ac3931c3cf0f594670f8a0e0c7065b9b7f':
+      Check SSID length before association (http://b/issue?id=2198151)
+
+commit cd43498901155042b215caad44f2632e1181756d
+Merge: d2e23a3 13a7741
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 28 10:29:20 2009 -0700
+
+    am 13a77412: Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+    
+    Merge commit '13a774123712fc5ce1e4033292ffc631c00b3ea5' into eclair-mr2
+    
+    * commit '13a774123712fc5ce1e4033292ffc631c00b3ea5':
+      Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+
+commit 8e39d9b8bfe54023b75c0efc864bd4033ca62dfa
+Merge: 0159e40 d60e69a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 26 14:41:13 2009 -0700
+
+    am d60e69ac: Check SSID length before association (http://b/issue?id=2198151)
+    
+    Merge commit 'd60e69ac3931c3cf0f594670f8a0e0c7065b9b7f' into eclair-plus-aosp
+    
+    * commit 'd60e69ac3931c3cf0f594670f8a0e0c7065b9b7f':
+      Check SSID length before association (http://b/issue?id=2198151)
+
+commit 0159e409cf8484c4ed232d4958d432f405ccb83b
+Merge: 9176d06 13a7741
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 26 14:40:53 2009 -0700
+
+    am 13a77412: Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+    
+    Merge commit '13a774123712fc5ce1e4033292ffc631c00b3ea5' into eclair-plus-aosp
+    
+    * commit '13a774123712fc5ce1e4033292ffc631c00b3ea5':
+      Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+
+commit d60e69ac3931c3cf0f594670f8a0e0c7065b9b7f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 26 12:27:25 2009 -0700
+
+    Check SSID length before association (http://b/issue?id=2198151)
+    
+    Signed-off-by: Brian Chen <bchen@ti.com>
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 13a774123712fc5ce1e4033292ffc631c00b3ea5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 26 12:12:55 2009 -0700
+
+    Postpone setting complete flag to the real FW start (http://b/issue?id=2198151)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 74f703ab2b5c5504fa81d3e8cdca55f35d747169
+Merge: be45bf2 65c6aca
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 17:08:34 2009 -0700
+
+    am 65c6acaf: am d2e23a38: tnetw1251: fix error -110 reading SDIO_CCCR_INTx
+    
+    Merge commit '65c6acaf057ac28e288fabcf4fac1c8f42e17266'
+    
+    * commit '65c6acaf057ac28e288fabcf4fac1c8f42e17266':
+      tnetw1251: fix error -110 reading SDIO_CCCR_INTx
+
+commit be45bf22d0d50802d8065cc7d423a6bd51c12e27
+Merge: a93e8f7 d53aa35
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 17:08:29 2009 -0700
+
+    am d53aa353: am b6ad5d19: Reduce stack size consumption to suppress compiler warning
+    
+    Merge commit 'd53aa35379b95371823cc64a3d852177c4a75eee'
+    
+    * commit 'd53aa35379b95371823cc64a3d852177c4a75eee':
+      Reduce stack size consumption to suppress compiler warning
+
+commit 65c6acaf057ac28e288fabcf4fac1c8f42e17266
+Merge: d53aa35 d2e23a3
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 17:03:11 2009 -0700
+
+    am d2e23a38: tnetw1251: fix error -110 reading SDIO_CCCR_INTx
+    
+    Merge commit 'd2e23a38e1747a625e902ade5bebf628b90e7538' into eclair-mr2-plus-aosp
+    
+    * commit 'd2e23a38e1747a625e902ade5bebf628b90e7538':
+      tnetw1251: fix error -110 reading SDIO_CCCR_INTx
+
+commit d53aa35379b95371823cc64a3d852177c4a75eee
+Merge: b513fe7 b6ad5d1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 17:03:06 2009 -0700
+
+    am b6ad5d19: Reduce stack size consumption to suppress compiler warning
+    
+    Merge commit 'b6ad5d195ebff3812ef53a65edfe329372506491' into eclair-mr2-plus-aosp
+    
+    * commit 'b6ad5d195ebff3812ef53a65edfe329372506491':
+      Reduce stack size consumption to suppress compiler warning
+
+commit d2e23a38e1747a625e902ade5bebf628b90e7538
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 16:54:40 2009 -0700
+
+    tnetw1251: fix error -110 reading SDIO_CCCR_INTx
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit b6ad5d195ebff3812ef53a65edfe329372506491
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 16:53:23 2009 -0700
+
+    Reduce stack size consumption to suppress compiler warning
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a93e8f7edb5bd743b81d14cabd4dac876f764c34
+Merge: bf759ad b513fe7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 13:32:15 2009 -0700
+
+    am b513fe72: (-s ours) am f87aecff: Change kernel path (do not merge)
+    
+    Merge commit 'b513fe72793634a65432b51ddbde405d9ed59e6b'
+    
+    * commit 'b513fe72793634a65432b51ddbde405d9ed59e6b':
+      Change kernel path (do not merge)
+
+commit b513fe72793634a65432b51ddbde405d9ed59e6b
+Merge: 466e286 f87aecf
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 13:24:02 2009 -0700
+
+    am f87aecff: Change kernel path (do not merge)
+    
+    Merge commit 'f87aecffc47371d202deff56c29f178f36a37f96' into eclair-mr2-plus-aosp
+    
+    * commit 'f87aecffc47371d202deff56c29f178f36a37f96':
+      Change kernel path (do not merge)
+
+commit f87aecffc47371d202deff56c29f178f36a37f96
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 13:14:00 2009 -0700
+
+    Change kernel path (do not merge)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit bf759adf8fcd3b4de74522d1f14b059f467e3dd2
+Merge: 7a5a37b 466e286
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 12:20:28 2009 -0700
+
+    am 466e2863: am 5b08036f: Add driver reloading if driver start/stop fails
+    
+    Merge commit '466e2863b96d070562f7a4e599be51db9b9b2c2f'
+    
+    * commit '466e2863b96d070562f7a4e599be51db9b9b2c2f':
+      Add driver reloading if driver start/stop fails
+
+commit 466e2863b96d070562f7a4e599be51db9b9b2c2f
+Merge: edf61f3 5b08036
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 12:15:11 2009 -0700
+
+    am 5b08036f: Add driver reloading if driver start/stop fails
+    
+    Merge commit '5b08036f41b522d26c26c3d0d34c590b41289f8e' into eclair-mr2-plus-aosp
+    
+    * commit '5b08036f41b522d26c26c3d0d34c590b41289f8e':
+      Add driver reloading if driver start/stop fails
+
+commit 5b08036f41b522d26c26c3d0d34c590b41289f8e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 23 12:08:52 2009 -0700
+
+    Add driver reloading if driver start/stop fails
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 7a5a37b6009d5890f2d48fc1d7a343bf2a804ff3
+Merge: dbf3113 edf61f3
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 19:06:40 2009 -0700
+
+    am edf61f3e: am a8eb545a: Merge change I5f33c764 into eclair-mr2
+    
+    Merge commit 'edf61f3e263d6295172fcc540ee99ae26770bb8f'
+    
+    * commit 'edf61f3e263d6295172fcc540ee99ae26770bb8f':
+      tnetw1251: Update cached Rssi value
+
+commit dbf31138ef794780aeadafd0c25aeda8abb07b6e
+Merge: 3fed225 16afdab
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 19:04:25 2009 -0700
+
+    am 16afdab5: am 54ac0e04: Merge change Idd2f8943 into eclair-mr2
+    
+    Merge commit '16afdab564e2973c7c6963d6e643c71c553000e9'
+    
+    * commit '16afdab564e2973c7c6963d6e643c71c553000e9':
+      Update cached Rssi value
+
+commit edf61f3e263d6295172fcc540ee99ae26770bb8f
+Merge: 16afdab a8eb545
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 17:41:57 2009 -0700
+
+    am a8eb545a: Merge change I5f33c764 into eclair-mr2
+    
+    Merge commit 'a8eb545a063dd5e2b30c19a45fc937d3ce1815e9' into eclair-mr2-plus-aosp
+    
+    * commit 'a8eb545a063dd5e2b30c19a45fc937d3ce1815e9':
+      tnetw1251: Update cached Rssi value
+
+commit a8eb545a063dd5e2b30c19a45fc937d3ce1815e9
+Merge: 54ac0e0 5f33c76
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Thu Oct 22 20:37:40 2009 -0400
+
+    Merge change I5f33c764 into eclair-mr2
+    
+    * changes:
+      tnetw1251: Update cached Rssi value
+
+commit 5f33c764852418f999ea0912146a9d110a757f9e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 17:34:40 2009 -0700
+
+    tnetw1251: Update cached Rssi value
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 16afdab564e2973c7c6963d6e643c71c553000e9
+Merge: bfe6d6a 54ac0e0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 14:27:38 2009 -0700
+
+    am 54ac0e04: Merge change Idd2f8943 into eclair-mr2
+    
+    Merge commit '54ac0e0432365251762313f76b938c8cedbbfd54' into eclair-mr2-plus-aosp
+    
+    * commit '54ac0e0432365251762313f76b938c8cedbbfd54':
+      Update cached Rssi value
+
+commit 54ac0e0432365251762313f76b938c8cedbbfd54
+Merge: 549884e dd2f894
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Thu Oct 22 17:22:22 2009 -0400
+
+    Merge change Idd2f8943 into eclair-mr2
+    
+    * changes:
+      Update cached Rssi value
+
+commit dd2f8943124116ab98a015dead90ad25f67a0e66
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 14:20:12 2009 -0700
+
+    Update cached Rssi value
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3fed225f1d0ec7e3ad0bfa5095a215cfb6e248a9
+Merge: 1567893 bfe6d6a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:22:20 2009 -0700
+
+    am bfe6d6aa: am 549884e2: am 80f57aca: Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+    
+    Merge commit 'bfe6d6aa24a7ac153f46b733c2d3e8507a30936f'
+    
+    * commit 'bfe6d6aa24a7ac153f46b733c2d3e8507a30936f':
+      Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+
+commit 156789317d5356f035c1d8b566dcada097779941
+Merge: d0c8160 1721060
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:22:16 2009 -0700
+
+    am 17210605: am 173c6313: Minor wake_lock function cleanup
+    
+    Merge commit '17210605ace5d9457add89c0a73aa084985db395'
+    
+    * commit '17210605ace5d9457add89c0a73aa084985db395':
+      Minor wake_lock function cleanup
+
+commit 9176d06e7ad3c63a73f81043873d45c0a4e2cb32
+Merge: 025e338 80f57ac
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:17:01 2009 -0700
+
+    am 80f57aca: Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+    
+    Merge commit '80f57acaa87b70fb893098c140f4931ee06dc582' into eclair-plus-aosp
+    
+    * commit '80f57acaa87b70fb893098c140f4931ee06dc582':
+      Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+
+commit bfe6d6aa24a7ac153f46b733c2d3e8507a30936f
+Merge: 1721060 549884e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:10:48 2009 -0700
+
+    am 549884e2: am 80f57aca: Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+    
+    Merge commit '549884e2bada986cb3dc4bdecefb32943a4f96dc' into eclair-mr2-plus-aosp
+    
+    * commit '549884e2bada986cb3dc4bdecefb32943a4f96dc':
+      Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+
+commit 17210605ace5d9457add89c0a73aa084985db395
+Merge: 5f7f8fe 173c631
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:10:45 2009 -0700
+
+    am 173c6313: Minor wake_lock function cleanup
+    
+    Merge commit '173c631353c6e85ca952eeac7f41c131648a92a5' into eclair-mr2-plus-aosp
+    
+    * commit '173c631353c6e85ca952eeac7f41c131648a92a5':
+      Minor wake_lock function cleanup
+
+commit 549884e2bada986cb3dc4bdecefb32943a4f96dc
+Merge: 173c631 80f57ac
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:05:54 2009 -0700
+
+    am 80f57aca: Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+    
+    Merge commit '80f57acaa87b70fb893098c140f4931ee06dc582' into eclair-mr2
+    
+    * commit '80f57acaa87b70fb893098c140f4931ee06dc582':
+      Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+
+commit 173c631353c6e85ca952eeac7f41c131648a92a5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 11:00:55 2009 -0700
+
+    Minor wake_lock function cleanup
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit d0c816067fecc9701f794e2650b09e383a38cff5
+Merge: ed4017d 5f7f8fe
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 09:28:17 2009 -0700
+
+    am 5f7f8fe6: am 52adf829: am 83ad7a40: Merge change I09dfaca5 into eclair
+    
+    Merge commit '5f7f8fe6887a0cc766c308381e4e28e8158c2967'
+    
+    * commit '5f7f8fe6887a0cc766c308381e4e28e8158c2967':
+      Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+
+commit 5f7f8fe6887a0cc766c308381e4e28e8158c2967
+Merge: 34b19f7 52adf82
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 09:21:17 2009 -0700
+
+    am 52adf829: am 83ad7a40: Merge change I09dfaca5 into eclair
+    
+    Merge commit '52adf829923ee6037c74ff050f815973f73129e0' into eclair-mr2-plus-aosp
+    
+    * commit '52adf829923ee6037c74ff050f815973f73129e0':
+      Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+
+commit 52adf829923ee6037c74ff050f815973f73129e0
+Merge: 18fc778 83ad7a4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 22 06:46:26 2009 -0700
+
+    am 83ad7a40: Merge change I09dfaca5 into eclair
+    
+    Merge commit '83ad7a4013d544883b51df130b68f5bd741aed08' into eclair-mr2
+    
+    * commit '83ad7a4013d544883b51df130b68f5bd741aed08':
+      Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+
+commit 80f57acaa87b70fb893098c140f4931ee06dc582
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 21 16:31:36 2009 -0700
+
+    Add clean exit if drvMain_Create() fails (http://b/issue?id=2198151)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 025e33828bd767a8e60593b3640cf5a2c3ff31ea
+Merge: 00ba8a9 83ad7a4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 21 12:15:26 2009 -0700
+
+    am 83ad7a40: Merge change I09dfaca5 into eclair
+    
+    Merge commit '83ad7a4013d544883b51df130b68f5bd741aed08' into eclair-plus-aosp
+    
+    * commit '83ad7a4013d544883b51df130b68f5bd741aed08':
+      Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+
+commit 83ad7a4013d544883b51df130b68f5bd741aed08
+Merge: 266077c 09dfaca
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Wed Oct 21 15:04:58 2009 -0400
+
+    Merge change I09dfaca5 into eclair
+    
+    * changes:
+      Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+
+commit 09dfaca5ecb53aec34a69fe9ebc2fe31e49bd4d9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 21 10:31:59 2009 -0700
+
+    Add check for NULL pointer in sync functions (http://b/issue?id=2198151)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ed4017d29e3c6d810a12d761f08f26d630864cba
+Merge: 4f0246f 34b19f7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 19 16:00:39 2009 -0700
+
+    am 34b19f7e: am 18fc7785: am 266077c2: Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+    
+    Merge commit '34b19f7ee4221c9abfe9c188788a36ff7225ae18'
+    
+    * commit '34b19f7ee4221c9abfe9c188788a36ff7225ae18':
+      Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+
+commit 34b19f7ee4221c9abfe9c188788a36ff7225ae18
+Merge: 8f2e836 18fc778
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 19 15:55:10 2009 -0700
+
+    am 18fc7785: am 266077c2: Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+    
+    Merge commit '18fc778564517faa85a0f472bc136672f9428a52' into eclair-mr2-plus-aosp
+    
+    * commit '18fc778564517faa85a0f472bc136672f9428a52':
+      Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+
+commit 00ba8a9d853959e94323128592df962f8bccb933
+Merge: 8813721 266077c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 19 15:50:02 2009 -0700
+
+    am 266077c2: Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+    
+    Merge commit '266077c22ef474c20b103c27f27f2f01f03dfbfe' into eclair-plus-aosp
+    
+    * commit '266077c22ef474c20b103c27f27f2f01f03dfbfe':
+      Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+
+commit 18fc778564517faa85a0f472bc136672f9428a52
+Merge: a01ebdd 266077c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 19 15:49:47 2009 -0700
+
+    am 266077c2: Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+    
+    Merge commit '266077c22ef474c20b103c27f27f2f01f03dfbfe' into eclair-mr2
+    
+    * commit '266077c22ef474c20b103c27f27f2f01f03dfbfe':
+      Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+
+commit 266077c22ef474c20b103c27f27f2f01f03dfbfe
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 19 14:16:28 2009 -0700
+
+    Switch sdio driver to private workqueue (http://b/issue?id=2182998)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 4f0246fdcda058507ab0c819be93c20dcaac26cd
+Merge: 9203f47 8f2e836
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 17:02:24 2009 -0700
+
+    am 8f2e8365: am a01ebdd8: Reduce disconnect message time to 800 ms
+    
+    Merge commit '8f2e83651d0175b7926660e19d08aeb6c50fed96'
+    
+    * commit '8f2e83651d0175b7926660e19d08aeb6c50fed96':
+      Reduce disconnect message time to 800 ms
+
+commit 9203f472f523c3f916421af3cb4d6cfd92fe22a9
+Merge: 2a99342 31b241d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 16:55:25 2009 -0700
+
+    am 31b241d1: am 04a14a26: Add sending HANGED message if driver is irresponsive
+    
+    Merge commit '31b241d1b7f6ec069076c54a9dce6ab7a10b0c23'
+    
+    * commit '31b241d1b7f6ec069076c54a9dce6ab7a10b0c23':
+      Add sending HANGED message if driver is irresponsive
+
+commit 2a993426056ed7322e1ffeb580e8e2e87a24ba5a
+Merge: cbc1277 f7d436a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 16:54:43 2009 -0700
+
+    am f7d436a0: am 324619d1: Fix possible memory corruption in parsing IE and memory leak in wext
+    
+    Merge commit 'f7d436a0272180e2b983a67a75ea21146d044f82'
+    
+    * commit 'f7d436a0272180e2b983a67a75ea21146d044f82':
+      Fix possible memory corruption in parsing IE and memory leak in wext
+
+commit cbc1277028d2d4aff30ebbf65a6bf6685fac27da
+Merge: 64dc30c 8813721
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 16:54:40 2009 -0700
+
+    am 8813721a: am e6d71254: Fix wake_lock delay after start/stop command
+    
+    Merge commit '8813721ac32cd87223acaad16b5cf607d6d16f45'
+    
+    * commit '8813721ac32cd87223acaad16b5cf607d6d16f45':
+
+commit 64dc30cdbfcb11426776a90ca1f2b76e14ef5c3e
+Merge: 58b5551 d36ab74
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 16:54:36 2009 -0700
+
+    am d36ab748: am 05ebca16: Fix scan results update for tnetw1251
+    
+    Merge commit 'd36ab748ea5ff5b57f03b28bb24852e9a6d7d0e2'
+    
+    * commit 'd36ab748ea5ff5b57f03b28bb24852e9a6d7d0e2':
+
+commit 58b5551eb4b76ab7bd1f84485f9a1837fbaf508a
+Merge: 9e4547f 61c7f44
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Oct 13 16:54:33 2009 -0700
+
+    am 61c7f44a: am 7c7f1071: Fix scan results update in case of ssid_scan=1
+    
+    Merge commit '61c7f44a8462cab57b9435002e085e8c3911242f'
+    
+    * commit '61c7f44a8462cab57b9435002e085e8c3911242f':
+
+commit 8f2e83651d0175b7926660e19d08aeb6c50fed96
+Merge: 31b241d a01ebdd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 12 13:01:06 2009 -0700
+
+    am a01ebdd8: Reduce disconnect message time to 800 ms
+    
+    Merge commit 'a01ebdd82780b8559e63f77f8730e4761f025771' into eclair-mr2-plus-aosp
+    
+    * commit 'a01ebdd82780b8559e63f77f8730e4761f025771':
+      Reduce disconnect message time to 800 ms
+
+commit a01ebdd82780b8559e63f77f8730e4761f025771
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 12 12:53:33 2009 -0700
+
+    Reduce disconnect message time to 800 ms
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9e4547f932ec2da2fe6a423321a984216e4bb3bd
+Merge: 8d6e2f5 e6d7125
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 12 11:16:12 2009 -0700
+
+    am e6d71254: Fix wake_lock delay after start/stop command
+    
+    Merge commit 'e6d712547e0d1c58925d04f03d286ad4aa75ce44'
+    
+    * commit 'e6d712547e0d1c58925d04f03d286ad4aa75ce44':
+      Fix wake_lock delay after start/stop command
+
+commit 8d6e2f50d2cfcba0ae0e5f98d3e449a33ebe227a
+Merge: 1f3e8d8 05ebca1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 12 11:16:08 2009 -0700
+
+    am 05ebca16: Fix scan results update for tnetw1251
+    
+    Merge commit '05ebca16ececfb589899959fea9bc2797c2f0acb'
+    
+    * commit '05ebca16ececfb589899959fea9bc2797c2f0acb':
+      Fix scan results update for tnetw1251
+
+commit 1f3e8d8d96fc6b00823c226b4792aa98fda6de80
+Merge: 2149228 7c7f107
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Oct 12 11:16:05 2009 -0700
+
+    am 7c7f1071: Fix scan results update in case of ssid_scan=1
+    
+    Merge commit '7c7f1071fc46e4b6af9dc6f853df00d3f110d976'
+    
+    * commit '7c7f1071fc46e4b6af9dc6f853df00d3f110d976':
+      Fix scan results update in case of ssid_scan=1
+
+commit 31b241d1b7f6ec069076c54a9dce6ab7a10b0c23
+Merge: f7d436a 04a14a2
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 9 15:56:44 2009 -0700
+
+    am 04a14a26: Add sending HANGED message if driver is irresponsive
+    
+    Merge commit '04a14a26b41b74cec54807d364bc85563bd73dd4' into eclair-mr2-plus-aosp
+    
+    * commit '04a14a26b41b74cec54807d364bc85563bd73dd4':
+      Add sending HANGED message if driver is irresponsive
+
+commit 04a14a26b41b74cec54807d364bc85563bd73dd4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 9 14:21:05 2009 -0700
+
+    Add sending HANGED message if driver is irresponsive
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f7d436a0272180e2b983a67a75ea21146d044f82
+Merge: 8813721 324619d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 9 13:49:21 2009 -0700
+
+    am 324619d1: Fix possible memory corruption in parsing IE and memory leak in wext
+    
+    Merge commit '324619d1785613830184dd9fc7f45c22f5f1b2be' into eclair-mr2-plus-aosp
+    
+    * commit '324619d1785613830184dd9fc7f45c22f5f1b2be':
+      Fix possible memory corruption in parsing IE and memory leak in wext
+
+commit 324619d1785613830184dd9fc7f45c22f5f1b2be
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Oct 9 13:19:48 2009 -0700
+
+    Fix possible memory corruption in parsing IE and memory leak in wext
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 8813721ac32cd87223acaad16b5cf607d6d16f45
+Merge: d36ab74 e6d7125
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 7 11:33:48 2009 -0700
+
+    am e6d71254: Fix wake_lock delay after start/stop command
+    
+    Merge commit 'e6d712547e0d1c58925d04f03d286ad4aa75ce44' into eclair-plus-aosp
+    
+    * commit 'e6d712547e0d1c58925d04f03d286ad4aa75ce44':
+      Fix wake_lock delay after start/stop command
+
+commit d36ab748ea5ff5b57f03b28bb24852e9a6d7d0e2
+Merge: 61c7f44 05ebca1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 7 11:33:21 2009 -0700
+
+    am 05ebca16: Fix scan results update for tnetw1251
+    
+    Merge commit '05ebca16ececfb589899959fea9bc2797c2f0acb' into eclair-plus-aosp
+    
+    * commit '05ebca16ececfb589899959fea9bc2797c2f0acb':
+      Fix scan results update for tnetw1251
+
+commit 61c7f44a8462cab57b9435002e085e8c3911242f
+Merge: 92fe02a 7c7f107
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Oct 7 11:33:18 2009 -0700
+
+    am 7c7f1071: Fix scan results update in case of ssid_scan=1
+    
+    Merge commit '7c7f1071fc46e4b6af9dc6f853df00d3f110d976' into eclair-plus-aosp
+    
+    * commit '7c7f1071fc46e4b6af9dc6f853df00d3f110d976':
+      Fix scan results update in case of ssid_scan=1
+
+commit 2149228395dcf36a898c2508ab78b3bd3ea5675a
+Author: Doug Kwan <dougkwan@google.com>
+Date:   Fri Oct 2 15:07:47 2009 -0700
+
+    Add missing shared library used in executable to linker command.  This executable
+    calls functions defined in a shared library without explicitly linking it. Currently
+    it works because the library is linked via dependency of another shared library.
+    This is fragile and not the right thing to do.
+
+commit e6d712547e0d1c58925d04f03d286ad4aa75ce44
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 16:36:15 2009 -0700
+
+    Fix wake_lock delay after start/stop command
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 05ebca16ececfb589899959fea9bc2797c2f0acb
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 15:27:22 2009 -0700
+
+    Fix scan results update for tnetw1251
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 7c7f1071fc46e4b6af9dc6f853df00d3f110d976
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 15:26:00 2009 -0700
+
+    Fix scan results update in case of ssid_scan=1
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit abd7c7d30d4605f9be22764a036b1815ce6ad4c1
+Merge: 385e28b 92fe02a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 13:39:10 2009 -0700
+
+    am 92fe02a7: am a9f95691: Add memory corruption check to A-MSDU in rx.c
+    
+    Merge commit '92fe02a71bb530d8fd1022291be925ccaaf22a9b'
+    
+    * commit '92fe02a71bb530d8fd1022291be925ccaaf22a9b':
+      Add memory corruption check to A-MSDU in rx.c
+
+commit 385e28b5ef467bbe85fce0e1156b0e56ec333aac
+Merge: 8e97546 e313d39
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 12:21:46 2009 -0700
+
+    am e313d39d: am 3f56c920: Reduce time in critical sections
+    
+    Merge commit 'e313d39d955735182beb36a8baaa1471a7c708a0'
+    
+    * commit 'e313d39d955735182beb36a8baaa1471a7c708a0':
+      Reduce time in critical sections
+
+commit 8e9754617b4c231f595acb612c745937a0a77ccc
+Merge: 4b522f4 43e7598
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Oct 1 11:41:31 2009 -0700
+
+    am 43e75980: am a41ad98a: Ensure to have interface UP before association.
+    
+    Merge commit '43e75980b9275692f8d2ded494eaa945e65a128d'
+    
+    * commit '43e75980b9275692f8d2ded494eaa945e65a128d':
+      Ensure to have interface UP before association.
+
+commit 92fe02a71bb530d8fd1022291be925ccaaf22a9b
+Merge: e313d39 a9f9569
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 30 21:13:25 2009 -0700
+
+    am a9f95691: Add memory corruption check to A-MSDU in rx.c
+    
+    Merge commit 'a9f9569173220ae5ba395822e7ea2380114b0e49' into eclair-plus-aosp
+    
+    * commit 'a9f9569173220ae5ba395822e7ea2380114b0e49':
+      Add memory corruption check to A-MSDU in rx.c
+
+commit a9f9569173220ae5ba395822e7ea2380114b0e49
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 30 17:27:11 2009 -0700
+
+    Add memory corruption check to A-MSDU in rx.c
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit e313d39d955735182beb36a8baaa1471a7c708a0
+Merge: 43e7598 3f56c92
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 30 15:28:44 2009 -0700
+
+    am 3f56c920: Reduce time in critical sections
+    
+    Merge commit '3f56c920776e053a33864b5d026811c89b56be9d' into eclair-plus-aosp
+    
+    * commit '3f56c920776e053a33864b5d026811c89b56be9d':
+      Reduce time in critical sections
+
+commit 3f56c920776e053a33864b5d026811c89b56be9d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 30 14:54:50 2009 -0700
+
+    Reduce time in critical sections
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 43e75980b9275692f8d2ded494eaa945e65a128d
+Merge: b2760ec a41ad98
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 29 16:19:07 2009 -0700
+
+    am a41ad98a: Ensure to have interface UP before association.
+    
+    Merge commit 'a41ad98a8f030f3fe192d60825fa765d58bf288b' into eclair-plus-aosp
+    
+    * commit 'a41ad98a8f030f3fe192d60825fa765d58bf288b':
+      Ensure to have interface UP before association.
+
+commit a41ad98a8f030f3fe192d60825fa765d58bf288b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 29 16:12:56 2009 -0700
+
+    Ensure to have interface UP before association.
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 4b522f4e6563a1850fb4e42480738955bc31df99
+Merge: 5c68c56 b2760ec
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Sep 27 15:38:53 2009 -0700
+
+    am b2760ec5: am 46875614: Add wake_lock delay after start/stop commands
+    
+    Merge commit 'b2760ec5a0897813bbc6c94138ae666f6ae134f9'
+    
+    * commit 'b2760ec5a0897813bbc6c94138ae666f6ae134f9':
+      Add wake_lock delay after start/stop commands
+
+commit 5c68c56f6842a376a7fe60b4b3297def4411189a
+Merge: 660bab0 79ba4bf
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Sep 27 15:37:17 2009 -0700
+
+    am 79ba4bf4: am 04635cee: Protect eAction with spinlock, add wake_lock for firmware start
+    
+    Merge commit '79ba4bf4b3ede4dc180245a7899a731766394d8f'
+    
+    * commit '79ba4bf4b3ede4dc180245a7899a731766394d8f':
+      Protect eAction with spinlock, add wake_lock for firmware start
+
+commit b2760ec5a0897813bbc6c94138ae666f6ae134f9
+Merge: 79ba4bf 4687561
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 14:29:11 2009 -0700
+
+    am 46875614: Add wake_lock delay after start/stop commands
+    
+    Merge commit '46875614b6c744a8054a045bc0d9dc271cb9f2ff' into eclair-plus-aosp
+    
+    * commit '46875614b6c744a8054a045bc0d9dc271cb9f2ff':
+      Add wake_lock delay after start/stop commands
+
+commit 46875614b6c744a8054a045bc0d9dc271cb9f2ff
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 14:24:15 2009 -0700
+
+    Add wake_lock delay after start/stop commands
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 79ba4bf4b3ede4dc180245a7899a731766394d8f
+Merge: 46f2fce 04635ce
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 13:33:41 2009 -0700
+
+    am 04635cee: Protect eAction with spinlock, add wake_lock for firmware start
+    
+    Merge commit '04635cee59642c3439608797ad2351ab37ca2840' into eclair-plus-aosp
+    
+    * commit '04635cee59642c3439608797ad2351ab37ca2840':
+      Protect eAction with spinlock, add wake_lock for firmware start
+
+commit 04635cee59642c3439608797ad2351ab37ca2840
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 13:25:49 2009 -0700
+
+    Protect eAction with spinlock, add wake_lock for firmware start
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 660bab0c1496461362ea0e3d030c776cf213faa2
+Merge: a41bf4e 46f2fce
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 10:55:17 2009 -0700
+
+    am 46f2fcec: am f019884e: Restore 802.11n support
+    
+    Merge commit '46f2fcecdd39ae047988c651cab23e5883ad8474'
+    
+    * commit '46f2fcecdd39ae047988c651cab23e5883ad8474':
+      Restore 802.11n support
+
+commit a41bf4e0f40bb51020ecad4e82bc4fc82b749bf5
+Merge: 700e6ca 4b074c1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 25 10:51:15 2009 -0700
+
+    am 4b074c1a: am c158bf7b: Tune BT EDR parameters and set SG_PROTECTIVE mode
+    
+    Merge commit '4b074c1a15b05f5886c0ec9e9f91d060743d611d'
+    
+    * commit '4b074c1a15b05f5886c0ec9e9f91d060743d611d':
+      Tune BT EDR parameters and set SG_PROTECTIVE mode
+
+commit 46f2fcecdd39ae047988c651cab23e5883ad8474
+Merge: 4b074c1 f019884
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 23 16:44:42 2009 -0700
+
+    am f019884e: Restore 802.11n support
+    
+    Merge commit 'f019884e8943bf8f5b28f39ba846cb6bc44b6a55' into eclair-plus-aosp
+    
+    * commit 'f019884e8943bf8f5b28f39ba846cb6bc44b6a55':
+      Restore 802.11n support
+
+commit f019884e8943bf8f5b28f39ba846cb6bc44b6a55
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 23 16:39:23 2009 -0700
+
+    Restore 802.11n support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 4b074c1a15b05f5886c0ec9e9f91d060743d611d
+Merge: 46ee20e c158bf7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 23 13:27:53 2009 -0700
+
+    am c158bf7b: Tune BT EDR parameters and set SG_PROTECTIVE mode
+    
+    Merge commit 'c158bf7bad39d39f8119d626611ac7a9a94dd238' into eclair-plus-aosp
+    
+    * commit 'c158bf7bad39d39f8119d626611ac7a9a94dd238':
+      Tune BT EDR parameters and set SG_PROTECTIVE mode
+
+commit c158bf7bad39d39f8119d626611ac7a9a94dd238
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 23 13:05:09 2009 -0700
+
+    Tune BT EDR parameters and set SG_PROTECTIVE mode
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 700e6caf6cc75572ab91526894df9564b200dbe9
+Merge: aaea9d4 46ee20e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 16:21:01 2009 -0700
+
+    am 46ee20ef: am bfca3da1: Fix build without PRINTF_ROLLBACK and REPORT_LOG
+    
+    Merge commit '46ee20ef92a9ab31d0f7a1aab652efee9a8e6195'
+    
+    * commit '46ee20ef92a9ab31d0f7a1aab652efee9a8e6195':
+      Fix build without PRINTF_ROLLBACK and REPORT_LOG
+
+commit 46ee20ef92a9ab31d0f7a1aab652efee9a8e6195
+Merge: ccecfca bfca3da
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 16:15:00 2009 -0700
+
+    am bfca3da1: Fix build without PRINTF_ROLLBACK and REPORT_LOG
+    
+    Merge commit 'bfca3da19996ce011eb0db38690f93e21ad2495a' into eclair-plus-aosp
+    
+    * commit 'bfca3da19996ce011eb0db38690f93e21ad2495a':
+      Fix build without PRINTF_ROLLBACK and REPORT_LOG
+
+commit bfca3da19996ce011eb0db38690f93e21ad2495a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 16:05:24 2009 -0700
+
+    Fix build without PRINTF_ROLLBACK and REPORT_LOG
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit aaea9d4c4131606599f159b37b178d3472a1baf1
+Merge: cba02da ccecfca
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 10:08:45 2009 -0700
+
+    am ccecfca5: am 4f0c9d1d: Fix hidden ap test
+    
+    Merge commit 'ccecfca5a8346caf653a37f431efe18245d90b70'
+    
+    * commit 'ccecfca5a8346caf653a37f431efe18245d90b70':
+      Fix hidden ap test
+
+commit ccecfca5a8346caf653a37f431efe18245d90b70
+Merge: 874823f 4f0c9d1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 10:00:54 2009 -0700
+
+    am 4f0c9d1d: Fix hidden ap test
+    
+    Merge commit '4f0c9d1db109ae9b4e81c9700de38be1edc7d56c' into eclair-plus-aosp
+    
+    * commit '4f0c9d1db109ae9b4e81c9700de38be1edc7d56c':
+      Fix hidden ap test
+
+commit 4f0c9d1db109ae9b4e81c9700de38be1edc7d56c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 21 09:54:13 2009 -0700
+
+    Fix hidden ap test
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit cba02da7816abe8261ad5c6eec667eaa9a9f321b
+Merge: bf49dbd 874823f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Sep 20 13:23:44 2009 -0700
+
+    am 874823ff: am f9058eac: Fix hidden ssid processing
+    
+    Merge commit '874823ffa0f79ccd292bebed1a3994da338206ba'
+    
+    * commit '874823ffa0f79ccd292bebed1a3994da338206ba':
+      Fix hidden ssid processing
+
+commit 874823ffa0f79ccd292bebed1a3994da338206ba
+Merge: 91215fe f9058ea
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Sep 20 13:18:16 2009 -0700
+
+    am f9058eac: Fix hidden ssid processing
+    
+    Merge commit 'f9058eac5a8f5dd2cb32f8a7cf020302e50b7c55' into eclair-plus-aosp
+    
+    * commit 'f9058eac5a8f5dd2cb32f8a7cf020302e50b7c55':
+      Fix hidden ssid processing
+
+commit f9058eac5a8f5dd2cb32f8a7cf020302e50b7c55
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Sun Sep 20 13:11:14 2009 -0700
+
+    Fix hidden ssid processing
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit bf49dbd8392641e130330c25df0890b9588466cf
+Merge: 0258bd8 91215fe
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 18:15:26 2009 -0700
+
+    am 91215fea: am 9901d870: Check if scan_result entry is not NULL
+    
+    Merge commit '91215feacd8848e727628e8186636537b77dffc1'
+    
+    * commit '91215feacd8848e727628e8186636537b77dffc1':
+      Check if scan_result entry is not NULL
+
+commit 91215feacd8848e727628e8186636537b77dffc1
+Merge: db78f38 9901d87
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 15:24:15 2009 -0700
+
+    am 9901d870: Check if scan_result entry is not NULL
+    
+    Merge commit '9901d87070be00226f95663cb6c2727f496fab2f' into eclair-plus-aosp
+    
+    * commit '9901d87070be00226f95663cb6c2727f496fab2f':
+      Check if scan_result entry is not NULL
+
+commit 9901d87070be00226f95663cb6c2727f496fab2f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 15:14:29 2009 -0700
+
+    Check if scan_result entry is not NULL
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0258bd81ee9df50db539ac17bd56b4576504eb3a
+Merge: d985047 db78f38
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 13:46:36 2009 -0700
+
+    am db78f389: am 4f809075: Fix wlan (sdio clocks) preventing from suspend
+    
+    Merge commit 'db78f3893442c354a9a606e2228996deac51b2d0'
+    
+    * commit 'db78f3893442c354a9a606e2228996deac51b2d0':
+      Fix wlan (sdio clocks) preventing from suspend
+
+commit db78f3893442c354a9a606e2228996deac51b2d0
+Merge: 903e008 4f80907
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 13:42:02 2009 -0700
+
+    am 4f809075: Fix wlan (sdio clocks) preventing from suspend
+    
+    Merge commit '4f8090754cf37855c39899666899497743d261f8' into eclair-plus-aosp
+    
+    * commit '4f8090754cf37855c39899666899497743d261f8':
+      Fix wlan (sdio clocks) preventing from suspend
+
+commit 4f8090754cf37855c39899666899497743d261f8
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 13:37:05 2009 -0700
+
+    Fix wlan (sdio clocks) preventing from suspend
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit d985047940832bdd32e85a4b44449b8dd05bee34
+Merge: b3e2a22 903e008
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 11:13:47 2009 -0700
+
+    am 903e0085: am cf5ecb21: Add debug prints
+    
+    Merge commit '903e0085d3a379c3dc43f3187a76079f5683db56'
+    
+    * commit '903e0085d3a379c3dc43f3187a76079f5683db56':
+      Add debug prints
+
+commit 903e0085d3a379c3dc43f3187a76079f5683db56
+Merge: 5dbbbb7 cf5ecb2
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 11:08:58 2009 -0700
+
+    am cf5ecb21: Add debug prints
+    
+    Merge commit 'cf5ecb211a32007817087c3bfca975ac1fa41f19' into eclair-plus-aosp
+    
+    * commit 'cf5ecb211a32007817087c3bfca975ac1fa41f19':
+      Add debug prints
+
+commit cf5ecb211a32007817087c3bfca975ac1fa41f19
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 11:01:32 2009 -0700
+
+    Add debug prints
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit b3e2a22c4f139ff661c5015dfcc9790414eed890
+Merge: 692c677 5dbbbb7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 10:53:51 2009 -0700
+
+    am 5dbbbb70: am b9c472e4: Fix setting memory corruption in osRgstry.c
+    
+    Merge commit '5dbbbb70e45ec36d1cdbf3308f98e6560f79ba54'
+    
+    * commit '5dbbbb70e45ec36d1cdbf3308f98e6560f79ba54':
+      Fix setting memory corruption in osRgstry.c
+
+commit 5dbbbb70e45ec36d1cdbf3308f98e6560f79ba54
+Merge: 41ddc64 b9c472e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 10:49:28 2009 -0700
+
+    am b9c472e4: Fix setting memory corruption in osRgstry.c
+    
+    Merge commit 'b9c472e425a823df929150475a9f340ad4decca3' into eclair-plus-aosp
+    
+    * commit 'b9c472e425a823df929150475a9f340ad4decca3':
+      Fix setting memory corruption in osRgstry.c
+
+commit b9c472e425a823df929150475a9f340ad4decca3
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Sep 18 10:40:20 2009 -0700
+
+    Fix setting memory corruption in osRgstry.c
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 692c677ad9cd0e10f11020a741084fb8369683e2
+Merge: ea27d89 41ddc64
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 14:34:16 2009 -0700
+
+    am 41ddc640: am 6c3e7f5d: Fix problem in waking up path
+    
+    Merge commit '41ddc640f8054e85b35d840e9e77746dec449a03'
+    
+    * commit '41ddc640f8054e85b35d840e9e77746dec449a03':
+      Fix problem in waking up path
+
+commit 41ddc640f8054e85b35d840e9e77746dec449a03
+Merge: 6c84d5b 6c3e7f5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 14:29:23 2009 -0700
+
+    am 6c3e7f5d: Fix problem in waking up path
+    
+    Merge commit '6c3e7f5dcb9c7319a5541993c0516594dfffb916' into eclair-plus-aosp
+    
+    * commit '6c3e7f5dcb9c7319a5541993c0516594dfffb916':
+      Fix problem in waking up path
+
+commit 6c3e7f5dcb9c7319a5541993c0516594dfffb916
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 13:28:13 2009 -0700
+
+    Fix problem in waking up path
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ea27d8910c9934b6f4f60b46be9aa8a89473eba3
+Merge: 2863b44 6c84d5b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 12:09:22 2009 -0700
+
+    am 6c84d5b6: am ee079dc3: Fix buffer overrun issue for tnetw1251
+    
+    Merge commit '6c84d5b6687fe51db1d78aa978981a7cdda4b9a7'
+    
+    * commit '6c84d5b6687fe51db1d78aa978981a7cdda4b9a7':
+      Fix buffer overrun issue for tnetw1251
+
+commit 2863b44a38cbe5f13327041cc6532ddc2ed473d5
+Merge: d557472 a1f0160
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 12:09:19 2009 -0700
+
+    am a1f01608: am 665ac662: Fix buffer overrun issue in regConvertStringtoMACAddress
+    
+    Merge commit 'a1f016081b2983842d2ad7e8d50ce47efdf132ae'
+    
+    * commit 'a1f016081b2983842d2ad7e8d50ce47efdf132ae':
+      Fix buffer overrun issue in regConvertStringtoMACAddress
+
+commit d5574728b34ea833cb5ca4e0f8e6e8499b0f13b3
+Merge: ad265b5 b36e598
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 09:58:50 2009 -0700
+
+    am b36e5983: am e6faac06: Fix buffer overrun issue in regConvertStringtoBeaconIETable
+    
+    Merge commit 'b36e5983447a5af7e4248677b9ca9971b9c3f764'
+    
+    * commit 'b36e5983447a5af7e4248677b9ca9971b9c3f764':
+      Fix buffer overrun issue in regConvertStringtoBeaconIETable
+
+commit 6c84d5b6687fe51db1d78aa978981a7cdda4b9a7
+Merge: a1f0160 ee079dc
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 08:40:50 2009 -0700
+
+    am ee079dc3: Fix buffer overrun issue for tnetw1251
+    
+    Merge commit 'ee079dc33311654335201357a52b6741e86be9b6' into eclair-plus-aosp
+    
+    * commit 'ee079dc33311654335201357a52b6741e86be9b6':
+      Fix buffer overrun issue for tnetw1251
+
+commit a1f016081b2983842d2ad7e8d50ce47efdf132ae
+Merge: b36e598 665ac66
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 17 08:40:42 2009 -0700
+
+    am 665ac662: Fix buffer overrun issue in regConvertStringtoMACAddress
+    
+    Merge commit '665ac6621f2db804438e91cf8e9cabac2455df47' into eclair-plus-aosp
+    
+    * commit '665ac6621f2db804438e91cf8e9cabac2455df47':
+      Fix buffer overrun issue in regConvertStringtoMACAddress
+
+commit ad265b5682780fed46866b21558f6a4ed91ff002
+Merge: ed5ad88 b4d2fba
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Wed Sep 16 18:24:09 2009 -0700
+
+    am b4d2fba4: am b0f27977: Fix the JUNK SSID check in the ti driver for voles platform.
+    
+    Merge commit 'b4d2fba4e1989bbad3fa0f592fbb6bad537c9b5c'
+    
+    * commit 'b4d2fba4e1989bbad3fa0f592fbb6bad537c9b5c':
+      Fix the JUNK SSID check in the ti driver for voles platform.
+
+commit ed5ad88879731daec3abea279d6ce44f3ff72491
+Merge: 0ac145a 75d49fa
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Wed Sep 16 18:23:47 2009 -0700
+
+    am 75d49fa7: am 20f16e25: Fix the assoication with SSID containing CJK characters.
+    
+    Merge commit '75d49fa78f02a95da0f36e3d0c7e23bf42e172c2'
+    
+    * commit '75d49fa78f02a95da0f36e3d0c7e23bf42e172c2':
+      Fix the assoication with SSID containing CJK characters.
+
+commit 0ac145a5d1e063b7a8cef5d1465c1f5747d957fd
+Merge: f2c5542 5ec8cb9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 16 18:19:28 2009 -0700
+
+    am 5ec8cb96: am 06cb189c: Fix MacAddress filtering processing
+    
+    Merge commit '5ec8cb9668cfbd25e204ed3dbcbcd0f1d072d858'
+    
+    * commit '5ec8cb9668cfbd25e204ed3dbcbcd0f1d072d858':
+      Fix MacAddress filtering processing
+
+commit ee079dc33311654335201357a52b6741e86be9b6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 16 15:19:28 2009 -0700
+
+    Fix buffer overrun issue for tnetw1251
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 665ac6621f2db804438e91cf8e9cabac2455df47
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 16 15:17:43 2009 -0700
+
+    Fix buffer overrun issue in regConvertStringtoMACAddress
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit b36e5983447a5af7e4248677b9ca9971b9c3f764
+Merge: b4d2fba e6faac0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 16 12:48:45 2009 -0700
+
+    am e6faac06: Fix buffer overrun issue in regConvertStringtoBeaconIETable
+    
+    Merge commit 'e6faac06e828675d760a7e787f8454bec44645d6' into eclair-plus-aosp
+    
+    * commit 'e6faac06e828675d760a7e787f8454bec44645d6':
+      Fix buffer overrun issue in regConvertStringtoBeaconIETable
+
+commit e6faac06e828675d760a7e787f8454bec44645d6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 16 12:40:22 2009 -0700
+
+    Fix buffer overrun issue in regConvertStringtoBeaconIETable
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit b4d2fba4e1989bbad3fa0f592fbb6bad537c9b5c
+Merge: 75d49fa b0f2797
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Tue Sep 15 02:03:15 2009 -0700
+
+    am b0f27977: Fix the JUNK SSID check in the ti driver for voles platform.
+    
+    Merge commit 'b0f27977402244a1b44d5d8bd06bacb5ee258bdf' into eclair-plus-aosp
+    
+    * commit 'b0f27977402244a1b44d5d8bd06bacb5ee258bdf':
+      Fix the JUNK SSID check in the ti driver for voles platform.
+
+commit b0f27977402244a1b44d5d8bd06bacb5ee258bdf
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Tue Sep 15 16:26:25 2009 +0800
+
+    Fix the JUNK SSID check in the ti driver for voles platform.
+    
+    The same fix as the CL 25017.
+
+commit 75d49fa78f02a95da0f36e3d0c7e23bf42e172c2
+Merge: 5ec8cb9 20f16e2
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Mon Sep 14 23:47:36 2009 -0700
+
+    am 20f16e25: Fix the assoication with SSID containing CJK characters.
+    
+    Merge commit '20f16e25734c96dc7e48e3a9577180460404773f' into eclair-plus-aosp
+    
+    * commit '20f16e25734c96dc7e48e3a9577180460404773f':
+      Fix the assoication with SSID containing CJK characters.
+
+commit 20f16e25734c96dc7e48e3a9577180460404773f
+Author: Chung-yih Wang <cywang@google.com>
+Date:   Tue Sep 15 12:39:08 2009 +0800
+
+    Fix the assoication with SSID containing CJK characters.
+    
+    This fix the validity check for the first 3 characters in original code.
+    Signed-off-by: Chung-yih Wang <cywang@google.com>
+
+commit 5ec8cb9668cfbd25e204ed3dbcbcd0f1d072d858
+Merge: b57f8db 06cb189
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 14 15:34:02 2009 -0700
+
+    am 06cb189c: Fix MacAddress filtering processing
+    
+    Merge commit '06cb189c0ecdd4fbfc949ae442634aeacfb3f26b' into eclair-plus-aosp
+    
+    * commit '06cb189c0ecdd4fbfc949ae442634aeacfb3f26b':
+      Fix MacAddress filtering processing
+
+commit 06cb189c0ecdd4fbfc949ae442634aeacfb3f26b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Sep 14 15:27:06 2009 -0700
+
+    Fix MacAddress filtering processing
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f2c5542cb4d538827f29989ce5a788d77dd7c7f3
+Merge: 3957f31 b57f8db
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 18:25:49 2009 -0700
+
+    am b57f8db5: am 5e861de5: Fix IE and Event memory corruption
+    
+    Merge commit 'b57f8db5938794a6256105a1e7b5ef4bea1406ac'
+    
+    * commit 'b57f8db5938794a6256105a1e7b5ef4bea1406ac':
+      Fix IE and Event memory corruption
+
+commit b57f8db5938794a6256105a1e7b5ef4bea1406ac
+Merge: a610c5b 5e861de
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 18:20:16 2009 -0700
+
+    am 5e861de5: Fix IE and Event memory corruption
+    
+    Merge commit '5e861de5ad899e72ec6582efb27da588b7583775' into eclair-plus-aosp
+    
+    * commit '5e861de5ad899e72ec6582efb27da588b7583775':
+      Fix IE and Event memory corruption
+
+commit 5e861de5ad899e72ec6582efb27da588b7583775
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 18:12:02 2009 -0700
+
+    Fix IE and Event memory corruption
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3957f3186b4694f5a3e78bf958c30dca9c46ef89
+Merge: 0dfaccf a610c5b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 16:29:08 2009 -0700
+
+    am a610c5bc: am 16ff62f3: Remove comments from wpa_supplciant.conf template
+    
+    Merge commit 'a610c5bc2360e4d9e8291b6bf587530d71d619fd'
+    
+    * commit 'a610c5bc2360e4d9e8291b6bf587530d71d619fd':
+      Remove comments from wpa_supplciant.conf template
+
+commit a610c5bc2360e4d9e8291b6bf587530d71d619fd
+Merge: fff3d3c 16ff62f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 12:25:19 2009 -0700
+
+    am 16ff62f3: Remove comments from wpa_supplciant.conf template
+    
+    Merge commit '16ff62f309a29bce3cb9cc8ab4fdb1e30384aaa6' into eclair-plus-aosp
+    
+    * commit '16ff62f309a29bce3cb9cc8ab4fdb1e30384aaa6':
+      Remove comments from wpa_supplciant.conf template
+
+commit 16ff62f309a29bce3cb9cc8ab4fdb1e30384aaa6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 9 12:17:21 2009 -0700
+
+    Remove comments from wpa_supplciant.conf template
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0dfaccf4365130be0e4ec3471c25ebfb0ae73ace
+Merge: 2654e55 fff3d3c
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Fri Sep 4 11:06:23 2009 -0700
+
+    am fff3d3c3: merge from open-source master
+    
+    Merge commit 'fff3d3c3e4db8b6164380e6a2e54f57b30444174'
+    
+    * commit 'fff3d3c3e4db8b6164380e6a2e54f57b30444174':
+
+commit fff3d3c3e4db8b6164380e6a2e54f57b30444174
+Merge: 023547f a7db066
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Fri Sep 4 07:51:31 2009 -0700
+
+    merge from open-source master
+
+commit 2654e55c58ee510ee4d421728341ae18c8d1bf2f
+Merge: bf5419e 023547f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 14:44:16 2009 -0700
+
+    am 023547f1: Initial patch for stack usage reduction
+    
+    Merge commit '023547f11f3d7c84ab64acaab9b9e821f8c528e7'
+    
+    * commit '023547f11f3d7c84ab64acaab9b9e821f8c528e7':
+      Initial patch for stack usage reduction
+
+commit 023547f11f3d7c84ab64acaab9b9e821f8c528e7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 13:34:52 2009 -0700
+
+    Initial patch for stack usage reduction
+    
+    This reverts commit 1827f856ea1f343c2287970d195b2ded139c7a1d.
+
+commit a7db066ad382a3a3d13182d07bd4bb02fa56175a
+Merge: 17ed231 2c2f52e
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Thu Sep 3 14:13:19 2009 -0700
+
+    merge from donut
+
+commit bf5419e6bf2c5a035ab72bd4f5a742f04c1bcae6
+Merge: 62192da 640bc59
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 11:23:06 2009 -0700
+
+    am 640bc593: Revert "Revert "Fix scan results if we have hidden ssid""
+    
+    Merge commit '640bc593e278f38345e6e718a193c6a5cf77b670'
+    
+    * commit '640bc593e278f38345e6e718a193c6a5cf77b670':
+      Revert "Revert "Fix scan results if we have hidden ssid""
+
+commit 62192da0e162f1dbe5ec29dd1da90799525a326c
+Merge: 5eaa880 bad6fbe
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 11:23:04 2009 -0700
+
+    am bad6fbeb: Revert "Revert "Fix memory leaks.""
+    
+    Merge commit 'bad6fbebd4588d035d2cde5da6c021200481559a'
+    
+    * commit 'bad6fbebd4588d035d2cde5da6c021200481559a':
+      Revert "Revert "Fix memory leaks.""
+
+commit 5eaa880a6e2f3de87f8bc5d2a991f4a8f689c7ae
+Merge: 340b6f0 02031bf
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 11:20:01 2009 -0700
+
+    am 02031bf3: Revert "Revert "Fix compilation if DEBUG=n""
+    
+    Merge commit '02031bf384692af64df1fdc67d00d373c2a6c85d'
+    
+    * commit '02031bf384692af64df1fdc67d00d373c2a6c85d':
+      Revert "Revert "Fix compilation if DEBUG=n""
+
+commit 340b6f06a437b44c0c81ec87e1fa217af3b334f7
+Merge: b8d250e 4b7f4a4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 11:15:01 2009 -0700
+
+    am 4b7f4a46: Revert "Revert "Fix race conditions during removing items from the queue""
+    
+    Merge commit '4b7f4a460e6745305106cd931a435a9d02f0311d'
+    
+    * commit '4b7f4a460e6745305106cd931a435a9d02f0311d':
+      Revert "Revert "Fix race conditions during removing items from the queue""
+
+commit 640bc593e278f38345e6e718a193c6a5cf77b670
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 11:04:39 2009 -0700
+
+    Revert "Revert "Fix scan results if we have hidden ssid""
+    
+    This reverts commit 7f5aef50612a4f8abcf7beec976e083c13359590.
+
+commit bad6fbebd4588d035d2cde5da6c021200481559a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 10:52:13 2009 -0700
+
+    Revert "Revert "Fix memory leaks.""
+    
+    This reverts commit 4adc645208e279467a70fd4fbc5e08a40d97c0ca.
+
+commit 02031bf384692af64df1fdc67d00d373c2a6c85d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 10:51:36 2009 -0700
+
+    Revert "Revert "Fix compilation if DEBUG=n""
+    
+    This reverts commit b6c7a8fa07b0a5695026ee4619543ca7a243843e.
+
+commit 4b7f4a460e6745305106cd931a435a9d02f0311d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Sep 3 10:42:42 2009 -0700
+
+    Revert "Revert "Fix race conditions during removing items from the queue""
+    
+    This reverts commit 47dbcd04cbfd90a5553933b11bbad97079ee3e12.
+
+commit b8d250e0fbbb40185cbf131d0db2d56413cefe38
+Merge: 5be7727 47dbcd0
+Author: Android Git Automerger <android-git-automerger@android.com>
+Date:   Wed Sep 2 22:59:13 2009 -0700
+
+    Merge commit '47dbcd04cbfd90a5553933b11bbad97079ee3e12'
+
+commit 47dbcd04cbfd90a5553933b11bbad97079ee3e12
+Author: Rebecca Schultz Zavin <rebecca@android.com>
+Date:   Wed Sep 2 22:13:49 2009 -0700
+
+    Revert "Fix race conditions during removing items from the queue"
+    
+    This reverts commit d8f7ee5f20e2e0c651e6041c1d01c5beda4f4a99.
+
+commit b6c7a8fa07b0a5695026ee4619543ca7a243843e
+Author: Rebecca Schultz Zavin <rebecca@android.com>
+Date:   Wed Sep 2 22:08:11 2009 -0700
+
+    Revert "Fix compilation if DEBUG=n"
+    
+    This reverts commit ea0e64cebf60071015a036d7ea77363512f75d30.
+
+commit 4adc645208e279467a70fd4fbc5e08a40d97c0ca
+Author: Rebecca Schultz Zavin <rebecca@android.com>
+Date:   Wed Sep 2 22:07:52 2009 -0700
+
+    Revert "Fix memory leaks."
+    
+    This reverts commit 845fe88e793e8bbdf6824b2e158ed3e1372df9a6.
+
+commit 7f5aef50612a4f8abcf7beec976e083c13359590
+Author: Rebecca Schultz Zavin <rebecca@android.com>
+Date:   Wed Sep 2 22:07:41 2009 -0700
+
+    Revert "Fix scan results if we have hidden ssid"
+    
+    This reverts commit 91d1076c0e42620f53cb30c947d725d218b9369b.
+
+commit 1827f856ea1f343c2287970d195b2ded139c7a1d
+Author: Rebecca Schultz Zavin <rebecca@android.com>
+Date:   Wed Sep 2 21:58:41 2009 -0700
+
+    Revert "Initial patch for stack usage reduction"
+    
+    This reverts commit f87127af1210bcf0cbbf0b641a7e5e287b6b2545.
+
+commit 5be7727488fe1f8ecc8324ca2901608042a0466e
+Merge: a1a6c6e e39acf3
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 18:20:44 2009 -0700
+
+    am e39acf39: (-s ours) Adjust path to eclair\'s kernel (do not merge)
+    
+    Merge commit 'e39acf397855afc6966e22e270a9a8d2217ffaaa'
+    
+    * commit 'e39acf397855afc6966e22e270a9a8d2217ffaaa':
+      Adjust path to eclair's kernel (do not merge)
+
+commit a1a6c6e3c4fd6ce9a0b7f38d57ec8c203bb314f7
+Merge: a994756 f87127a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 18:14:52 2009 -0700
+
+    am f87127af: Initial patch for stack usage reduction
+    
+    Merge commit 'f87127af1210bcf0cbbf0b641a7e5e287b6b2545'
+    
+    * commit 'f87127af1210bcf0cbbf0b641a7e5e287b6b2545':
+      Initial patch for stack usage reduction
+
+commit e39acf397855afc6966e22e270a9a8d2217ffaaa
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 18:14:40 2009 -0700
+
+    Adjust path to eclair's kernel (do not merge)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f87127af1210bcf0cbbf0b641a7e5e287b6b2545
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 17:53:08 2009 -0700
+
+    Initial patch for stack usage reduction
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a994756d519a7bfb284e147977e0a33edcf54abc
+Merge: 93847a1 91d1076
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 16:23:27 2009 -0700
+
+    am 91d1076c: Fix scan results if we have hidden ssid
+    
+    Merge commit '91d1076c0e42620f53cb30c947d725d218b9369b'
+    
+    * commit '91d1076c0e42620f53cb30c947d725d218b9369b':
+      Fix scan results if we have hidden ssid
+
+commit 91d1076c0e42620f53cb30c947d725d218b9369b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 16:04:05 2009 -0700
+
+    Fix scan results if we have hidden ssid
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 93847a12be5b5397d5446ac09bc7c4fb6738df67
+Merge: cebe80a 845fe88
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 13:35:15 2009 -0700
+
+    am 845fe88e: Fix memory leaks.
+    
+    Merge commit '845fe88e793e8bbdf6824b2e158ed3e1372df9a6'
+    
+    * commit '845fe88e793e8bbdf6824b2e158ed3e1372df9a6':
+      Fix memory leaks.
+
+commit cebe80a6a2da2c18f2e8feb1ad954cf2171551bd
+Merge: 00e947e ea0e64c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 13:33:54 2009 -0700
+
+    am ea0e64ce: Fix compilation if DEBUG=n
+    
+    Merge commit 'ea0e64cebf60071015a036d7ea77363512f75d30'
+    
+    * commit 'ea0e64cebf60071015a036d7ea77363512f75d30':
+      Fix compilation if DEBUG=n
+
+commit 845fe88e793e8bbdf6824b2e158ed3e1372df9a6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 12:50:52 2009 -0700
+
+    Fix memory leaks.
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ea0e64cebf60071015a036d7ea77363512f75d30
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Sep 2 09:56:57 2009 -0700
+
+    Fix compilation if DEBUG=n
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 00e947e14394a7a4e8ca53d0d1916d6bbfb05c66
+Merge: 2ec37e3 d8f7ee5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 16:24:46 2009 -0700
+
+    am d8f7ee5f: Fix race conditions during removing items from the queue
+    
+    Merge commit 'd8f7ee5f20e2e0c651e6041c1d01c5beda4f4a99'
+    
+    * commit 'd8f7ee5f20e2e0c651e6041c1d01c5beda4f4a99':
+      Fix race conditions during removing items from the queue
+
+commit d8f7ee5f20e2e0c651e6041c1d01c5beda4f4a99
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 16:17:25 2009 -0700
+
+    Fix race conditions during removing items from the queue
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 2ec37e325dc86d26fdf30fcd6af2f2e9854cb99d
+Merge: 2699582 6a0d082
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 12:15:48 2009 -0700
+
+    am 6a0d0824: Add NULL pointer failure checking
+    
+    Merge commit '6a0d0824f00909557486f113d52716238595aaa0'
+    
+    * commit '6a0d0824f00909557486f113d52716238595aaa0':
+      Add NULL pointer failure checking
+
+commit 2699582e9c1a18008fed5dd0c9e14e68e5995e0c
+Merge: 26ba5e1 77a78b1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 12:15:24 2009 -0700
+
+    am 77a78b11: Check alloc_skb() for possible failure
+    
+    Merge commit '77a78b11a0b8e7c1a5b1625e0fddd39ef3a9e224'
+    
+    * commit '77a78b11a0b8e7c1a5b1625e0fddd39ef3a9e224':
+      Check alloc_skb() for possible failure
+
+commit 26ba5e170b9191a04b37dc63a911cbd84df07542
+Merge: d63c86f 446aa7f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 12:15:09 2009 -0700
+
+    am 446aa7f3: Fix fsm NULL pointer crash if not initialized
+    
+    Merge commit '446aa7f3a3944c64e482173f23a10dcc165c7367'
+    
+    * commit '446aa7f3a3944c64e482173f23a10dcc165c7367':
+      Fix fsm NULL pointer crash if not initialized
+
+commit d63c86fd9c906c619c000e2c4a141992eecb10a4
+Merge: 6f4ca6d 9e2fac0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 12:15:08 2009 -0700
+
+    am 9e2fac0a: Adjust memory allocation
+    
+    Merge commit '9e2fac0a4ecb09f18a82862079172579a6947428'
+    
+    * commit '9e2fac0a4ecb09f18a82862079172579a6947428':
+      Adjust memory allocation
+
+commit 6a0d0824f00909557486f113d52716238595aaa0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 11:07:18 2009 -0700
+
+    Add NULL pointer failure checking
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 77a78b11a0b8e7c1a5b1625e0fddd39ef3a9e224
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 10:24:34 2009 -0700
+
+    Check alloc_skb() for possible failure
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 446aa7f3a3944c64e482173f23a10dcc165c7367
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 10:07:30 2009 -0700
+
+    Fix fsm NULL pointer crash if not initialized
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9e2fac0a4ecb09f18a82862079172579a6947428
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Sep 1 10:05:05 2009 -0700
+
+    Adjust memory allocation
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 6f4ca6d2e404a672db843c5a3cdc0b9ffbf3887b
+Merge: e679fee 9f3a154
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Aug 27 13:11:10 2009 -0700
+
+    am 9f3a1545: Fix tnetw1251 hidden ssid connection
+    
+    Merge commit '9f3a1545edc83b1fe8acd88a237082be7d6956c1'
+    
+    * commit '9f3a1545edc83b1fe8acd88a237082be7d6956c1':
+      Fix tnetw1251 hidden ssid connection
+
+commit 9f3a1545edc83b1fe8acd88a237082be7d6956c1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Aug 27 13:06:23 2009 -0700
+
+    Fix tnetw1251 hidden ssid connection
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit e679feef215e58f8543e3b92f4c522bc5c6e7849
+Merge: c8b659d 0600c66
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Aug 20 12:19:36 2009 -0700
+
+    am 0600c662: Increase delay after "start" command and check scan_results status
+    
+    Merge commit '0600c66215c6382b39e138568beabf85c51ad8fd'
+    
+    * commit '0600c66215c6382b39e138568beabf85c51ad8fd':
+      Increase delay after "start" command and check scan_results status
+
+commit 0600c66215c6382b39e138568beabf85c51ad8fd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Aug 20 12:12:14 2009 -0700
+
+    Increase delay after "start" command and check scan_results status
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit c8b659d97f322342542734056ad1119fa10c29c4
+Merge: e3e868f dccaf9a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 16:49:25 2009 -0700
+
+    am dccaf9af: Fix scan behaviour for roaming in wifi driver
+    
+    Merge commit 'dccaf9af25422ede0e8468a6d7d850e5cb343519'
+    
+    * commit 'dccaf9af25422ede0e8468a6d7d850e5cb343519':
+      Fix scan behaviour for roaming in wifi driver
+
+commit e3e868f36e047dc98a7e4c027759aeda92d66585
+Merge: ede8d31 3620e16
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 16:49:18 2009 -0700
+
+    am 3620e167: Fix scan settings for roaming and get_bssid_info() function
+    
+    Merge commit '3620e1678098eaffdaf8b71cf5536321707a4a26'
+    
+    * commit '3620e1678098eaffdaf8b71cf5536321707a4a26':
+      Fix scan settings for roaming and get_bssid_info() function
+
+commit dccaf9af25422ede0e8468a6d7d850e5cb343519
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 14:43:42 2009 -0700
+
+    Fix scan behaviour for roaming in wifi driver
+    
+    Signed-off-by: Daniel Chen <daniel.ch_chen@htc.com>
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3620e1678098eaffdaf8b71cf5536321707a4a26
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 14:18:16 2009 -0700
+
+    Fix scan settings for roaming and get_bssid_info() function
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ede8d31454e085f40ac5a55d34459a098e3a55b7
+Merge: 6f4b1a2 b1c7add
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 10:32:22 2009 -0700
+
+    am b1c7adde: Fix kernel crash when recovery mechanism fails
+    
+    Merge commit 'b1c7adde70f3a7dd380758004b9d274dc9abe9ea'
+    
+    * commit 'b1c7adde70f3a7dd380758004b9d274dc9abe9ea':
+      Fix kernel crash when recovery mechanism fails
+
+commit b1c7adde70f3a7dd380758004b9d274dc9abe9ea
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 10:26:50 2009 -0700
+
+    Fix kernel crash when recovery mechanism fails
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 6f4b1a28d03e7ec93fd89138cf8e763a26eb2ea2
+Merge: a089208 b65bbc1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 09:44:32 2009 -0700
+
+    am b65bbc13: Improve PsPoll delivery failure timing
+    
+    Merge commit 'b65bbc13b25a1013093b408da2b794b58ae88023'
+    
+    * commit 'b65bbc13b25a1013093b408da2b794b58ae88023':
+      Improve PsPoll delivery failure timing
+
+commit b65bbc13b25a1013093b408da2b794b58ae88023
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Aug 19 09:40:09 2009 -0700
+
+    Improve PsPoll delivery failure timing
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a0892086865844d5f7bfdb83494fe8c90ee946f0
+Merge: 8458aa1 4397575
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Aug 18 08:34:45 2009 -0700
+
+    am 43975756: (-s ours) am 2c2f52e4: (-s ours) Reduce driver size by strip --strip-unneeded (do not merge)
+    
+    Merge commit '43975756736f9ba012653ddb8a6343a7dfa6ed50'
+    
+    * commit '43975756736f9ba012653ddb8a6343a7dfa6ed50':
+      Reduce driver size by strip --strip-unneeded (do not merge)
+
+commit 43975756736f9ba012653ddb8a6343a7dfa6ed50
+Merge: 8458aa1 2c2f52e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Aug 18 08:30:34 2009 -0700
+
+    am 2c2f52e4: (-s ours) Reduce driver size by strip --strip-unneeded (do not merge)
+    
+    Merge commit '2c2f52e482a7e2577ec586d7d00a27cf08619420' into eclair
+    
+    * commit '2c2f52e482a7e2577ec586d7d00a27cf08619420':
+      Reduce driver size by strip --strip-unneeded (do not merge)
+
+commit 8458aa15d6797bd02049dc79972529c9a2e00d5d
+Merge: ad6c9cb f1afff1
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Mon Aug 17 15:52:42 2009 -0700
+
+    Merge change 21533 into eclair
+    
+    * changes:
+      Sholes wireless driver fixes.
+
+commit f1afff14b14abc2bafc344803cdee62ad83c7a27
+Author: Lorenzo Colitti <lorenzo@google.com>
+Date:   Fri Aug 14 18:51:52 2009 -0700
+
+    Sholes wireless driver fixes.
+    
+    1. Ignore broadcast frames we sent ourselves, as per the 802.11 standard.
+    2. In an effort to avoid data copies, the driver uses skbuffs incorrectly,
+       updating skb->data directly without updating skb->tail. Update the tail
+       pointer as well.
+    3. Correct spelling mistakes in some frequently-seen log messages.
+
+commit ad6c9cb7ae598953d93fc87fd9e845a12c131075
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Aug 17 14:40:37 2009 -0700
+
+    Fix LEAP support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit cbee36d244ec74eb778b1445749e337d7edcc6dd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Aug 17 13:11:05 2009 -0700
+
+    Fix search to use both BSSID and SSID
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a0b9904193194094e8f8daf0278c298b2ea8c150
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Aug 14 11:16:16 2009 -0700
+
+    Minor cleaning of wake_lock functions
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 2c2f52e482a7e2577ec586d7d00a27cf08619420
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Aug 13 13:52:34 2009 -0700
+
+    Reduce driver size by strip --strip-unneeded (do not merge)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit acd89e8f547322db23ab0f7c3775082654c4b13b
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Aug 10 10:24:50 2009 -0700
+
+    Fix TX_ATTENUATION parameter error and clean error messages
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit fa51d1bca22d377b09ff90041e04b282aaf869b0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Aug 10 09:45:44 2009 -0700
+
+    Add PMK cache support
+    
+    Signed-off-by: Zheng BaoZhong-E13358 <bao-zhong@motorola.com>
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 957eee34b272fc1f84355b89b451eb7a98bd0860
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Aug 7 15:20:51 2009 -0700
+
+    Fix gcc 4.4.1 compilation warnings
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ebe098ffbae04e9dbacfcee38bbf9c9d0bdd6eff
+Merge: ff22181 7feb8d0
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Fri Aug 7 14:43:54 2009 -0700
+
+    Merge change 20465
+    
+    * changes:
+      Reduce driver size by strip --strip-unneeded
+
+commit 7feb8d0f0f04deabb4cda090118f62be53cd33b0
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Aug 7 14:36:15 2009 -0700
+
+    Reduce driver size by strip --strip-unneeded
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ff2218129c7c4314adfe7f6883318ea91d884430
+Merge: 0a5bc43 614b3aa
+Author: Doug Zongker <dougz@android.com>
+Date:   Thu Aug 6 21:24:28 2009 -0700
+
+    am 614b3aac: strip comments from wifi config files
+    
+    Merge commit '614b3aac00a487fa35f527f0345c92ab368322df'
+    
+    * commit '614b3aac00a487fa35f527f0345c92ab368322df':
+      strip comments from wifi config files
+
+commit 614b3aac00a487fa35f527f0345c92ab368322df
+Author: Doug Zongker <dougz@android.com>
+Date:   Thu Aug 6 16:38:36 2009 -0700
+
+    strip comments from wifi config files
+    
+    This saves about 34k from the system image.
+    
+    Bug: 2036961
+
+commit 0a5bc43e49579115124f3deeb122f88d9daa105c
+Merge: 6910c6d 17ed231
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Tue Aug 4 09:00:31 2009 -0700
+
+    merge from open-source master
+
+commit 6910c6d18774fec1bd7f4903bf95f71ccd80b773
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Aug 3 08:33:01 2009 -0700
+
+    Fix power management 96M clock issue
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 17ed2312cb258f976a691da4780806c1d288e2bf
+Merge: 788f6e2 849c6d4
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Mon Aug 3 07:45:50 2009 -0700
+
+    merge from donut
+
+commit ddc827cb88f8625c62e6193fa9c21be6f9268bc6
+Merge: 05b011d 849c6d4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 30 16:06:51 2009 -0700
+
+    am 849c6d41: (-s ours) Release host before sdio_reset_comm() (do not merge)
+    
+    Merge commit '849c6d4186a7fcd4d25bcff6cc2e6bc25f8c4696'
+    
+    * commit '849c6d4186a7fcd4d25bcff6cc2e6bc25f8c4696':
+      Release host before sdio_reset_comm() (do not merge)
+
+commit 849c6d4186a7fcd4d25bcff6cc2e6bc25f8c4696
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 30 11:48:27 2009 -0700
+
+    Release host before sdio_reset_comm() (do not merge)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 05b011d3cd04f6b16c5d97a23d52d79e0716cf57
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 30 11:40:22 2009 -0700
+
+    Release host before sdio_reset_comm()
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 899e73ea04542662999c77a0ffa125c3f96bd879
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 29 17:09:55 2009 -0700
+
+    Fix cross-compile problem of sharing shlist object
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 6b81e10aa53ed66a9ff0d022c0df5852ad41e9ad
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 29 14:31:02 2009 -0700
+
+    Increase Dwell time for broadcast active scan
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f0b45cb49603e543c2075f00dc8170a288585bc7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jul 28 12:35:59 2009 -0700
+
+    Fix sdio_reset_comm() frequent call on flaky HW
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3eccf36b8b2676516532475bfd3cb7943aea918c
+Merge: 774eea7 788f6e2
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sun Jul 26 11:43:56 2009 -0700
+
+    reconcile korg/master into goog/master
+
+commit 788f6e20d7f5ec37d23fae236607a18741ac35c1
+Merge: b4818be 80908ea
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Sat Jul 25 20:50:29 2009 -0700
+
+    Merge korg/donut into korg/master
+    
+    Conflicts:
+    
+    	sta_dk_4_0_4_32/wpa_supplicant_lib/Android.mk
+
+commit 774eea7757fac1d91aca4d51854b5e8f5d8af5af
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 22 10:26:03 2009 -0700
+
+    Set recommended config values for Wifi
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ed6a25120881135f25d9173223306e9232bb2564
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Jul 20 09:54:48 2009 -0700
+
+    Ralink S7 issue fix
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 762d794c97ce8ff01eb025b1129c18fac5f11ac4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Jul 17 16:27:07 2009 -0700
+
+    Fix buffer corruption problem
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 35b2a8ee36533e8f8504406510063de7aafe4473
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 15 13:38:35 2009 -0700
+
+    Turn off compiling wpa_supplicant connectivity (BUILD_SUPPL=n)
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit f3580267ddbfb4215398cf99b4d22a5b22ac2040
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jul 14 10:35:52 2009 -0700
+
+    Skip "probe scan" in case network doesn't have scan_ssid flag
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 566fe6710997ebdbd5858587b9732e51c2f80ec7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jul 14 09:52:57 2009 -0700
+
+    Fix scan results merge for tnet1251
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3f2824312a75dcb53eccc70ee2cbf5356cc1c0bb
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Jul 10 10:18:16 2009 -0700
+
+    Fix handling SSID with length = 32 chars
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 99add8f05e029c06ed1361acb2d498fb6a86889d
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 9 15:57:54 2009 -0700
+
+    Use Active scan if SSID is hidden
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 117d44c9d4e7d71393464268813ab4800cf213bd
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 9 15:24:07 2009 -0700
+
+    Use Active scan if SSID is hidden
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9615cc23eb6ffe3b882734aa06e2c386f5ad4446
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jul 7 16:48:51 2009 -0700
+
+    Adjust tiwlan.ini and remove ZOOM2 ifdefs
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 653850f71f9caaa41af19cadbab24bb5e655daf4
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 2 13:25:24 2009 -0700
+
+    Update to version 6.1.0.0.95_M3
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 9a6af3ba4826df0b0206f5ebc3395a9c49482205
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jul 2 12:27:28 2009 -0700
+
+    Turn off mmchs_fck and mmchs_ick after sdio transaction
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 26dca5b82d77f6979414032c7a0b3860a0bb1e0e
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 1 12:34:07 2009 -0700
+
+    Fix setting wakeup irq
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 64b6e23421bc0b85ae06e6d93a4564a666bf07a6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jul 1 12:17:28 2009 -0700
+
+    Add wakelocks for driver operation
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit a67e2e5196684101f6b16308dd998cde279d3ba1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Jun 29 15:36:08 2009 -0700
+
+    Switch to use sdio probe function
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 951b369d107bdf087f13640e85f85d8f6dd09a12
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jun 25 13:51:24 2009 -0700
+
+    Add rx-filter support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit fef2d7cc76b403c949d9b81dcddf8f9469f6e51a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jun 25 13:31:25 2009 -0700
+
+    Add proper link speed and rssi processing
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0f1d5d4137d6a6bc5d3556d06e81406d50c84155
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jun 24 16:47:24 2009 -0700
+
+    Turn off debug prints
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3df4a33bc0739d3afad19b25d720fc4ea9953938
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jun 24 16:39:56 2009 -0700
+
+    Add preliminary embedded sdio support
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit adeb01147059a6ee46a7c7294b5e1f8ea3e98fa5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Jun 22 14:36:23 2009 -0700
+
+    Improve power management
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit ec29f2034565fb88f83a88ea18913a57c6080e2c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Jun 19 16:39:39 2009 -0700
+
+    Change open/stop functions not to start/stop the firmware
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0182115b13c0c9dc9bf238106846b0499e894e22
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri Jun 19 11:10:02 2009 -0700
+
+    Add random default MAC address setting
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 807176e5fd5bdd9713f2c768590c2f0f9057eb3a
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jun 18 13:32:16 2009 -0700
+
+    Remove -Werror flag to allow gcc 4.4.0 compilation
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 916897579d3c1026cea66d7bc9537301798f3cd9
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jun 17 10:53:40 2009 -0700
+
+    Fix scan results merge for current scan problem
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 12532c077d6a741017e11b24e9784bdf573ddd92
+Merge: 421ffa1 80908ea
+Author: San Mehat <san@google.com>
+Date:   Tue Jun 16 21:59:41 2009 -0700
+
+    am 80908ea4: tiwlan_supplicant_driver: When sending an event to UDP port 9000, also send it to 9001. This allows \'another\' listener for driver events.
+    
+    Merge commit '80908ea476c8520bf401114876b4dfb93ae3e395'
+    
+    * commit '80908ea476c8520bf401114876b4dfb93ae3e395':
+      tiwlan_supplicant_driver: When sending an event to UDP port 9000,
+
+commit 421ffa198d9e6ba731af025088ec16b62a188799
+Merge: 3b1d79a c00d718
+Author: San Mehat <san@google.com>
+Date:   Tue Jun 16 21:59:38 2009 -0700
+
+    am c00d718b: tiwlan_supplicant_driver: Change a bunch of INFO messages to DEBUG
+    
+    Merge commit 'c00d718b82f0ee70203309ebf49158d75a36b740'
+    
+    * commit 'c00d718b82f0ee70203309ebf49158d75a36b740':
+      tiwlan_supplicant_driver: Change a bunch of INFO messages to DEBUG
+      tiwlan_loader: Remove a bunch of debugging
+
+commit 80908ea476c8520bf401114876b4dfb93ae3e395
+Author: San Mehat <san@google.com>
+Date:   Tue Jun 16 12:06:36 2009 -0700
+
+    tiwlan_supplicant_driver: When sending an event to UDP port 9000,
+    also send it to 9001. This allows 'another' listener for driver events.
+    
+    Signed-off-by: San Mehat <san@google.com>
+
+commit c00d718b82f0ee70203309ebf49158d75a36b740
+Author: San Mehat <san@google.com>
+Date:   Tue Jun 16 12:05:03 2009 -0700
+
+    tiwlan_supplicant_driver: Change a bunch of INFO messages to DEBUG
+    
+        Also add a minimal handler for IPC_EVENT_LOW_SNR / IPC_EVENT_LOW_RSSI
+    so that we don't complain about not handling them. (avoids logspam)
+    
+    Signed-off-by: San Mehat <san@google.com>
+
+commit 3d26de9dd167a47b9dcdc8644b79fc786ad1e45b
+Author: San Mehat <san@google.com>
+Date:   Tue Jun 16 12:03:30 2009 -0700
+
+    tiwlan_loader: Remove a bunch of debugging
+    
+    Signed-off-by: San Mehat <san@google.com>
+
+commit 3b1d79afe268559be8a66e9a1328fdf130876da1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jun 16 10:53:53 2009 -0700
+
+    Switch to "private" workqueue
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit fc92a955ee2cf0c462698a801506fedce0bcc800
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jun 16 10:48:56 2009 -0700
+
+    Fix PowerOn sequence
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 45544f73189f4649d4afb21a0dab72cd70971e2f
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jun 10 13:32:13 2009 -0700
+
+    Fix roaming support stack overflow
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 3aa89304a80dfdab448223cb72e3c66521e16df7
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jun 9 16:53:40 2009 -0700
+
+    Switch to TI private scan IOCTL, Add channels processing
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 153b43aa392c6bced5c1a030f37190dab7f88b84
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Jun 8 16:40:35 2009 -0700
+
+    Fix checking STARt/STOP driver state
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 247a64809a7f1c608021856f439574bf6fd92988
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon Jun 8 15:20:59 2009 -0700
+
+    Add 'driver rssi-approx' call to return rssi value without ioctl call.
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0962ad234863d9545e93f21fb3930575a8c99390
+Merge: fdd209a 5c47175
+Author: San Mehat <san@google.com>
+Date:   Fri Jun 5 21:17:59 2009 -0700
+
+    am 5c471753: tiwlan: Avoid DMA bounce buffer on read by being evil
+    
+    Merge commit '5c4717531c8b29dc220bdaae320a31a5ea011a21'
+    
+    * commit '5c4717531c8b29dc220bdaae320a31a5ea011a21':
+      tiwlan: Avoid DMA bounce buffer on read by being evil
+
+commit 5c4717531c8b29dc220bdaae320a31a5ea011a21
+Author: San Mehat <san@google.com>
+Date:   Fri Jun 5 19:42:23 2009 -0700
+
+    tiwlan: Avoid DMA bounce buffer on read by being evil
+    
+    Signed-off-by: San Mehat <san@google.com>
+
+commit fdd209a5a06880ac53836d7eee5488ff6ccb4fc1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jun 4 14:55:46 2009 -0700
+
+    Use common scanmegre sources for all TI Wifi parts
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 59b2a14998e275820a4e6c0d947a9990173ca016
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu Jun 4 14:47:01 2009 -0700
+
+    Add scan result "smoothing"
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 03ca2baee0849a8f501bac03bbeedbe0efc55bda
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Wed Jun 3 10:44:29 2009 -0700
+
+    Add config files for tnetw1271
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 2f1efcb9f7b834427f50fce16e78b8ad3be40a05
+Merge: 19a3485 ab438fc
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Tue Jun 2 14:20:32 2009 -0700
+
+    Merge change 2954
+    
+    * changes:
+      Move HW pin configuration to the kernel board file
+
+commit ab438fc855fd64b4b2b700f814972c085a1772ff
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue Jun 2 14:18:22 2009 -0700
+
+    Move HW pin configuration to the kernel board file
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 19a3485995fa01f1fd0c0227f91d9221318c969e
+Merge: 7367369 2a41c9b
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Thu May 28 11:11:53 2009 -0700
+
+    Merge change 2625
+    
+    * changes:
+      Add generic HW control layer Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 2a41c9bcfdb878f169a6794b7d7e55ec821ffa9c
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu May 28 11:09:32 2009 -0700
+
+    Add generic HW control layer
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 7367369195b62f417529129cd522ae3361593af5
+Merge: bff7da1 12d754a
+Author: Android (Google) Code Review <android-gerrit@google.com>
+Date:   Fri May 22 10:34:36 2009 -0700
+
+    Merge change 2335
+    
+    * changes:
+      Add Wifi control abstraction layer, Fix driver removal crash
+
+commit 12d754a18612383f03b960dfad4dbcaba72df370
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Fri May 22 10:32:21 2009 -0700
+
+    Add Wifi control abstraction layer, Fix driver removal crash
+
+commit bff7da18b72b06c5ca38a3e759207307999a6c36
+Author: Robert Greenwalt <robdroid@android.com>
+Date:   Thu May 21 17:25:16 2009 -0700
+
+    Changing ro.product.wifi.channels system property
+    
+    Changing ro.product.wifi.channels to the more correct
+    ro.wifi.channels.  Build tools to change in a separate commit.
+
+commit b12b0e780f3bdb0125388cdfbe209d73b2d6484f
+Author: Robert Greenwalt <robdroid@android.com>
+Date:   Thu May 21 13:37:29 2009 -0700
+
+    Use build systemprop for allowed channels.
+    Part of the fix for 1625953.  Used to use ro.carrier or device locale to set the allowed channels, but that has been moved out and consolidated in the phone app.  Now it uses a build-time setting if available or defaults to 13 channels.
+
+commit 45f09cf2766e260c51803933330f60f563362d96
+Merge: 0b8a0f0 3b04409
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue May 19 15:28:28 2009 -0700
+
+    am 3b044092: Fix driver crash if firmware is not loaded
+    
+    Merge commit '3b0440922c346500467fdceca53a4e03bf276de6'
+    
+    * commit '3b0440922c346500467fdceca53a4e03bf276de6':
+      Fix driver crash if firmware is not loaded
+
+commit 3b0440922c346500467fdceca53a4e03bf276de6
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon May 18 14:15:16 2009 -0700
+
+    Fix driver crash if firmware is not loaded
+    
+    Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+commit 0b8a0f0a7ce38b52b1ddc40e24d5f3e1f1003ad5
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Mon May 18 11:28:02 2009 -0700
+
+    Switch to new wpa_supplicant layer
+
+commit 8bcb495e4b36149a053402093e10ec7205db94a1
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Thu May 14 13:53:06 2009 -0700
+
+    Add wpa_supplicant driver layer for wilink 6.1
+
+commit 9aa8ee433182c5a59338d58ba4c045d2dcacb3f2
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue May 12 16:51:15 2009 -0700
+
+    [ARM] zoom2: wifi: Add kernel 2.6.29 compatibility
+
+commit 1a7b74b3e567574b0f8b6269cb48d53d3efe3d64
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue May 12 15:30:37 2009 -0700
+
+    Fix logging and return codes
+
+commit 981801b95b81e6d1c7a2085967406e86af0f08fc
+Author: Dmitry Shmidt <dimitrysh@google.com>
+Date:   Tue May 12 12:22:02 2009 -0700
+
+    Initial code package of WiLink_Driver_6.1.0.0.84
+
+commit 02d7515eca810acbc93be9324751d712af6d38c7
+Merge: 8b5808d 0fc24af
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Wed Apr 22 18:33:20 2009 -0700
+
+    Merge donut into master
+
+commit 0fc24af3570cb1ca2b1d154ca69b19c17efd1651
+Merge: 3fc3497 d3fffb9
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Wed Apr 22 17:57:01 2009 -0700
+
+    merge cupcake into donut
+
+commit 8b5808da6d74e94d1d54e67c4ce7227eb5eab03c
+Merge: b4f74ac 3fc3497
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Wed Apr 22 17:12:44 2009 -0700
+
+    Merge donut into master
+
+commit b4f74ac558d8e09566ffffc40e4d6b11ccc2b34f
+Merge: 59b6432 28a8b73
+Author: Dmitry Shmidt <>
+Date:   Tue Apr 21 15:20:47 2009 -0700
+
+    Merge branch 'readonly-p4-master'
+
+commit 28a8b7370a08958b1d14c922dae2d4ed22c04205
+Author: Dmitry Shmidt <>
+Date:   Tue Apr 21 15:19:23 2009 -0700
+
+    AI 147256: am: CL 147254 Add kernel 2.6.29 support
+      Original author: dimitrysh
+    
+    Automated import of CL 147256
+
+commit 3fc3497ba9725629167c84c2d5e5633b1aad367a
+Author: Dmitry Shmidt <>
+Date:   Tue Apr 21 15:16:19 2009 -0700
+
+    AI 147254: Add kernel 2.6.29 support
+      BUG=1798203
+    
+    Automated import of CL 147254
+
+commit 59b64329818f9e7ef73464e9ba692ed9b09a4e16
+Merge: b49dc05 8de7bd3
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 20 09:54:17 2009 -0700
+
+    Merge branch 'readonly-p4-master'
+
+commit 8de7bd33fbf4ae6a92443d98e5b13dce741783ca
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 20 09:52:56 2009 -0700
+
+    AI 146935: am: CL 146934 Make TI Wifi driver choice framework-independent - part 1
+      Original author: dimitrysh
+    
+    Automated import of CL 146935
+
+commit 16fe14c8fe9dadadfa29f47d8d2ebf3777d08148
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 20 09:48:54 2009 -0700
+
+    AI 146934: Make TI Wifi driver choice framework-independent - part 1
+      BUG=1786365
+    
+    Automated import of CL 146934
+
+commit b49dc0548771613e95121af197a3cbe8daa1a664
+Merge: 3ae67f4 6c6ad48
+Author: Lorenzo Colitti <>
+Date:   Tue Apr 14 12:10:30 2009 -0700
+
+    Merge branch 'readonly-p4-master'
+
+commit 6c6ad487589071beed201eca367f08c4c5c0f325
+Author: Lorenzo Colitti <>
+Date:   Tue Apr 14 12:08:55 2009 -0700
+
+    AI 146166: am: CL 145920 Don't filter out IPv6 multicast packets.
+      Original author: lorenzo
+    
+    Automated import of CL 146166
+
+commit 7689fd86d2843d33b67349d0ef645eb7de7bdf98
+Author: Lorenzo Colitti <>
+Date:   Mon Apr 13 13:52:56 2009 -0700
+
+    AI 145920: Don't filter out IPv6 multicast packets.
+    
+    Automated import of CL 145920
+
+commit 3ae67f4b07117bbc9ee9b6e06fab4adece2cafd0
+Merge: 68cd20f f24d367
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 6 17:37:31 2009 -0700
+
+    Merge branch 'readonly-p4-master'
+
+commit f24d367789d392a3e38229903b3b58b63f65cd44
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 6 17:36:22 2009 -0700
+
+    AI 144727: am: CL 144726 Add debug command: scan-mode
+      Original author: dimitrysh
+    
+    Automated import of CL 144727
+
+commit edb3b17ca0f0a3b00a12a4a5bd036de9f9550795
+Author: Dmitry Shmidt <>
+Date:   Mon Apr 6 17:34:49 2009 -0700
+
+    AI 144726: Add debug command: scan-mode
+      BUG=1334581
+    
+    Automated import of CL 144726
+
+commit 68cd20fe80c13aa408301d0e5ac69c416055fe56
+Merge: e406829 058dc1f
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Mar 31 21:34:27 2009 -0700
+
+    Merge commit 'goog/readonly-p4-master'
+
+commit 058dc1f05238b5a9a619805fa6e293c4d3f26647
+Author: Dmitry Shmidt <>
+Date:   Tue Mar 31 16:28:13 2009 -0700
+
+    AI 143856: am: CL 143855 Fix race conditions between interrupt handler and driver removal
+      Original author: dimitrysh
+      Merged from: //branches/donutburger/...
+    
+    Automated import of CL 143856
+
+commit e9dc1509d8454898db813e1e1f73f842be659831
+Author: Dmitry Shmidt <>
+Date:   Tue Mar 31 16:27:53 2009 -0700
+
+    AI 143855: Fix race conditions between interrupt handler and driver removal
+      BUG=1739398
+    
+    Automated import of CL 143855
+
+commit e406829be5db3ed2735854d97ba7847b37bfd646
+Merge: 6f99bb6 b4818be
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Sun Mar 29 08:55:16 2009 -0700
+
+    Merge branch 'open_source_no_contributions' into google_internal
+
+commit b4818befdfbbce0513e7070c08cfea250fd76a3c
+Merge: d457dbf d3fffb9
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Mar 27 15:31:14 2009 -0700
+
+    Merge commit 'korg/cupcake'
+
+commit 6f99bb613f129fdab074bb19408df725957d5bc4
+Author: San Mehat <>
+Date:   Tue Mar 24 21:32:21 2009 -0700
+
+    Automated import from //branches/master/...@142093,142093
+
+commit 30c7578b5310e2dea8ec949ed294fff998ad3401
+Author: San Mehat <>
+Date:   Tue Mar 24 21:26:31 2009 -0700
+
+    Automated import from //branches/donutburger/...@142092,142092
+
+commit 654ced352826ec5a0b7848bafa087743c70ab2af
+Author: Dmitry Shmidt <>
+Date:   Tue Mar 24 17:52:19 2009 -0700
+
+    Automated import from //branches/master/...@140528,140528
+
+commit 28334f5ebb2cb84d2901109f1559a6d12f0cb4ab
+Author: Dmitry Shmidt <>
+Date:   Tue Mar 24 17:50:14 2009 -0700
+
+    Automated import from //branches/donutburger/...@140523,140523
+
+commit d3fffb9251a7d4b8ce1f74d48050a528353a4817
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Mar 19 23:09:00 2009 -0700
+
+    auto import from //branches/cupcake_rel/...@141571
+
+commit 6f4d4701e9ed8767b70203a0f6348dc5cf5f9f0c
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Wed Mar 18 17:39:49 2009 -0700
+
+    auto import from //branches/cupcake_rel/...@140373
+
+commit d457dbf9647c45a2ab16d636705d4bedd7cfa62d
+Merge: 6ff408d 7bfc4e5
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Tue Mar 17 16:08:54 2009 -0700
+
+    Merge commit 'remotes/korg/cupcake' into merge
+
+commit 7bfc4e581771193145d1be28cf843aa75d9e9aca
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Wed Mar 11 12:12:01 2009 -0700
+
+    auto import from //branches/cupcake/...@137873
+
+commit 5e707b56f3f3026cac7b8ac2b94ed0e3574abdb1
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Mon Mar 9 11:52:15 2009 -0700
+
+    auto import from //branches/cupcake/...@137197
+
+commit bb5303225a773c94b71c5f09cd7849d039e54be7
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Mar 5 14:34:39 2009 -0800
+
+    auto import from //depot/cupcake/@136594
+
+commit 64064216a8433360745f69edddce19a606659163
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Mar 3 19:32:59 2009 -0800
+
+    auto import from //depot/cupcake/@135843
+
+commit ba13e298dff123b5a281d6e2704fcdc684b324fa
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Mar 3 18:29:04 2009 -0800
+
+    auto import from //depot/cupcake/@135843
+
+commit b625cb49a462741ce4550e9bd9d593d051af37c8
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Mar 3 14:04:41 2009 -0800
+
+    auto import from //depot/cupcake/@132589
+
+commit d1814f045ecef6d7846e653f94990bd732310a11
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Mon Mar 2 22:54:47 2009 -0800
+
+    auto import from //depot/cupcake/@137055
+
+commit ef20f0715eda8f8b0b8101ba095a1f758c5a2647
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Feb 19 10:57:36 2009 -0800
+
+    auto import from //branches/cupcake/...@132276
+
+commit 66722c5556cb01ef514f97e6ccbb7ce1581afeaf
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Feb 10 15:44:07 2009 -0800
+
+    auto import from //branches/cupcake/...@130745
+
+commit 6ff408df1efe9981f20ab8ce6ec36d6ff6f034dc
+Merge: f859ec1 b3b4322
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Jan 22 00:16:17 2009 -0800
+
+    Merge branch 'cupcake'
+
+commit b3b4322335be9cfa53b9017fa65af7a7b422c62b
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Jan 22 00:13:45 2009 -0800
+
+    auto import from //branches/cupcake/...@127436
+
+commit f859ec1678344d8055edc2f3dba3f88c4b51bdb7
+Merge: da2940c 40425b0
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Jan 20 14:05:44 2009 -0800
+
+    Merge branch 'cupcake'
+
+commit 40425b002260b0b7e21abd7f10e07f42cc2c88e4
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Jan 20 14:04:01 2009 -0800
+
+    auto import from //branches/cupcake/...@127101
+
+commit da2940ca655452a04c5590227afa830328e28454
+Merge: 1a24dc3 24f0be0
+Author: android-build SharedAccount <android-build@undroid16.corp.google.com>
+Date:   Thu Jan 15 16:16:12 2009 -0800
+
+    Merge branch 'cupcake'
+
+commit 24f0be0e9a23b41683dea619ead9739615c83fac
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Thu Jan 15 16:12:14 2009 -0800
+
+    auto import from //branches/cupcake/...@126645
+
+commit 1a24dc3bed8ee3d4fc869cdaa6ddacf5b3c73df8
+Merge: 40c1cfd f8c4aa2
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Jan 9 18:04:23 2009 -0800
+
+    Merge branch 'cupcake'
+
+commit f8c4aa207556bfbc61564365933dab7e766e4c52
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Fri Jan 9 17:51:25 2009 -0800
+
+    auto import from //branches/cupcake/...@125939
+
+commit 40c1cfdc6961ae6dffef24e494bd7e7012a9bac7
+Author: San Mehat <san@google.com>
+Date:   Sat Dec 20 11:19:26 2008 -0800
+
+    Fix wifi for public cupcake by bringing forward two patches that got missed:
+    
+    - Add kernel pre-alloc support
+    - Minor cleanups
+    
+    Signed-off-by: San Mehat <san@google.com>
+
+commit ff18293c4dd393d172a7eeedadfe2fe2f5cdbdc9
+Merge: 3d2d628 b646ee4
+Author: Jean-Baptiste Queru <jbq@google.com>
+Date:   Fri Dec 19 08:07:31 2008 -0800
+
+    Merge commit 'remotes/korg/cupcake'
+    
+    Conflicts:
+    	wpa_supplicant_lib/Android.mk
+
+commit b646ee4ff2d88f4481b1cced9b480f3b9abc0d71
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Wed Dec 17 18:08:10 2008 -0800
+
+    Code drop from //branches/cupcake/...@124589
+
+commit 3d2d6280a1fd54f31a53f72ccbf54a85e4601734
+Author: Iliyan Malchev <malchev@google.com>
+Date:   Wed Nov 5 17:41:24 2008 -0800
+
+    fix makefile
+    
+    Signed-off-by: Iliyan Malchev <malchev@google.com>
+
+commit 80f4564458bdb56aa3d741956315f18a4000d8f8
+Author: Brian Swetland <swetland@google.com>
+Date:   Mon Oct 27 16:25:45 2008 -0700
+
+    add a gitignore for the module build
+
+commit 47af07a9f3f62eaafb52633415915c26511efe45
+Author: Brian Swetland <swetland@google.com>
+Date:   Mon Oct 27 16:22:35 2008 -0700
+
+    fix out-of-tree module build
+    
+    Now you can build correctly with:
+    make KERNEL=/path/to/kernel
+
+commit 607e8a019b921eee008cd1e9ffc132318fabce7f
+Author: The Android Open Source Project <initial-contribution@android.com>
+Date:   Tue Oct 21 07:00:00 2008 -0700
+
+    Initial Contribution
