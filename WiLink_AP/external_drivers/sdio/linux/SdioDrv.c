@@ -582,121 +582,179 @@ static void sdiodrv_free_resources(void)
 
 int sdioDrv_InitHw(void)
 {
+	int rc;
+	u32 status;
+#ifdef SDIO_1_BIT /* see also in SdioAdapter.c */
+	unsigned long clock_rate = 6000000;
+#else
+	unsigned long clock_rate = 24000000;
+#endif
+
+	printk(KERN_INFO "TIWLAN SDIO sdioDrv_InitHw()!!");
+
+        rc = sdioDrv_clk_enable();
+	if (rc) {
+		PERR("sdioDrv_InitHw : sdioDrv_clk_enable FAILED !!!\n");
+		goto err;
+	}
+
+	OMAP3430_mmc_reset();
+
+	//obc - init sequence p. 3600,3617
+	/* 1.8V */
+	OMAP_HSMMC_WRITE(CAPA, OMAP_HSMMC_READ(CAPA) | VS18);
+	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | SDVS18);//SDVS fits p. 3650
+	/* clock gating */
+	OMAP_HSMMC_WRITE(SYSCONFIG, OMAP_HSMMC_READ(SYSCONFIG) | AUTOIDLE);
+
+	/* bus power */
+	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | SDBP);//SDBP fits p. 3650
+	/* interrupts */
+	OMAP_HSMMC_WRITE(ISE, 0);
+	OMAP_HSMMC_WRITE(IE, IE_EN_MASK);
+
+	//p. 3601 suggests moving to the end
+	OMAP3430_mmc_set_clock(clock_rate, &g_drv);
+	printk("SDIO clock Configuration is now set to %dMhz\n",(int)clock_rate/1000000);
+
+	/* Bus width */
+#ifdef SDIO_1_BIT /* see also in SdioAdapter.c */
+	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 1);
+	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) & (ONE_BIT));
+#else
+	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 4);
+	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | (1 << 1));//DTW 4 bits - p. 3650
+#endif
+
+	/* send the init sequence. 80 clocks of synchronization in the SDIO */
+	//doesn't match p. 3601,3617 - obc
+	OMAP_HSMMC_WRITE( CON, OMAP_HSMMC_READ(CON) | INIT_STREAM);
+	OMAP_HSMMC_SEND_COMMAND( 0, 0);
+	status = sdiodrv_poll_status(OMAP_HSMMC_STAT, CC, MMC_TIMEOUT_MS);
+	if (!(status & CC)) {
+		PERR("sdioDrv_InitHw() SDIO Command error status = 0x%x\n", status);
+		rc = status;
+		goto err;
+	}
+	OMAP_HSMMC_WRITE(CON, OMAP_HSMMC_READ(CON) & ~INIT_STREAM);
+
 	return 0;
+err:
+	/* Disabling clocks for now */
+	sdioDrv_clk_disable();
+
+	return rc;
+
 } /* sdiodrv_init */
 
 void sdiodrv_shutdown(void)
 {
 	PDEBUG("entering %s()\n" , __FUNCTION__ );
-
 	sdiodrv_free_resources();
-
 	PDEBUG("exiting %s\n", __FUNCTION__);
-} /* sdiodrv_shutdown() */
+}
 
 static int sdiodrv_send_data_xfer_commad(u32 cmd, u32 cmdarg, int length, u32 buffer_enable_status, unsigned int bBlkMode)
 {
-    int status;
+	int status;
 
 	PDEBUG("%s() writing CMD 0x%x ARG 0x%x\n",__FUNCTION__, cmd, cmdarg);
 
-    /* block mode */
+	/* block mode */
 	if(bBlkMode) {
-        /* 
-         * Bits 31:16 of BLK reg: NBLK Blocks count for current transfer.
-         *                        in case of Block MOde the lenght is treated here as number of blocks 
-         *                        (and not as a length).
-         * Bits 11:0 of BLK reg: BLEN Transfer Block Size. in case of block mode set that field to block size. 
-         */
-        OMAP_HSMMC_WRITE(BLK, (length << 16) | (g_drv.uBlkSize << 0));
+		/*
+		 * Bits 31:16 of BLK reg: NBLK Blocks count for current transfer.
+		 *                        in case of Block MOde the lenght is treated here as number of blocks
+		 *                        (and not as a length).
+		 * Bits 11:0 of BLK reg: BLEN Transfer Block Size. in case of block mode set that field to block size.
+		 */
+		OMAP_HSMMC_WRITE(BLK, (length << 16) | (g_drv.uBlkSize << 0));
 
-        /*
-         * In CMD reg:
-         * BCE: Block Count Enable
-         * MSBS: Multi/Single block select
-         */
-        cmd |= MSBS | BCE ;
+		/*
+		 * In CMD reg:
+		 * BCE: Block Count Enable
+		 * MSBS: Multi/Single block select
+		 */
+		cmd |= MSBS | BCE ;
 	} else {
-        OMAP_HSMMC_WRITE(BLK, length);
-    }
+		OMAP_HSMMC_WRITE(BLK, length);
+	}
 
-    status = sdiodrv_send_command(cmd, cmdarg);
+	status = sdiodrv_send_command(cmd, cmdarg);
 	if(!(status & CC)) {
-	    PERR("sdiodrv_send_data_xfer_commad() SDIO Command error! STAT = 0x%x\n", status);
-	    return 0;
+		PERR("sdiodrv_send_data_xfer_commad() SDIO Command error! STAT = 0x%x\n", status);
+		return 0;
 	}
 	PDEBUG("%s() length = %d(%dw) BLK = 0x%x\n",
 		   __FUNCTION__, length,((length + 3) >> 2), OMAP_HSMMC_READ(BLK));
 
-    return sdiodrv_poll_status(OMAP_HSMMC_PSTATE, buffer_enable_status, MMC_TIMEOUT_MS);
+	return sdiodrv_poll_status(OMAP_HSMMC_PSTATE, buffer_enable_status, MMC_TIMEOUT_MS);
 
 } /* sdiodrv_send_data_xfer_commad() */
 
 int sdiodrv_data_xfer_sync(u32 cmd, u32 cmdarg, void *data, int length, u32 buffer_enable_status)
 {
-    u32 buf_start, buf_end, data32;
+	u32 buf_start, buf_end, data32;
 	int status;
 
-    status = sdiodrv_send_data_xfer_commad(cmd, cmdarg, length, buffer_enable_status, 0);
+	status = sdiodrv_send_data_xfer_commad(cmd, cmdarg, length, buffer_enable_status, 0);
 	if(!(status & buffer_enable_status)) 
-    {
-	    PERR("sdiodrv_data_xfer_sync() buffer disabled! length = %d BLK = 0x%x PSTATE = 0x%x\n", 
+	{
+		PERR("sdiodrv_data_xfer_sync() buffer disabled! length = %d BLK = 0x%x PSTATE = 0x%x\n",
 			   length, OMAP_HSMMC_READ(BLK), status);
-	    return -1;
+		return -1;
 	}
 	buf_end = (u32)data+(u32)length;
 
 	//obc need to check BRE/BWE every time, see p. 3605
 	/*
-	 * Read loop 
+	 * Read loop
 	 */
 	if (buffer_enable_status == BRE)
 	{
-	  if (((u32)data & 3) == 0) /* 4 bytes aligned */
-	  {
-		for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+		if (((u32)data & 3) == 0) /* 4 bytes aligned */
 		{
-		  *((unsigned long*)(data)) = OMAP_HSMMC_READ(DATA);
+			for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+			{
+				*((unsigned long*)(data)) = OMAP_HSMMC_READ(DATA);
+			}
 		}
-	  }
-	  else                      /* 2 bytes aligned */
-	  {
-		for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+		else                      /* 2 bytes aligned */
 		{
-		  data32 = OMAP_HSMMC_READ(DATA);
-		  *((unsigned short *)data)     = (unsigned short)data32;
-		  *((unsigned short *)data + 1) = (unsigned short)(data32 >> 16);
+			for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+			{
+				data32 = OMAP_HSMMC_READ(DATA);
+				*((unsigned short *)data)     = (unsigned short)data32;
+				*((unsigned short *)data + 1) = (unsigned short)(data32 >> 16);
+			}
 		}
-	  }
 	}
 	/*
-	 * Write loop 
+	 * Write loop
 	 */
 	else
 	{
-	  if (((u32)data & 3) == 0) /* 4 bytes aligned */
-	  {
-		for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+		if (((u32)data & 3) == 0) /* 4 bytes aligned */
 		{
-		  OMAP_HSMMC_WRITE(DATA,*((unsigned long*)(data)));
+			for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+			{
+				OMAP_HSMMC_WRITE(DATA,*((unsigned long*)(data)));
+			}
 		}
-	  }
-	  else                      /* 2 bytes aligned */
-	  {
-		for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+		else                      /* 2 bytes aligned */
 		{
-		  OMAP_HSMMC_WRITE(DATA,*((unsigned short*)data) | *((unsigned short*)data+1) << 16 );
+			for (buf_start = (u32)data; (u32)data < buf_end; data += sizeof(unsigned long))
+			{
+				OMAP_HSMMC_WRITE(DATA,*((unsigned short*)data) | *((unsigned short*)data+1) << 16 );
+			}
 		}
-
-	  }
 	}
 	status  = sdiodrv_poll_status(OMAP_HSMMC_STAT, TC, MMC_TIMEOUT_MS);
-	if(!(status & TC)) 
+	if(!(status & TC))
 	{
-	    PERR("sdiodrv_data_xfer_sync() transfer error! STAT = 0x%x\n", status);
-	    return -1;
+		PERR("sdiodrv_data_xfer_sync() transfer error! STAT = 0x%x\n", status);
+		return -1;
 	}
-
 	return 0;
 
 } /* sdiodrv_data_xfer_sync() */
@@ -708,7 +766,7 @@ int sdioDrv_ConnectBus (void *       fCbFunc,
 {
 	g_drv.BusTxnCB      = fCbFunc;
 	g_drv.BusTxnHandle  = hCbArg;
-	g_drv.uBlkSizeShift = uBlkSizeShift;  
+	g_drv.uBlkSizeShift = uBlkSizeShift;
 	g_drv.uBlkSize      = 1 << uBlkSizeShift;
 
 	INIT_WORK(&g_drv.sdiodrv_work, sdiodrv_task);
@@ -727,10 +785,10 @@ int sdioDrv_DisconnectBus (void)
 }
 
 //p.3609 cmd flow
-int sdioDrv_ExecuteCmd (unsigned int uCmd, 
-                        unsigned int uArg, 
-                        unsigned int uRespType, 
-                        void *       pResponse, 
+int sdioDrv_ExecuteCmd (unsigned int uCmd,
+                        unsigned int uArg,
+                        unsigned int uRespType,
+                        void *       pResponse,
                         unsigned int uLen)
 {
 	unsigned int uCmdReg   = 0;
@@ -743,14 +801,14 @@ int sdioDrv_ExecuteCmd (unsigned int uCmd,
 
 	uStatus = sdiodrv_send_command(uCmdReg, uArg);
 
-	if (!(uStatus & CC)) 
+	if (!(uStatus & CC))
 	{
-	    PERR("sdioDrv_ExecuteCmd() SDIO Command error status = 0x%x\n", uStatus);
-	    return -1;
+		PERR("sdioDrv_ExecuteCmd() SDIO Command error status = 0x%x\n", uStatus);
+		return -1;
 	}
 	if ((uLen > 0) && (uLen <= 4))/*obc - Len > 4 ? shouldn't read anything ? */
 	{
-	    uResponse = OMAP_HSMMC_READ(RSP10);
+		uResponse = OMAP_HSMMC_READ(RSP10);
 		memcpy (pResponse, (char *)&uResponse, uLen);
 		PDEBUG("sdioDrv_ExecuteCmd() response = 0x%x\n", uResponse);
 	}
@@ -759,9 +817,9 @@ int sdioDrv_ExecuteCmd (unsigned int uCmd,
 
 /*--------------------------------------------------------------------------------------*/
 
-int sdioDrv_ReadSync (unsigned int uFunc, 
-                      unsigned int uHwAddr, 
-                      void *       pData, 
+int sdioDrv_ReadSync (unsigned int uFunc,
+                      unsigned int uHwAddr,
+                      void *       pData,
                       unsigned int uLen,
                       unsigned int bIncAddr,
                       unsigned int bMore)
@@ -782,10 +840,10 @@ int sdioDrv_ReadSync (unsigned int uFunc,
 }
 
 /*--------------------------------------------------------------------------------------*/
-int sdioDrv_ReadAsync (unsigned int uFunc, 
-                       unsigned int uHwAddr, 
-                       void *       pData, 
-                       unsigned int uLen, 
+int sdioDrv_ReadAsync (unsigned int uFunc,
+                       unsigned int uHwAddr,
+                       void *       pData,
+                       unsigned int uLen,
                        unsigned int bBlkMode,
                        unsigned int bIncAddr,
                        unsigned int bMore)
@@ -818,9 +876,9 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 
 	iStatus = sdiodrv_send_data_xfer_commad(OMAP_HSMMC_CMD53_READ_DMA, uCmdArg, uNumBlks, BRE, bBlkMode);
 
-	if (!(iStatus & BRE)) 
+	if (!(iStatus & BRE))
 	{
-		PERR("sdioDrv_ReadAsync() buffer disabled! length = %d BLK = 0x%x PSTATE = 0x%x, BlkMode = %d\n", 
+		PERR("sdioDrv_ReadAsync() buffer disabled! length = %d BLK = 0x%x PSTATE = 0x%x, BlkMode = %d\n",
 			uLen, OMAP_HSMMC_READ(BLK), iStatus, bBlkMode);
 		return -1;
 	}
@@ -831,7 +889,7 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 	if (!dma_bus_address) {
 		PERR("sdioDrv_ReadAsync: dma_map_single failed\n");
 		return -1;
-	}		
+	}
 
 	if (g_drv.dma_read_addr != 0) {
 		printk(KERN_ERR "sdioDrv_ReadAsync: previous DMA op is not finished!\n");
@@ -858,9 +916,9 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 
 /*--------------------------------------------------------------------------------------*/
 
-int sdioDrv_WriteSync (unsigned int uFunc, 
-                       unsigned int uHwAddr, 
-                       void *       pData, 
+int sdioDrv_WriteSync (unsigned int uFunc,
+                       unsigned int uHwAddr,
+                       void *       pData,
                        unsigned int uLen,
                        unsigned int bIncAddr,
                        unsigned int bMore)
@@ -882,10 +940,10 @@ int sdioDrv_WriteSync (unsigned int uFunc,
 }
 
 /*--------------------------------------------------------------------------------------*/
-int sdioDrv_WriteAsync (unsigned int uFunc, 
-                        unsigned int uHwAddr, 
-                        void *       pData, 
-                        unsigned int uLen, 
+int sdioDrv_WriteAsync (unsigned int uFunc,
+                        unsigned int uHwAddr,
+                        void *       pData,
+                        unsigned int uLen,
                         unsigned int bBlkMode,
                         unsigned int bIncAddr,
                         unsigned int bMore)
@@ -900,27 +958,26 @@ int sdioDrv_WriteAsync (unsigned int uFunc,
 //	printk(KERN_INFO "in sdioDrv_WriteAsync\n");
 
 	if (bBlkMode)
-    {
-        /* For block mode use number of blocks instead of length in bytes */
-        uNumBlks = uLen >> g_drv.uBlkSizeShift;
-        uDmaBlockCount = uNumBlks;
-        /* due to the DMA config to 32Bit per element (OMAP_DMA_DATA_TYPE_S32) the division is by 4 */ 
-        uNumOfElem = g_drv.uBlkSize >> 2;
-    }
-    else
-    {
-        uNumBlks = uLen;
-        uDmaBlockCount = 1;
-        uNumOfElem = (uLen + 3) >> 2;
-    }
+	{
+		/* For block mode use number of blocks instead of length in bytes */
+		uNumBlks = uLen >> g_drv.uBlkSizeShift;
+		uDmaBlockCount = uNumBlks;
 
-    uCmdArg = SDIO_CMD53_WRITE(1, uFunc, bBlkMode, bIncAddr, uHwAddr, uNumBlks);
+		/* due to the DMA config to 32Bit per element (OMAP_DMA_DATA_TYPE_S32) the division is by 4 */
+		uNumOfElem = g_drv.uBlkSize >> 2;
+	} else {
+		uNumBlks = uLen;
+		uDmaBlockCount = 1;
+		uNumOfElem = (uLen + 3) >> 2;
+	}
 
-    iStatus = sdiodrv_send_data_xfer_commad(OMAP_HSMMC_CMD53_WRITE_DMA, uCmdArg, uNumBlks, BWE, bBlkMode);
-    if (!(iStatus & BWE)) 
-    {
-        PERR("sdioDrv_WriteAsync() buffer disabled! length = %d, BLK = 0x%x, Status = 0x%x\n", 
-             uLen, OMAP_HSMMC_READ(BLK), iStatus);
+	uCmdArg = SDIO_CMD53_WRITE(1, uFunc, bBlkMode, bIncAddr, uHwAddr, uNumBlks);
+
+	iStatus = sdiodrv_send_data_xfer_commad(OMAP_HSMMC_CMD53_WRITE_DMA, uCmdArg, uNumBlks, BWE, bBlkMode);
+	if (!(iStatus & BWE))
+	{
+		PERR("sdioDrv_WriteAsync() buffer disabled! length = %d, BLK = 0x%x, Status = 0x%x\n",
+		     uLen, OMAP_HSMMC_READ(BLK), iStatus);
 		return -1;
 	}
 
@@ -956,23 +1013,23 @@ int sdioDrv_WriteAsync (unsigned int uFunc,
 
 /*--------------------------------------------------------------------------------------*/
 
-int sdioDrv_ReadSyncBytes (unsigned int  uFunc, 
-                           unsigned int  uHwAddr, 
-                           unsigned char *pData, 
-                           unsigned int  uLen, 
+int sdioDrv_ReadSyncBytes (unsigned int  uFunc,
+                           unsigned int  uHwAddr,
+                           unsigned char *pData,
+                           unsigned int  uLen,
                            unsigned int  bMore)
 {
 	unsigned int uCmdArg;
 	unsigned int i;
 	int          iStatus;
 
-	for (i = 0; i < uLen; i++) 
+	for (i = 0; i < uLen; i++)
 	{
 		uCmdArg = SDIO_CMD52_READ(0, uFunc, 0, uHwAddr);
 
 		iStatus = sdiodrv_send_command(OMAP_HSMMC_CMD52_READ, uCmdArg);
 
-		if (!(iStatus & CC)) 
+		if (!(iStatus & CC))
 		{
 			PERR("sdioDrv_ReadSyncBytes() SDIO Command error status = 0x%x\n", iStatus);
 			return -1;
@@ -991,23 +1048,23 @@ int sdioDrv_ReadSyncBytes (unsigned int  uFunc,
 
 /*--------------------------------------------------------------------------------------*/
 
-int sdioDrv_WriteSyncBytes (unsigned int  uFunc, 
-                            unsigned int  uHwAddr, 
-                            unsigned char *pData, 
-                            unsigned int  uLen, 
+int sdioDrv_WriteSyncBytes (unsigned int  uFunc,
+                            unsigned int  uHwAddr,
+                            unsigned char *pData,
+                            unsigned int  uLen,
                             unsigned int  bMore)
 {
 	unsigned int uCmdArg;
 	unsigned int i;
 	int          iStatus;
 
-	for (i = 0; i < uLen; i++) 
+	for (i = 0; i < uLen; i++)
 	{
 		uCmdArg = SDIO_CMD52_WRITE(1, uFunc, 0, uHwAddr, *pData);
 
 		iStatus = sdiodrv_send_command(OMAP_HSMMC_CMD52_WRITE, uCmdArg);
 
-		if (!(iStatus & CC)) 
+		if (!(iStatus & CC))
 		{
 			PERR("sdioDrv_WriteSyncBytes() SDIO Command error status = 0x%x\n", iStatus);
 			return -1;
@@ -1023,12 +1080,6 @@ int sdioDrv_WriteSyncBytes (unsigned int  uFunc,
 static int sdioDrv_probe(struct platform_device *pdev)
 {
 	int rc;
-	u32 status;
-#ifdef SDIO_1_BIT /* see also in SdioAdapter.c */
-	unsigned long clock_rate = 6000000;
-#else
-	unsigned long clock_rate = 24000000;
-#endif
 
 	printk(KERN_INFO "TIWLAN SDIO probe: initializing mmc%d device\n", pdev->id + 1);
 
@@ -1040,7 +1091,7 @@ static int sdioDrv_probe(struct platform_device *pdev)
 
         rc= request_irq(OMAP_MMC_IRQ, sdiodrv_irq, 0, SDIO_DRIVER_NAME, &g_drv);
         if (rc != 0) {
-                PERR("sdioDrv_InitHw() - request_irq FAILED!!\n");
+                PERR("sdioDrv_probe() - request_irq FAILED!!\n");
                 return rc;
         }
         sdiodrv_irq_requested = 1;
@@ -1080,55 +1131,21 @@ static int sdioDrv_probe(struct platform_device *pdev)
 		goto err;
 	}
 	sdiodrv_iclk_got = 1;
-	
-        rc = sdioDrv_clk_enable();
-        if (rc) {
-                PERR("sdioDrv_probe : clk_enable FAILED !!!\n");
-                goto err;
+
+	pr_debug("Configuring SDIO DMA registers\n");
+	pr_debug("pdev->id is %d\n", pdev->id);
+	if ( pdev->id == 1 ) {
+		/* MMC2 */
+		TIWLAN_MMC_CONTROLLER_BASE_ADDR = OMAP_HSMMC2_BASE;
+		TIWLAN_MMC_DMA_TX = OMAP24XX_DMA_MMC2_TX;
+		TIWLAN_MMC_DMA_RX = OMAP24XX_DMA_MMC2_RX;
         }
-
-	OMAP3430_mmc_reset();
-
-	//obc - init sequence p. 3600,3617
-	/* 1.8V */
-	OMAP_HSMMC_WRITE(CAPA,		OMAP_HSMMC_READ(CAPA) | VS18);
-	OMAP_HSMMC_WRITE(HCTL,		OMAP_HSMMC_READ(HCTL) | SDVS18);//SDVS fits p. 3650
-	/* clock gating */
-	OMAP_HSMMC_WRITE(SYSCONFIG, OMAP_HSMMC_READ(SYSCONFIG) | AUTOIDLE);
-
-	/* bus power */
-	OMAP_HSMMC_WRITE(HCTL,		OMAP_HSMMC_READ(HCTL) | SDBP);//SDBP fits p. 3650
-	/* interrupts */
-	OMAP_HSMMC_WRITE(ISE,		0);
-	OMAP_HSMMC_WRITE(IE,		IE_EN_MASK);
-
-	//p. 3601 suggests moving to the end
-	OMAP3430_mmc_set_clock(clock_rate, &g_drv);
-	printk("SDIO clock Configuration is now set to %dMhz\n",(int)clock_rate/1000000);
-
-	/* Bus width */
-#ifdef SDIO_1_BIT /* see also in SdioAdapter.c */
-	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 1);
-	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) & (ONE_BIT));
-#else
-	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 4);
-	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | (1 << 1));//DTW 4 bits - p. 3650
-#endif
-	
-	/* send the init sequence. 80 clocks of synchronization in the SDIO */
-	//doesn't match p. 3601,3617 - obc
-	OMAP_HSMMC_WRITE( CON, OMAP_HSMMC_READ(CON) | INIT_STREAM);
-	OMAP_HSMMC_SEND_COMMAND( 0, 0);
-	status = sdiodrv_poll_status(OMAP_HSMMC_STAT, CC, MMC_TIMEOUT_MS);
-	if (!(status & CC)) {
-		PERR("sdioDrv_InitHw() SDIO Command error status = 0x%x\n", status);
-		rc = -1;
-		goto err;
+	else if ( pdev->id == 2 ) {
+		/* MMC3 */
+		TIWLAN_MMC_CONTROLLER_BASE_ADDR = OMAP_HSMMC3_BASE;
+		TIWLAN_MMC_DMA_TX = OMAP34XX_DMA_MMC3_TX;
+		TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 	}
-	OMAP_HSMMC_WRITE(CON, OMAP_HSMMC_READ(CON) & ~INIT_STREAM);
-
-	/* Disabling clocks for now */
-	sdioDrv_clk_disable();
 
 	return 0;
 err:
@@ -1202,8 +1219,7 @@ static struct platform_driver sdioDrv_struct = {
 	},
 };
 
-void sdioDrv_register_pm(int (*wlanDrvIf_Start)(void),
-						int (*wlanDrvIf_Stop)(void))
+void sdioDrv_register_pm(int (*wlanDrvIf_Start)(void), int (*wlanDrvIf_Stop)(void))
 {
 	g_drv.wlanDrvIf_pm_resume = wlanDrvIf_Start;
 	g_drv.wlanDrvIf_pm_suspend = wlanDrvIf_Stop;
@@ -1211,50 +1227,51 @@ void sdioDrv_register_pm(int (*wlanDrvIf_Start)(void),
 
 int sdioDrv_clk_enable(void)
 {
-       unsigned long flags;
-       int ret = 0;
+	unsigned long flags;
+	int ret = 0;
 
-       spin_lock_irqsave(&g_drv.clk_lock, flags);
-       if (g_drv.ifclks_enabled)
-               goto done;
+	spin_lock_irqsave(&g_drv.clk_lock, flags);
+	if (g_drv.ifclks_enabled)
+		goto done;
 
-       ret = clk_enable(g_drv.iclk);
-       if (ret)
-              goto clk_en_err1;
+	ret = clk_enable(g_drv.iclk);
+	if (ret)
+		goto clk_en_err1;
 
-       ret = clk_enable(g_drv.fclk);
-       if (ret)
-               goto clk_en_err2;
-       g_drv.ifclks_enabled = 1;
+	ret = clk_enable(g_drv.fclk);
+	if (ret)
+		goto clk_en_err2;
 
-       sdioDrv_hsmmc_restore_ctx();
+	g_drv.ifclks_enabled = 1;
+
+	sdioDrv_hsmmc_restore_ctx();
 
 done:
-       spin_unlock_irqrestore(&g_drv.clk_lock, flags);
-       return ret;
+	spin_unlock_irqrestore(&g_drv.clk_lock, flags);
+	return ret;
 
 clk_en_err2:
-       clk_disable(g_drv.iclk);
+	clk_disable(g_drv.iclk);
 clk_en_err1 :
-       spin_unlock_irqrestore(&g_drv.clk_lock, flags);
-       return ret;
+	spin_unlock_irqrestore(&g_drv.clk_lock, flags);
+	return ret;
 }
 
 void sdioDrv_clk_disable(void)
 {
-       unsigned long flags;
+	unsigned long flags;
 
-       spin_lock_irqsave(&g_drv.clk_lock, flags);
-       if (!g_drv.ifclks_enabled)
-               goto done;
+	spin_lock_irqsave(&g_drv.clk_lock, flags);
+	if (!g_drv.ifclks_enabled)
+		goto done;
 
-       sdioDrv_hsmmc_save_ctx();
+	sdioDrv_hsmmc_save_ctx();
 
-       clk_disable(g_drv.fclk);
-       clk_disable(g_drv.iclk);
-       g_drv.ifclks_enabled = 0;
+	clk_disable(g_drv.fclk);
+	clk_disable(g_drv.iclk);
+	g_drv.ifclks_enabled = 0;
 done:
-       spin_unlock_irqrestore(&g_drv.clk_lock, flags);
+	spin_unlock_irqrestore(&g_drv.clk_lock, flags);
 }
 
 #ifdef TI_SDIO_STANDALONE
@@ -1305,8 +1322,7 @@ EXPORT_SYMBOL(sdioDrv_WriteAsync);
 EXPORT_SYMBOL(sdioDrv_ReadSyncBytes);
 EXPORT_SYMBOL(sdioDrv_WriteSyncBytes);
 EXPORT_SYMBOL(sdioDrv_register_pm);
-MODULE_DESCRIPTION("TI WLAN SDIO driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS(SDIO_DRIVER_NAME);
-MODULE_AUTHOR("Texas Instruments Inc");
+MODULE_AUTHOR("Texas Instruments Inc, CyanogenDefy");
 #endif
