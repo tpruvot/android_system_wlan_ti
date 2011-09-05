@@ -492,6 +492,10 @@ $(OS_COMMON):
 #
 # Recursively builds the linux OS stub object file
 #
+UNAME := $(shell uname -sm)
+ifneq (,$(findstring Darwin,$(UNAME)))
+.NOTPARALLEL: $(OS_LINUX)
+endif
 $(OS_LINUX):
 	$(MAKE) -C $(OS_LINUX_DIR) CROSS_COMPILE=$(CROSS_COMPILE) DEBUG=$(DEBUG) BUILD_SUPPL=$(BUILD_SUPPL) SUPPL=$(SUPPL) WSPI=$(WSPI) INTR=$(INTR) XCC=$(XCC) INFO=$(INFO) STATIC_LIB=$(STATIC_LIB) OS_AUXILIARY_LIBS+=../$(DRIVER_LIB) OS_AUXILIARY_LIBS+=../$(OS_COMMON) BMTRACE=$(BMTRACE)
 

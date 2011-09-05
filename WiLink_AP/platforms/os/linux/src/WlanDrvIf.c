@@ -918,6 +918,10 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
    dev->validate_addr   = NULL;
 #endif
 
+   NETDEV_SET_PRIVATE(dev,drv);
+   drv->netdev = dev;
+   strcpy (dev->name, TIWLAN_DRV_IF_NAME);
+   netif_carrier_off (dev);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
    dev->open = wlanDrvIf_Start;
    dev->stop = wlanDrvIf_Stop;
@@ -1027,11 +1031,11 @@ static int wlanDrvIf_Create (void)
     drv->tCommon.eIfRole = IF_ROLE_TYPE_AP;
 #endif
 //MOTO BEGIN
-       drv->tiwlan_wq = create_freezeable_workqueue(TIWLAN_DRV_NAME);
-       if (!drv->tiwlan_wq) {
+ drv->pWorkQueue = create_singlethread_workqueue (TIWLAN_DRV_NAME);
+       if (!drv->pWorkQueue) {
                kfree (drv);
                ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
-               return TI_NOK;
+               return -ENOMEM;
        }
        drv->wl_packet = 0;
        drv->wl_count = 0;
@@ -1122,19 +1126,27 @@ static int wlanDrvIf_Create (void)
 static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
 {
     /* Release the driver network interface */
-    if (drv->netdev)
+//printk("   wlanDrvIf_Destroy enter \n");
+ if (drv->netdev)
     {
-        netif_stop_queue  (drv->netdev);
+//printk("   wlanDrvIf_Destroy enter 2\n");  
+   netif_stop_queue  (drv->netdev);
+//printk("   wlanDrvIf_Destroy cp1 \n");
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
         wlanDrvIf_Stop    (drv->netdev);
+//printk("   wlanDrvIf_Destroy cp2 \n");
 #endif
         unregister_netdev (drv->netdev);
+//printk("   wlanDrvIf_Destroy cp3 \n");
         free_netdev(drv->netdev);
+//printk("   wlanDrvIf_Destroy cp4 \n");
     }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21))
+//printk("   wlanDrvIf_Destroy cp5 \n");
     cancel_work_sync (&drv->tWork); 
 #else
+//printk("   wlanDrvIf_Destroy cp6 \n");
     cancel_delayed_work (&drv->tWork);
 #endif
     //TODO: Yang Ming. check with STA code again.
@@ -1142,37 +1154,45 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
     flush_workqueue (drv->pWorkQueue);
     destroy_workqueue (drv->pWorkQueue);
     */
-
+//printk("   wlanDrvIf_Destroy cp7 \n");
     /* Destroy all driver modules */
     if (drv->tCommon.hDrvMain)
     {
+ //printk("   wlanDrvIf_Destroy cp8 \n");
         drvMain_Destroy (drv->tCommon.hDrvMain);
     }
-
+//printk("   wlanDrvIf_Destroy cp9 \n");
     /* close the ipc_kernel socket*/
     if (drv && drv->wl_sock) 
     {
+  //     printk("   wlanDrvIf_Destroy cp10 \n");
         sock_release (drv->wl_sock->sk_socket);
     }
-
+//printk("   wlanDrvIf_Destroy cp11 \n");
     /* Release the driver interrupt (or polling timer) */
 #ifdef PRIODIC_INTERRUPT
+//printk("   wlanDrvIf_Destroy cp12 \n");
     os_timerDestroy (drv, drv->hPollTimer);
 #else
     if (drv->irq)
     {
+//printk("   wlanDrvIf_Destroy cp13 \n");
 //        free_irq (drv->irq, drv);
         hPlatform_freeInterrupt (drv);	//MOTO
+//printk("   wlanDrvIf_Destroy cp14 \n");
     }
 #endif
 //MOTO BEGIN
-    if (drv->tiwlan_wq)
-        destroy_workqueue(drv->tiwlan_wq);
+    if (drv->pWorkQueue)
+//printk("   wlanDrvIf_Destroy cp15 \n");
+        destroy_workqueue(drv->pWorkQueue);
+//printk("   wlanDrvIf_Destroy cp16 \n");
 #ifdef CONFIG_HAS_WAKELOCK
 	wake_lock_destroy(&drv->wl_wifi);
 	wake_lock_destroy(&drv->wl_rxwake);
 #endif
 //MOTO END
+//printk("   wlanDrvIf_Destroy cp17 \n");
     /* 
      *  Free init files memory
      */
@@ -1184,6 +1204,7 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tFwImage.uSize, -drv->tCommon.tFwImage.uSize);
         #endif
     }
+//printk("   wlanDrvIf_Destroy cp18 \n");
     if (drv->tCommon.tNvsImage.pImage)
     {
         kfree (drv->tCommon.tNvsImage.pImage);
@@ -1192,6 +1213,7 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tNvsImage.uSize, -drv->tCommon.tNvsImage.uSize);
         #endif
     }
+//printk("   wlanDrvIf_Destroy cp19 \n");
     if (drv->tCommon.tIniFile.pImage)
     {
         kfree (drv->tCommon.tIniFile.pImage);
@@ -1200,7 +1222,7 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tIniFile.uSize, -drv->tCommon.tIniFile.uSize);
         #endif
     }
-
+//printk("   wlanDrvIf_Destroy cp20 \n");
     /* Free the driver object */
 #ifdef TI_DBG
     tb_destroy();
@@ -1245,11 +1267,16 @@ static int __init wlanDrvIf_ModuleInit (void)
 
 static void __exit wlanDrvIf_ModuleExit (void)
 {
+//printk("   wlanDrvIf_exit cp1 \n");
     wlanDrvIf_Destroy (pDrvStaticHandle);
+
 //MOTO BEGIN
 #ifndef TI_SDIO_STANDALONE
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
+//printk("   wlanDrvIf_exit cp2 \n");
     sdioDrv_exit();
+
+//printk("   wlanDrvIf_exit cp3 \n");
 #endif
 #endif
 //MOTO END
@@ -1333,15 +1360,15 @@ void wlanDrvIf_DisableTx (TI_HANDLE hOs)
 TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacket, TI_UINT16 Length, TIntraBssBridge *pBridgeDecision)
 {
    TWlanDrvIfObj  *drv     = (TWlanDrvIfObj *)OsContext;
-   unsigned char  *pdata   = (unsigned char *)((TI_UINT32)pPacket & ~(TI_UINT32)0x3);
+   unsigned char  *pdata   = (unsigned char *)((TI_UINT32)pRxDesc & ~(TI_UINT32)0x3);
    rx_head_t      *rx_head = (rx_head_t *)(pdata -  WSPI_PAD_BYTES - RX_HEAD_LEN_ALIGNED);
    struct sk_buff *skb     = rx_head->skb;
    struct sk_buff *new_skb;
    EIntraBssBridgeDecision eBridge = INTRA_BSS_BRIDGE_NO_BRIDGE;
 
 
-   skb->data = RX_ETH_PKT_DATA(pPacket);
-   skb_put(skb, RX_ETH_PKT_LEN(pPacket));
+   skb->data = pPacket;
+   skb_put(skb, Length);
 
 
    skb->dev       = drv->netdev;

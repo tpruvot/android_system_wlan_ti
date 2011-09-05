@@ -37,6 +37,7 @@
   FILENAME:       Device1273.h
 
   DESCRIPTION:    TNETW1273 Registes addresses/defintion
+                  TNETW1283 Registes new/changed
 
 
 
@@ -522,6 +523,8 @@
 #define CHIP_ID                        CHIP_ID_B/* Leave for TNETW compatability*/
 #define CHIP_ID_1273_PG10              (0x04030101)
 #define CHIP_ID_1273_PG20              (0x04030111)
+#define CHIP_ID_1283_PG10              (0x05030101)
+#define CHIP_ID_1283_PG20              (0x05030111)
 
 #define SYSTEM                         (REGISTERS_BASE + 0x0810)
 #define PCI_ARB_CFG                    (REGISTERS_BASE + 0x0814)
@@ -977,5 +980,53 @@
 
 /* Command mail box address */
 #define CMD_MBOX_ADDRESS               0x407B4
+
+#ifdef TNETW1283
+
+#define SYS_CLK_CFG_REG             (0x2200)
+#define MCS_PLL_CLK_SEL_FREF        (0x01) /* Bit[0]   -  0-TCXO,  1-FREF */
+#define WL_CLK_REQ_TYPE_FREF        (0x08) /* Bit[3:2] - 01-TCXO, 10-FREF */
+#define PRCM_CM_EN_MUX_WLAN_FREF    (0x10) /* Bit[4]   -  0-TCXO,  1-FREF */
+
+#define TCXO_ILOAD_INT_REG          (0x2264)
+#define TCXO_CLK_DETECT_REG         (0x2266)
+#define TCXO_DET_FAILED                     0x10 /* Bit[4] */
+#define FREF_ILOAD_INT_REG          (0x2084)
+#define FREF_CLK_DETECT_REG         (0x2086)
+#define FREF_CLK_DETECT_FAIL         0x10 /* Bit[4] */
+
+#define PLL_LOCK_COUNTERS_REG       (0xD8C)
+#define PLL_LOCK_COUNTERS_COEX      (0x0F)
+#define PLL_LOCK_COUNTERS_MCS       (0xF0)
+#define MCS_PLL_OVERRIDE_REG        (0xD90)
+#define MCS_PLL_CONFIG_REG          (0xD92)
+#define MCS_PLL_CONFIG_REG_VAL      (0x73)
+
+
+#define MCS_PLL_M_REG               (0xD94)
+#define MCS_PLL_N_REG               (0xD96)
+#define MCS_PLL_M_REG_VAL           (0xC8)
+#define MCS_PLL_N_REG_VAL           (0x07)
+
+
+
+
+
+
+#define MCS_SEL_IN_FREQ_MASK        (0x0070)
+#define MCS_SEL_IN_FREQ_SHIFT       4
+
+
+#define WL_SPARE_REG                (0x2320) /* Use this reg for masking during driver access */
+#define WL_SPARE_VAL                (0x04)
+
+
+#define HW_CONFIG_19_2_M         1
+#define HW_CONFIG_26_M           2
+#define HW_CONFIG_38_4_M         3
+#define HW_CONFIG_52_M           4
+
+#endif
+
 
 #endif

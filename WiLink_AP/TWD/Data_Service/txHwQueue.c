@@ -126,6 +126,7 @@ typedef struct
     
     TTxHwQueueInfo  aTxHwQueueInfo[MAX_NUM_OF_AC]; /* The per queue variables */
     TTxHwLinkInfo   aTxHwLinkInfo[WLANLINKS_MAX_LINKS]; /* The per link variables */
+    TI_UINT32       uNumTotalLinks;                   /* Number of currently connected stations*/
 
 } TTxHwQueue;
 
@@ -297,6 +298,7 @@ TI_STATUS txHwQueue_Restart (TI_HANDLE hTxHwQueue)
     pTxHwQueue->uNumUsedDescriptors = 0;
     pTxHwQueue->uFwTxResultsCntr = 0;
     pTxHwQueue->uDrvTxPacketsCntr = 0;
+    pTxHwQueue->uNumTotalLinks = 0;
 
     /* Info per queue */
     for (TxQid = 0; TxQid < MAX_NUM_OF_AC; TxQid++)
@@ -432,8 +434,17 @@ ETxHwQueStatus txHwQueue_AllocResources (TI_HANDLE hTxHwQueue, TTxCtrlBlk *pTxCt
     /***********************************************************************/
 
     /* Update blocks numbers in Tx descriptor */
+#ifdef TNETW1283
+    /* in 1283, no need of extra mem blocks setting to the hardware */
+    /* set total blocks in the extra blocks field, FW will deliver only total blocks */ 
+
+    /* !!!!!!!!!!!!!just for test - swap fields - OK for HW, fw will have the value on other field */
+    pTxCtrlBlk->tTxDescriptor.extraMemBlks = uNumBlksToAlloc;
+    pTxCtrlBlk->tTxDescriptor.totalMemBlks = BLKS_HW_ALLOC_SPARE;
+#else
     pTxCtrlBlk->tTxDescriptor.extraMemBlks = BLKS_HW_ALLOC_SPARE;
     pTxCtrlBlk->tTxDescriptor.totalMemBlks = uNumBlksToAlloc;
+#endif
 
     /* Update packet allocation info:  */
     pTxHwQueue->uNumUsedDescriptors++; /* Update number of packets in FW (for descriptors allocation check). */
@@ -684,9 +695,24 @@ ETxnStatus txHwQueue_UpdateFreeResources (TI_HANDLE hTxHwQueue, FwStatus_t *pFwS
     {
         TTxHwLinkInfo *pLinkInfo = &(pTxHwQueue->aTxHwLinkInfo[uHlid]);
         TI_UINT8 new_FwFree = pFwStatus->txLinkFreeBlks[uHlid];
-        TI_UINT8 new_FwMax = ((pFwStatus->linkPsBitmap >> uHlid) & 1) ? HW_RESOURCES_MIN_FW_LINK_BLOCKS : HW_RESOURCES_MAX_FW_LINK_BLOCKS; 
+        TI_UINT8 new_FwMax; 
         TI_UINT32 uAvailableLinkBlks;
 
+        if((pFwStatus->linkPsBitmap >> uHlid) & 1)
+        {
+            if(pTxHwQueue->uNumTotalLinks == 1)
+            {
+                new_FwMax = HW_RESOURCES_MAX_FW_LINK_BLOCKS;
+            }
+            else
+            {
+                new_FwMax = HW_RESOURCES_MIN_FW_LINK_BLOCKS;
+            }
+        }
+        else
+        {
+            new_FwMax = HW_RESOURCES_MAX_FW_LINK_BLOCKS;
+        }
         /* set initial backbressure value */
         if (pLinkInfo->bBusy) 
             RESET_LINK_BACKPRESSURE(&uLinkBackpressure, uHlid); /* Init link as stopped. */
@@ -771,6 +797,36 @@ ETxnStatus txHwQueue_UpdateFreeResources (TI_HANDLE hTxHwQueue, FwStatus_t *pFwS
     return TXN_STATUS_COMPLETE;
 }
 
+/****************************************************************************
+ *                  txHwQueue_AddLink()
+ ****************************************************************************
+ * DESCRIPTION: 
+   ===========
+  Increment counter of currently active data links
+****************************************************************************/
+void  txHwQueue_AddLink(TI_HANDLE hTxHwQueue)
+{
+    TTxHwQueue *pTxHwQueue = (TTxHwQueue *)hTxHwQueue;
+    pTxHwQueue->uNumTotalLinks++;
+}
+
+/****************************************************************************
+ *                  txHwQueue_RemoveLink()
+ ****************************************************************************
+ * DESCRIPTION: 
+   ===========
+  Deccrement counter of currently active data links
+****************************************************************************/
+void  txHwQueue_RemoveLink(TI_HANDLE hTxHwQueue)
+{
+    TTxHwQueue *pTxHwQueue = (TTxHwQueue *)hTxHwQueue;
+
+    if(pTxHwQueue->uNumTotalLinks) /* Sanity check */
+    {
+        pTxHwQueue->uNumTotalLinks--;
+    }
+    
+}
 
 /****************************************************************************
  *                  txHwQueue_CheckResources()
@@ -897,7 +953,7 @@ void txHwQueue_PrintInfo (TI_HANDLE hTxHwQueue)
             pTxHwQueue->aTxHwQueueInfo[TxQid].bQueueBusy));
     }
     WLAN_OS_REPORT(("\n"));
-
+    WLAN_OS_REPORT(("Number of Active Links = %d\n", pTxHwQueue->uNumTotalLinks));
     for(uHlid = 0; uHlid < WLANLINKS_MAX_LINKS; uHlid++)
     {
         WLAN_OS_REPORT(("Link=%d: HostAllocCount=%3d, FwFreeCount=%3d, FwMax=%3d, Busy=%d, uNumBlksCausedBusy=%d, uLastAllocNumBlks=%d\n", 

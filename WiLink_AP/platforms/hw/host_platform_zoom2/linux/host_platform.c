@@ -174,12 +174,39 @@ int hPlatform_DevicePowerOn (void)
 
 int hPlatform_Wlan_Hardware_Init(void)
 {
+#ifdef TNETW1283
+    g_external_board = 1;
+#endif
     if(g_external_board)
     {
          pad_config(CONTROL_PADCONF_CAM_D1_EXT, 0xFFF0FFFF, 0x00040000); /* EN = 157 */
          pad_config(CONTROL_PADCONF_MCBSP1_CLKX_EXT, 0xFFFFFFF0, 0x0000011C); /* IRQ = 162*/
     }
 	
+	/*
+	  * set pull up on all SDIO lines
+	  * Setting MUX Mode of 0, and pull bits to 3
+	  */
+
+	/* set for mmc2_cmd - second half of the padconf register
+	  * Should set (x is don't change):  xxxx xxxx xxx1 1000 xxxx xxxx xxxx xxxx */
+	pad_config(CONTROL_PADCONF_MMC3_CMD, 0xFFFFFFF0, 0x0000011B);
+
+	pad_config(CONTROL_PADCONF_MMC3_CLK, 0xFFF0FFE0,0x001C011A);
+	
+	/* set for mmc3_dat0 and dat1 - both parts of the padconf register
+	  * Should set (x is don't change):  xxxx xxxx xxx1 1000 xxxx xxxx xxx1 1000 */
+	pad_config(CONTROL_PADCONF_MMC3_DAT0, 0xFFF0FFF0, 0x011A011A);
+
+	pad_config(CONTROL_PADCONF_MMC3_DAT2, 0xFFFFFFF0, 0x0000011A);
+
+	pad_config(CONTROL_PADCONF_MMC3_DAT3, 0xFFF0FFFF, 0x011A0000);
+	
+	#define CONTROL_PADCONF_MMC2_DAT4       0x48002164    /* set AE4 to mmc2_dat4  set AH3 to mmc2_dat5 */
+	pad_config(CONTROL_PADCONF_MMC2_DAT4, 0xFFF0FFF0, 0x00180018);
+	
+	#define CONTROL_PADCONF_MMC2_DAT6       0x48002168    /* set AF3 to mmc2_dat6  set AE3 to mmc2_dat7 */
+	pad_config(CONTROL_PADCONF_MMC2_DAT6, 0xFFF0FFF0, 0x00180018);
 	return 0;
 }
 

@@ -98,6 +98,7 @@ VOID CuCmd_GetRxDataFiltersStatistics(THandle hCuCmd, ConParm_t parm[], U16 nPar
 
 VOID CuCmd_ShowStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_ShowTxStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
+VOID CuCmd_ShowLinkStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 VOID CuCmd_ShowAdvancedParams(THandle hCuCmd, ConParm_t parm[], U16 nParms);
 
 VOID CuCmd_ScanAppGlobalConfig(THandle hCuCmd, ConParm_t parm[], U16 nParms);

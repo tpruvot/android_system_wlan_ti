@@ -974,6 +974,7 @@ TI_STATUS cmdBld_CmdIeBssStart (TI_HANDLE hCmdBld, BssStartCmd_t *pBssStartParam
     pCmd->broadcastHLID     = pBssStartParams->broadcastHLID;
     pCmd->globalHLID        = pBssStartParams->globalHLID;
     pCmd->basicRateSet      = ENDIAN_HANDLE_LONG(pBssStartParams->basicRateSet);
+	pCmd->beaconExpiry		= pBssStartParams->beaconExpiry;
 
     os_memoryCopy(pCmdBld->hOs, &pCmd->ssid, &pBssStartParams->ssid, sizeof(SSID_t));
     os_memoryCopy(pCmdBld->hOs, pCmd->bssid, pBssStartParams->bssid, MAC_ADDR_LEN);
@@ -986,10 +987,11 @@ TI_STATUS cmdBld_CmdIeBssStart (TI_HANDLE hCmdBld, BssStartCmd_t *pBssStartParam
                     pCmd->bssid[0],pCmd->bssid[1],pCmd->bssid[2],pCmd->bssid[3],pCmd->bssid[4],pCmd->bssid[5], pCmd->bssIndex));
     WLAN_OS_REPORT(("beacon=%d dtim=%d aging=%d chan=%d band=%d\n", 
                     pCmd->beaconInterval, pCmd->dtimInterval, pCmd->agingPeriod, pCmd->channelNumber, pCmd->band));
-    WLAN_OS_REPORT(("brdcstHLID=%d globalHLID=%d ssidType=%d basicRates=0x%04x\n",
-                    pCmd->broadcastHLID, pCmd->globalHLID, pCmd->ssid.ssidType, (TI_UINT32)pCmd->basicRateSet));    
+    WLAN_OS_REPORT(("brdcstHLID=%d globalHLID=%d ssidType=%d basicRates=0x%04x beacon expiry=%d\n",
+                    pCmd->broadcastHLID, pCmd->globalHLID, pCmd->ssid.ssidType, (TI_UINT32)pCmd->basicRateSet, pCmd->beaconExpiry));    
     WLAN_OS_REPORT(("%s: <--------------------------------------------\n", __FUNCTION__));
-  
+
+
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, 
                              CMD_BSS_START, 
                              (void *)pCmd, 

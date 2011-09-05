@@ -48,9 +48,9 @@
 #define _WLAN_LINKS_H_
 
 #include "APExternalIf.h"
-/* Constants */
+#include "STADExternalIf.h"
 
-#define WLANLINKS_MAX_LINKS         		7
+/* Constants */
 
 #define WLANLINKS_INVALID_HLID     0xff
 
@@ -72,13 +72,6 @@ typedef enum
     WLANLINK_SUBSTATE_CONN_NORMAL,
     WLANLINK_SUBSTATE_CONN_ROAMING
 }EWlanLinkSubState;
-
-typedef enum
-{
-    WLANLINK_TYPE_SPECIFIC,
-    WLANLINK_TYPE_BRCST,
-    WLANLINK_TYPE_GLOBAL,
-}EWlanLinkType;
 
 typedef enum
 {

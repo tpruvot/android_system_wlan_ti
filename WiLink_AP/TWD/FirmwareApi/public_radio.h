@@ -437,6 +437,8 @@ typedef enum RADIO_CHANNEL_INDEX_ENMT
 
 #define NUMBER_OF_2_4_G_CHANNELS    (NUMBER_OF_2_4_G_CHANNEL_INDICES_E + 1)
 #define NUMBER_OF_5G_CHANNELS       (NUMBER_OF_RADIO_CHANNEL_INDEXS_E - NUMBER_OF_2_4_G_CHANNELS)
+#define HALF_NUMBER_OF_2_4_G_CHANNELS 	(NUMBER_OF_2_4_G_CHANNELS / 2)
+#define HALF_NUMBER_OF_5G_CHANNELS  	((NUMBER_OF_5G_CHANNELS + 1) / 2)
 
 typedef enum RADIO_RATE_GROUPS_ENMT
 {		
@@ -449,6 +451,9 @@ typedef enum RADIO_RATE_GROUPS_ENMT
 	_18_12_RATE_GROUP_E,                /* band 4.9Ghz (Japan) high sub-band(J34,36,J38,40, J42, 44, J46,48) */
 	_9_6_RATE_GROUP_E,                  /* band 5GHz 1st sub-band(52->64 in steps of 4) */
 	_11b_RATE_GROUP_E,                  /* band 5GHz 2nd sub-band(100->116 in steps of 4) */
+#ifdef TNETW1283
+	MCS0_RATE_GROUP_E,
+#endif
 /*_______________________________________________*/
     UNUSED_RATE_GROUPS_E,
 	NUMBER_OF_RATE_GROUPS_E = UNUSED_RATE_GROUPS_E,				
@@ -517,7 +522,8 @@ typedef enum CALIBRATION_COMMANDS_ENMT
     CM_RX_LNAGAIN_calibration_e,
 
 	CM_SMART_REFLEX_calibration_e,
-	CM_CHANNEL_RESPONSE_calibration_e
+	CM_CHANNEL_RESPONSE_calibration_e,				/* 33 */
+	CM_DCO_ITRIM_calibration_e
 
 }CALIBRATION_COMMANDS_ENM;
 
@@ -744,6 +750,7 @@ typedef struct
 	int					ClpcOffset[NUMBER_OF_RATE_GROUPS_E];		 /* CLPC */
 	int8				CurrentTemperature;							 /* current temperature in Celsius */
 	uint16				CurrentVbat;								 /* VBat	*/
+	uint8				enableCalibration;							 /* enableCalibration */
 	
 }CLPCTempratureVbatStruct;
 
@@ -752,8 +759,8 @@ typedef struct
 	int16			oRadioStatus;
 	uint8			iCommand; /* command to check */
 	
-	CalibrationInfo				calibInfo;			/* for eCMD_GET_CALIBRAIONS_INFO */
-	CLPCTempratureVbatStruct	CLPCTempVbatInfo;	/* for eCMD_GET_CLPC_VBAT_TEMPERATURE_INFO */
+	CalibrationInfo				oCalibInfo;			/* for eCMD_GET_CALIBRAIONS_INFO */
+	CLPCTempratureVbatStruct	oCLPCTempVbatInfo;	/* for eCMD_GET_CLPC_VBAT_TEMPERATURE_INFO */
 
 	uint8			padding[3];
 	
@@ -1043,6 +1050,7 @@ typedef enum TXPWR_CFG0__VGA_STEP_ENMT
 /* TX BIP default parameters */
 #define CALIBRATION_STEP_SIZE			1000
 #define CALIBRATION_POWER_HIGHER_RANGE	22000
+#define CALIBRATION_POWER_HIGHER_RANGE_FOR_RFMD	19000
 #define CALIBRATION_POWER_LOWER_RANGE	(-3000)
 
 #define FIRST_PD_CURVE_TO_SET_2_OCTET	(10 * CALIBRATION_STEP_SIZE)/* dBm */
@@ -1282,7 +1290,9 @@ typedef enum
 	eDISABLE_CLPC,
 	eENABLE_CLPC,
 	eRESET_CLPC_TABLES,
-	eINIDCATE_CLPC_ACTIVATION_TIME
+	eINIDCATE_CLPC_ACTIVATION_TIME,
+	eENABLE_CALIBRATIAONS,
+	eDISABLE_CALIBRATIAONS
 }CLPCCommands;
 
 typedef struct 
@@ -1395,19 +1405,34 @@ typedef enum
 #define MAX_SMART_REFLEX_PARAM					(MAX_SMART_REFLEX_FUB_VALUES + SMART_REFLEX_START_ERROR_VALUE_INDEX)
 
 
+#ifdef TNETW1283
+#define MAX_GENERAL_SETTINGS_PARAM  4
+#endif
 
 typedef struct 
 {
 	uint8	RefClk;                                 
 	uint8	SettlingTime;                                                                 
 	uint8	ClockValidOnWakeup;                      
+#ifdef TNETW1283
+	uint8	TcxoRefClk;                                 
+	uint8	TcxoSettlingTime;                                                                 
+	uint8	TcxoValidOnWakeup; 
+	uint8	TcxoLdoVoltage; 
+	uint8	pad1; 
+#else
 	uint8	DC2DCMode;                               
+#endif
 	uint8	Single_Dual_Band_Solution;  
 	uint8	TXBiPFEMAutoDetect;
 	uint8	TXBiPFEMManufacturer;  
 /*	GeneralSettingsByte	Settings; */
+#ifdef TNETW1283
+    uint8   GeneralSettings[MAX_GENERAL_SETTINGS_PARAM];
+    uint8   pad2;
+#else
     uint8   GeneralSettings;
-
+#endif
 
     /* smart reflex state*/
     uint8 SRState; 
@@ -1447,7 +1472,8 @@ typedef enum
 	eREF_CLK_19_2_E,
 	eREF_CLK_26_E,
 	eREF_CLK_38_4_E,
-	eREF_CLK_52_E
+	eREF_CLK_52_E,
+	eREF_CLK_XTAL
 
 }REF_CLK_ENM;
 
@@ -1705,6 +1731,22 @@ typedef enum PHY_RADIO_VBIAS_MV_ENMT
 }PHY_RADIO_VBIAS_MV_ENM;
 
 /* Gain monitor values */
+#ifdef TNETW1283
+typedef enum PHY_RADIO_GAIN_MONITOR_TYPES_ENMT
+{
+	FIRST_GAIN_MONITOR_TYPE_E,
+/*-----------------------------------------------*/
+	GAIN_MONITOR_X0_5_E = 0,
+	GAIN_MONITOR_X1_E = 1,
+	GAIN_MONITOR_X2_E = 2,
+	GAIN_MONITOR_X4_E = 3,
+	GAIN_MONITOR_X8_E = 4,
+/*_______________________________________________*/
+	NUMBER_OF_GAIN_MONITOR_TYPES_E, /* 5 */			
+	LAST_GAIN_MONITOR_TYPE_E = (NUMBER_OF_GAIN_MONITOR_TYPES_E - 1)	
+
+}PHY_RADIO_GAIN_MONITOR_TYPES_ENM;
+#elif TNETW1273
 typedef enum PHY_RADIO_GAIN_MONITOR_TYPES_ENMT
 {
 	FIRST_GAIN_MONITOR_TYPE_E,
@@ -1722,6 +1764,7 @@ typedef enum PHY_RADIO_GAIN_MONITOR_TYPES_ENMT
 	LAST_GAIN_MONITOR_TYPE_E = (NUMBER_OF_GAIN_MONITOR_TYPES_E - 1)	
 
 }PHY_RADIO_GAIN_MONITOR_TYPES_ENM;
+#endif
 
 
 /* TX Packet Mode; */

@@ -1,31 +1,36 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * roleAP.c
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 /** \file roleAP.c
  *  \brief Role AP info
@@ -86,6 +91,7 @@ typedef struct
     TI_HANDLE           hRxData;
     
     TBssCapabilities    tBssCapabilities;
+	TI_UINT8            uBeaconTxTimeout;
 	TI_UINT32			aAllocatedLinks[WLANLINKS_MAX_LINKS];
 	TI_UINT32			uNumAllocatedLinks;
 	TI_UINT32			uBrcstHlid;
@@ -96,6 +102,9 @@ typedef struct
     TSecurityKeys       tTwdKey[MAX_WEP_KEY];
 	ERoleApState		eState;
 	TRoleApStats		tRoleApStats;
+	TApWpsIe            tWpsIe;
+    TI_UINT32           uTxPower;
+
 } TRoleAP;
 
 
@@ -124,10 +133,13 @@ static void FillDeauthTemplate(TI_HANDLE hRoleAP, TSetTemplate *pTemplateStruct)
 static void ConfigureFrameTemplates(TI_HANDLE hRoleAP);
 static void ConfigureRatePolicies(TI_HANDLE hRoleAP);
 static TI_STATUS setBeaconProbeRspTempl(TRoleAP *pRoleAP);
+static void setDeauthTemplate( TRoleAP * pRoleAP );
+static void setQosNullDataTemplate( TRoleAP * pRoleAP);
+static void setNullDataTemplate(TRoleAP * pRoleAP);
 static TI_STATUS setKey(TI_HANDLE hRoleAP, TSecurityKeys *pTwdKey);
 static TI_STATUS FillBeaconTemplate(TI_HANDLE hRoleAP, TApBeaconParams *pAPBeaconParams, TSetTemplate *pTemplateStruct);
 static TI_STATUS FillProbeRespTemplate(TI_HANDLE hRoleAP, TApBeaconParams *pAPBeaconParams, TSetTemplate *pTemplateStruct);
-static TI_STATUS sendAgingEvent(TRoleAP *pRoleAP, TI_UINT32 uHlid, EApEvent eEvent);
+static TI_STATUS sendEvent(TRoleAP *pRoleAP, TI_UINT32 uHlid, EApEvent eEvent);
 static TI_STATUS maxTxRetryStaEventCB(TI_HANDLE hRoleAP, TI_CHAR *pData, TI_UINT32 uDataLen);
 static void DecodeStaRates(TI_UINT8 *aRates, TI_UINT32 uRatesLen);
 static void SetApRates(TI_HANDLE hRoleAP, TApRateSet *pRateParams);
@@ -220,17 +232,17 @@ void roleAP_init (TStadHandlesList *pStadHandles)
  * 
  * Set module's object default values 
  */ 
-TI_STATUS roleAP_SetDefaults (TI_HANDLE hRoleAP)
+TI_STATUS roleAP_SetDefaults (TI_HANDLE hRoleAP, TRoleApInitParams *tRoleApInitParams)
 {
     TRoleAP *pRoleAP = (TRoleAP *)hRoleAP;
 
+
+	pRoleAP->uBeaconTxTimeout = tRoleApInitParams->ubeaconTxTimeout;
 
     rxData_IntraBssBridge_Enable(pRoleAP->hRxData);
 
     return TI_OK;
 }
-
-/*ALEXA_TODO: remove roleAP set/get param stubs*/
 
 /** 
  * \fn     roleAP_setParam 
@@ -325,6 +337,57 @@ TI_STATUS roleAP_setParam(TI_HANDLE hRoleAP, paramInfo_t *pParam)
  */
 TI_STATUS roleAP_getParam(TI_HANDLE hRoleAP, paramInfo_t *pParam)
 {
+	TRoleAP     *pRoleAP = (TRoleAP *)hRoleAP;
+    
+    /* check handle validity */
+    if (pParam == NULL)
+    {
+		TRACE0(pRoleAP->hReport, REPORT_SEVERITY_ERROR , " roleAP_getParam(): pParam is NULL!\n");
+        return TI_NOK;
+    }
+
+    switch (pParam->paramType)
+	{
+		case ROLE_AP_GET_LINK_COUNTERS:
+		{
+			TI_UINT32 uHlid;
+			TWlanLinkPeerDescr tPeerDescr;
+            TLinkDataCounters *pLinkCounters = (TLinkDataCounters*)pParam->content.linkDataCounters;
+
+			/* Get Rx Link Counters*/
+            pParam->paramType = RX_DATA_LINK_COUNTERS;
+			rxData_getParam(pRoleAP->hRxData, pParam);
+
+			/* Get Rx Link Counters*/
+            pParam->paramType = TX_CTRL_GET_DATA_LINK_COUNTER;
+			txCtrlParams_getParam(pRoleAP->hTxCtrl, pParam);
+            
+            /* Get Link MAC Address*/
+			for (uHlid = 0; uHlid < WLANLINKS_MAX_LINKS; uHlid++)
+			{
+				pLinkCounters[uHlid].validLink = TI_FALSE;
+
+				if (pRoleAP->aAllocatedLinks[uHlid] != WLANLINKS_INVALID_HLID)
+				{
+					if ((wlanLinks_GetPeerDescr(pRoleAP->hWlanLinks, uHlid, &tPeerDescr) != TI_OK) ||
+						(wlanLinks_GetLinkType(pRoleAP->hWlanLinks, uHlid, &(pLinkCounters[uHlid].linkType)) != TI_OK))
+						continue;
+
+                    pLinkCounters[uHlid].validLink = TI_TRUE;
+					if (pLinkCounters[uHlid].linkType == WLANLINK_TYPE_BRCST)
+						os_memorySet(pRoleAP->hOs, pLinkCounters[uHlid].aMacAddr, 0xFF, sizeof(TMacAddr));
+					else
+						os_memoryCopy(pRoleAP->hOs, pLinkCounters[uHlid].aMacAddr, tPeerDescr.aMacAddr, sizeof(TMacAddr));
+				}
+			}
+		}
+		break;
+
+		default:
+			TRACE1(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "\n *** In roleAP_getParam,  bad param= %X\n", pParam->paramType);    
+            break;
+	}
+
     return TI_OK;
 }
 
@@ -344,7 +407,6 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
     TTwdParamInfo      tTwdParam;
     int i;
     TRroamingTriggerParams params;
-
 
     pRoleAP->tBssCapabilities.uBssIndex = uBssIdx;
 
@@ -372,6 +434,9 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
                                                                                pRoleAP->tBssCapabilities.uChannel,
                                                                                (ERadioBand)pRoleAP->tBssCapabilities.uBand,
                                                                                TI_TRUE);
+
+    pTwdParam->content.halCtrlTxPowerDbm = TI_MIN(pRoleAP->uTxPower, pTwdParam->content.halCtrlTxPowerDbm);
+
     tRes = TWD_SetParam(pRoleAP->hTWD, pTwdParam);
 	if (tRes != TI_OK)
 	{
@@ -401,7 +466,7 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
 
     if (pRoleAP->keyType != KEY_NULL)
       TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ, pRoleAP->uBrcstHlid, TI_TRUE);
-
+   
     os_memorySet(pRoleAP->hOs, &pRoleAP->tRoleApStats, 0, sizeof(pRoleAP->tRoleApStats));
 
     os_memoryFree(pRoleAP->hOs, pParam , sizeof(paramInfo_t));
@@ -419,7 +484,7 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
     {
         if (pRoleAP->tTwdKey[i].keyType != KEY_NULL)
         {
-            setKey(pRoleAP,&pRoleAP->tTwdKey[i]);
+         setKey(pRoleAP,&pRoleAP->tTwdKey[i]);
         }
     }
 
@@ -502,7 +567,7 @@ TI_STATUS roleAP_stop(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
         return TI_OK;
 	}
 
-	pRoleAP->eState	= ROLEAP_STATE_STOPPED;
+    pRoleAP->eState	= ROLEAP_STATE_STOPPED;
 
     wlanDrvIf_DisableTx (pRoleAP->hOs);
     setRxPortStatus(pRoleAP, CLOSE); /* disable Rx path */
@@ -561,16 +626,15 @@ TI_STATUS roleAP_NotifyFwReset(TI_HANDLE hRoleAP)
 
 TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
 {
-    TRoleAP          *pRoleAP = (TRoleAP *)hRoleAP;
-    TApGeneralParam  *pGenParams;
-    TApChannelParams *pChannelParams;
-    TApSsidParam     *pSsidParams;    
-    TI_STATUS status = TI_OK;
-    TSecurityKeys    *pTwdKey;
-    TTwdParamInfo    tTwdParam;
-    TApConnPhaseParam	*pConnPhaseParam;
-    TTwdConnPhaseParam	tTwdConnPhaseParam;
-    TI_STATUS  tRes = TI_NOK;
+    TRoleAP          	*pRoleAP = (TRoleAP *)hRoleAP;
+    TApGeneralParam  	*pGenParams;
+    TApChannelParams 	*pChannelParams;
+    TApSsidParam     	*pSsidParams;    
+    TApWpsIe         	*pWpsIe;
+    TI_STATUS 			status = TI_OK;
+    TSecurityKeys    	*pTwdKey;
+    TTwdParamInfo    	tTwdParam;
+    TI_STATUS  			tRes = TI_NOK;
     
 
     switch (cmd) 
@@ -756,22 +820,29 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
 		status = SaveDeauthReason(hRoleAP, (TApGeneralParam *)pBuffer);
         break;
 
+	case ROLE_AP_SET_PROBE_WPS_IE:
+		pWpsIe = (TApWpsIe*)pBuffer;
+		pRoleAP->tWpsIe.iIeLen = pWpsIe->iIeLen;
+		os_memoryCopy(pRoleAP->hOs,pRoleAP->tWpsIe.cIe,pWpsIe->cIe,pWpsIe->iIeLen);
+		break;
+
     case TWD_ADD_KEY_PARAMS:
          pTwdKey = (TSecurityKeys*)pBuffer;
          pRoleAP->keyType = pTwdKey->keyType;
 
-		 TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , " RoleAp: TWD_ADD_KEY_PARAMS key type %d \n",pRoleAP->keyType);    
+         TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , " RoleAp: TWD_ADD_KEY_PARAMS key type %d \n",pRoleAP->keyType);    
+
 
         // in case of wep or broadcst key keep the keys in roleAp and set the FW after BssConfig.
-        if ((pTwdKey->lidKeyType == BROADCAST_LID_TYPE)|| (pTwdKey->keyType == KEY_WEP))
+        if (((pTwdKey->lidKeyType == BROADCAST_LID_TYPE)|| (pTwdKey->keyType == KEY_WEP)) &&
+			(pRoleAP->eState != ROLEAP_STATE_STARTED))
         {
-         os_memoryCopy(pRoleAP->hOs, &pRoleAP->tTwdKey[pTwdKey->keyIndex],pBuffer, sizeof(TSecurityKeys));
+          os_memoryCopy(pRoleAP->hOs, &pRoleAP->tTwdKey[pTwdKey->keyIndex],pBuffer, sizeof(TSecurityKeys));
         }
         else
         {
          status = setKey(pRoleAP,pTwdKey);
-         if (pRoleAP->keyType == KEY_TKIP)
-           TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_TRUE);
+		 TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_TRUE);
         }
      
         break;
@@ -787,8 +858,8 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         if (tRes != TI_OK)
 			TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_DEL_KEY_PARAMS :Error in TWD_SetParam status %d \n", tRes);    
 	
-        if (pRoleAP->keyType == KEY_TKIP)
-          TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_FALSE);
+        TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_FALSE);
+        TxDataQ_setEncryptionFieldSizes(pRoleAP->hTxDataQ,pTwdKey->hlid,0);
 
         break;
 
@@ -806,18 +877,26 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
 	case ROLE_AP_ENABLE:
 		status = roleAP_enable(hRoleAP);
         break;
-   
-     case TWD_SET_CONNECTION_PHASE:
-	pConnPhaseParam = (TApConnPhaseParam *)pBuffer;
-	tTwdConnPhaseParam.uMode = pConnPhaseParam->mode;
-	os_memoryCopy(pRoleAP->hOs, tTwdConnPhaseParam.aMacAddr, pConnPhaseParam->macAddr, AP_MAC_ADDR);
+
+    case ROLE_AP_SET_TX_POWER:
+         pGenParams = (TApGeneralParam *)pBuffer;
+         pRoleAP->uTxPower = pGenParams->lValue;
+         break;
+
+	case TWD_SET_CONNECTION_PHASE:
+	{
+		TTwdConnPhaseParam	tTwdConnPhaseParam;
+		pGenParams = (TApGeneralParam *)pBuffer;
+
+        os_memoryCopy(pRoleAP->hOs, tTwdConnPhaseParam.aMacAddr, pGenParams->cMac, AP_MAC_ADDR);
 
         tRes = TWD_SetConnectionPhase(pRoleAP->hTWD, &tTwdConnPhaseParam, NULL, NULL);
         if (tRes != TI_OK)
-	TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_SET_CONNECTION_PHASE :Error in TWD_SetConnectionPhase status %d \n", tRes);    
+			TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_SET_CONNECTION_PHASE :Error in TWD_SetConnectionPhase status %d \n", tRes);
+	}
         break;
-    
-     default:
+
+    default:
 		TRACE2(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "\n !!! In %s,  bad command type = 0x%X\n", __FUNCTION__,cmd);    
         status = TI_NOK;
         break;
@@ -934,6 +1013,8 @@ static TI_STATUS BssStart(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
     bssStartPrm.broadcastHLID   = pRoleAP->uBrcstHlid;
     bssStartPrm.bssIndex        = uBssIdx;
     bssStartPrm.basicRateSet    = pRoleAP->tBssCapabilities.uBasicRateBitmap;
+	bssStartPrm.beaconExpiry	= pRoleAP->uBeaconTxTimeout;
+
 
     return TWD_BssStart(pRoleAP->hTWD, &bssStartPrm);
 }
@@ -1027,15 +1108,20 @@ static TI_STATUS FreeWlanLink(TI_HANDLE hRoleAP, TI_UINT32 uHlid)
 
     if (pRoleAP->keyType != KEY_NULL)
     {
-		/* TODO save this flag in Wilink DB */
-		TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ,uHlid,TI_FALSE);
+      /* TODO save this flag in Wilink DB */
+  	  TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ,uHlid,TI_FALSE);
+      TxDataQ_setEncryptionFieldSizes(pRoleAP->hTxDataQ,uHlid,0);
     }
 
-    /*Free the Wlan Link*/
+    /* Free the Wlan Link*/
     if (wlanLinks_FreeLink(pRoleAP->hWlanLinks, (TI_UINT32)uHlid) != TI_OK)
     {
          return TI_NOK;
     }
+
+    /* Reset Rx & Tx Link counters*/
+	rxData_resetLinkCounters(pRoleAP->hRxData, pRoleAP->aAllocatedLinks[uHlid]);
+    txCtrlParams_resetLinkCounters(pRoleAP->hTxCtrl, pRoleAP->aAllocatedLinks[uHlid]);
 
 	/* Update my links */
 	pRoleAP->aAllocatedLinks[uHlid] = WLANLINKS_INVALID_HLID;
@@ -1155,7 +1241,7 @@ static TI_STATUS AddStation(TI_HANDLE hRoleAP, void *pStationParams)
     /* set Data Encrypt bit for not OPEN system */
     if (pRoleAP->keyType != KEY_NULL)
     {
-		TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ,uHlid,TI_TRUE);
+      TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ,uHlid,TI_TRUE);
     }
 
 
@@ -1594,9 +1680,62 @@ static TI_STATUS FillProbeRespTemplate(TI_HANDLE hRoleAP, TApBeaconParams *pAPBe
     }
 
     /* Copy the Probe Response Tail section */
+
+    /* insert WPS IE if exists */
+    if (pRoleAP->tWpsIe.iIeLen != 0) {
+
+    	TI_UINT8 *pPos = pAPBeaconParams->cTail;
+    	TI_UINT8 *pEnd = pAPBeaconParams->cTail + pAPBeaconParams->iTailLen;
+    	TI_UINT8 *pWps = NULL;
+    	TI_UINT8 *pCopyPos = NULL;
+
+#define WLAN_EID_VENDOR_SPECIFIC 221
+#define WPS_DEV_OUI_WFA 0x0050f204
+#define WPA_GET_BE32(a) ((((u32) (a)[0]) << 24) | (((u32) (a)[1]) << 16) | \
+			 (((u32) (a)[2]) << 8) | ((u32) (a)[3]))
+
+        while (pPos + 1 < pEnd) {
+    		if (pPos + 2 + pPos[1] > pEnd) {
+    			WLAN_OS_REPORT((" FillProbeRespTemplate(): wrong size of IE\n"));
+    			break;
+    		}
+    		if (pPos[0] == WLAN_EID_VENDOR_SPECIFIC && pPos[1] >= 4 &&
+    				WPA_GET_BE32(&pPos[2]) == WPS_DEV_OUI_WFA) {
+    			pWps = pPos;
+    			WLAN_OS_REPORT((" FillProbeRespTemplate(): found WPS IE\n"));
+    			break;
+    		}
+    		pPos += 2 + pPos[1];
+    	}
+
+    	if (!pWps) {
+    		WLAN_OS_REPORT((" FillProbeRespTemplate(): no WPS IE was found in beacon, this is likely an error\n"));
+    	}
+       
+    	// IDAN, TODO, add error handling
+
+    	/* copy first part of tail */
+    	pCopyPos = pTemplateStruct->ptr + uTempSize;
+    	os_memoryCopy(pRoleAP->hOs, pCopyPos, pAPBeaconParams->cTail, (char *)pWps - pAPBeaconParams->cTail);
+    	pCopyPos += (char *)pWps-pAPBeaconParams->cTail;
+       
+    	/* copy WPS IE */
+    	os_memoryCopy(pRoleAP->hOs, pCopyPos, pRoleAP->tWpsIe.cIe, pRoleAP->tWpsIe.iIeLen);
+    	pCopyPos += pRoleAP->tWpsIe.iIeLen;
+        
+    	/* copy last part of tail */
+        os_memoryCopy(pRoleAP->hOs, pCopyPos, pWps + pWps[1] + 2,
+    			pAPBeaconParams->iTailLen - ((char*)pWps - pAPBeaconParams->cTail) - (pWps[1] + 2));
+    	pCopyPos += pAPBeaconParams->iTailLen - ((char*)pWps - pAPBeaconParams->cTail) - (pWps[1] + 2);
+
+    	pTemplateStruct->len = pCopyPos - pTemplateStruct->ptr;
+        
+    }
+    else { /* no WPS IE, just copy tail as it is */
     os_memoryCopy(pRoleAP->hOs, pTemplateStruct->ptr + uTempSize, pAPBeaconParams->cTail, pAPBeaconParams->iTailLen);
     uTempSize += pAPBeaconParams->iTailLen;
     pTemplateStruct->len = uTempSize;
+    }
 
     ((probeRspTemplate_t*)pTemplateStruct->ptr)->hdr.fc = ENDIAN_HANDLE_WORD(DOT11_FC_PROBE_RESP);
 
@@ -1640,16 +1779,11 @@ static void FillDeauthTemplate(TI_HANDLE hRoleAP, TSetTemplate *pTemplateStruct)
 static void ConfigureFrameTemplates(TI_HANDLE hRoleAP)
 {
 	TRoleAP *pRoleAP      = (TRoleAP *)hRoleAP;
-	TSetTemplate            tTemplateStruct;
-	disconnTemplate_t		tDeauthTemplate;
 
 	setBeaconProbeRspTempl(pRoleAP);
-
-	tTemplateStruct.type = AP_DEAUTH_TEMPLATE;
-	tTemplateStruct.ptr = (TI_UINT8*)&tDeauthTemplate;
-    FillDeauthTemplate(hRoleAP, &tTemplateStruct);
-	TWD_CmdTemplate (pRoleAP->hTWD, &tTemplateStruct, NULL, NULL);
-	report_PrintDump(tTemplateStruct.ptr, tTemplateStruct.len);
+    setDeauthTemplate(pRoleAP);
+    setQosNullDataTemplate(pRoleAP);
+    setNullDataTemplate(pRoleAP);
 }
 
 /** 
@@ -1726,7 +1860,6 @@ static void BssStartCompleteCb(TI_HANDLE hRoleAP)
 	{
 		TRACE1(pRoleAP->hReport, REPORT_SEVERITY_ERROR, 
 		   "%s: Failed to update link state, for Global link\n",__FUNCTION__);
-		return;
 	}
     /* Set link state to OPEN and to prevent error, go through state MGMT */
     txMgmtQ_SetLinkState(pRoleAP->hTxMgmtQ, pRoleAP->uGlobalHlid, TX_CONN_STATE_MGMT);
@@ -1815,7 +1948,7 @@ static TI_STATUS InactiveStaEventCB(TI_HANDLE hRoleAP, TI_CHAR *pData, TI_UINT32
             TRACE2(pRoleAP->hReport,REPORT_SEVERITY_INFORMATION , "%s: Set STA HLID=%u inactivity\n",__FUNCTION__, i);	
 
 			wlanLinks_SetLinkInactivity (pRoleAP->hWlanLinks, TI_TRUE, i);
-            sendAgingEvent (pRoleAP, i, AP_EVENT_STA_AGING);
+            sendEvent (pRoleAP, i, AP_EVENT_STA_AGING);
     	}
     }
     return TI_OK;
@@ -1850,7 +1983,7 @@ static TI_STATUS maxTxRetryStaEventCB(TI_HANDLE hRoleAP, TI_CHAR *pData, TI_UINT
 			TRACE2(pRoleAP->hReport,REPORT_SEVERITY_INFORMATION , "%s: Set STA HLID=%u inactivity\n",__FUNCTION__, i);	
 
 			wlanLinks_SetLinkInactivity (pRoleAP->hWlanLinks, TI_TRUE, i);
-            sendAgingEvent (pRoleAP, i, AP_EVENT_STA_MAX_TX_RETRY);
+            sendEvent (pRoleAP, i, AP_EVENT_STA_MAX_TX_RETRY);
     	}
     }
     return TI_OK;
@@ -1858,7 +1991,7 @@ static TI_STATUS maxTxRetryStaEventCB(TI_HANDLE hRoleAP, TI_CHAR *pData, TI_UINT
 
 
 /** 
- * \fn     sendAgingEvent
+ * \fn     sendEvent
  * \brief  The functions is called to send inactivity event to
  * users space process - hostapd
  * 
@@ -1870,7 +2003,7 @@ static TI_STATUS maxTxRetryStaEventCB(TI_HANDLE hRoleAP, TI_CHAR *pData, TI_UINT
  * \return  operation status
  * \sa      roleAP_SetDefaults()
  */
-static TI_STATUS sendAgingEvent(TRoleAP *pRoleAP, TI_UINT32 uHlid, EApEvent eEvent)
+static TI_STATUS sendEvent(TRoleAP *pRoleAP, TI_UINT32 uHlid, EApEvent eEvent)
 {
     TI_STATUS   tRes;
     TWlanLinkPeerDescr tStaDescr;
@@ -2004,7 +2137,7 @@ static TI_STATUS setKey(TI_HANDLE hRoleAP, TSecurityKeys *pTwdKey)
             case KEY_WEP:
             case KEY_NULL:
             case KEY_XCC:
-            default:
+        default:
                 TxDataQ_setEncryptionFieldSizes (pRoleAP->hTxDataQ,pTwdKey->hlid, 0);
                 break;
         }
@@ -2014,6 +2147,7 @@ static TI_STATUS setKey(TI_HANDLE hRoleAP, TSecurityKeys *pTwdKey)
    tTwdParam.content.configureCmdCBParams.pCb = (TI_UINT8*)pTwdKey;
    tTwdParam.content.configureCmdCBParams.fCb = NULL;
    tTwdParam.content.configureCmdCBParams.hCb = NULL;
+
    tRes = TWD_SetParam (pRoleAP->hTWD, &tTwdParam);
    if (tRes != TI_OK)
 	   TRACE1(pRoleAP->hReport,REPORT_SEVERITY_ERROR, "RoleAp_SetKey TWD_RSN_KEY_ADD_PARAM_ID :TWD_SetParam status %d \n", tRes);
@@ -2081,6 +2215,114 @@ static TI_STATUS setBeaconProbeRspTempl(TRoleAP *pRoleAP)
 
     os_memoryFree (pRoleAP->hOs, tTemplateStruct.ptr, uLen);
 	return tRes;
+}
+/** 
+ * \fn     setDeauthTemplate
+ * \brief  The functions is called to set de-authentication
+ * template
+ * 
+ * The function s called by ConfigureFrameTemplates
+ * 
+ * \note
+ * \param   pRoleAP - pointer to RoleAP object
+ * 
+ * \return  void
+ * \sa      roleAP_Start()
+ */
+static void setDeauthTemplate( TRoleAP * pRoleAP )
+{
+    TSetTemplate            tTemplateStruct;
+    disconnTemplate_t		tDeauthTemplate;
+
+
+	tTemplateStruct.type = AP_DEAUTH_TEMPLATE;
+	tTemplateStruct.ptr = (TI_UINT8*)&tDeauthTemplate;
+    tTemplateStruct.uRateMask = TWD_GetBitmapByRateNumber(pRoleAP->hTWD, pRoleAP->tBssCapabilities.uMinBasicRate);
+    FillDeauthTemplate(pRoleAP, &tTemplateStruct);
+	TWD_CmdTemplate (pRoleAP->hTWD, &tTemplateStruct, NULL, NULL);
+}
+
+/** 
+ * \fn     setQosNullDataTemplate
+ * \brief  The functions is called to set QOS Null Data
+ * template
+ * 
+ * The function s called by ConfigureFrameTemplates
+ * 
+ * \note
+ * \param   pRoleAP - pointer to RoleAP object
+ * 
+ * \return  void
+ * \sa      roleAP_Start()
+ */
+static void setQosNullDataTemplate( TRoleAP * pRoleAP)
+{
+
+    TSetTemplate            tTemplateStruct;
+    QosNullDataTemplate_t   tQosNullDataTemplate;
+    QosNullDataTemplate_t	*pBuffer;
+    TI_UINT16				fc;
+    TI_UINT16				qosControl;
+
+    tTemplateStruct.type = QOS_NULL_DATA_TEMPLATE;
+    tTemplateStruct.ptr = (TI_UINT8*)&tQosNullDataTemplate;
+    tTemplateStruct.uRateMask = TWD_GetBitmapByRateNumber(pRoleAP->hTWD, pRoleAP->tBssCapabilities.uMinBasicRate);
+    pBuffer =  (QosNullDataTemplate_t*)tTemplateStruct.ptr;
+    os_memoryZero(pRoleAP->hOs, pBuffer, sizeof(QosNullDataTemplate_t));
+
+    
+    MAC_COPY (pBuffer->hdr.address2, pRoleAP->tBssCapabilities.tBssid);
+    MAC_COPY (pBuffer->hdr.address3, pRoleAP->tBssCapabilities.tBssid);
+    fc = DOT11_FC_DATA_NULL_QOS | (1 << DOT11_FC_FROM_DS_SHIFT);
+    COPY_WLAN_WORD(&pBuffer->hdr.fc, &fc); /* copy with endianess handling. */
+    qosControl = 0;  /* User priority */
+    qosControl <<= QOS_CONTROL_UP_SHIFT;
+    COPY_WLAN_WORD(&pBuffer->hdr.qosControl, &qosControl); /* copy with endianess handling. */
+
+
+    tTemplateStruct.len = WLAN_QOS_HDR_LEN;
+
+    TWD_CmdTemplate (pRoleAP->hTWD, &tTemplateStruct, NULL, NULL);
+}
+
+/** 
+ * \fn     setNullDataTemplate
+ * \brief  The functions is called to set Null Data template
+ * 
+ * The function s called by ConfigureFrameTemplates
+ * 
+ * \note
+ * \param   pRoleAP - pointer to RoleAP object
+ * 
+ * \return  void
+ * \sa      roleAP_Start()
+ */
+static void setNullDataTemplate(TRoleAP * pRoleAP)
+{
+    TSetTemplate            tTemplateStruct;
+    nullDataTemplate_t      tNullDataTemplate;
+    nullDataTemplate_t      *pBuffer;
+    TI_UINT16				fc;
+
+    tTemplateStruct.type = NULL_DATA_TEMPLATE;
+    tTemplateStruct.ptr = (TI_UINT8*)&tNullDataTemplate;
+    tTemplateStruct.uRateMask = TWD_GetBitmapByRateNumber(pRoleAP->hTWD, pRoleAP->tBssCapabilities.uMinBasicRate);
+    pBuffer =  (nullDataTemplate_t*)tTemplateStruct.ptr;
+
+    os_memoryZero(pRoleAP->hOs, pBuffer, sizeof(nullDataTemplate_t));
+
+
+    	/* Set BSSID address */
+	MAC_COPY (pBuffer->hdr.BSSID, pRoleAP->tBssCapabilities.tBssid);
+    MAC_COPY (pBuffer->hdr.SA,    pRoleAP->tBssCapabilities.tBssid);
+
+
+    fc = DOT11_FC_DATA_NULL_FUNCTION | (1 << DOT11_FC_FROM_DS_SHIFT);
+
+    COPY_WLAN_WORD(&pBuffer->hdr.fc, &fc); /* copy with endianess handling. */
+
+    tTemplateStruct.len = sizeof(dot11_mgmtHeader_t);	
+    TWD_CmdTemplate (pRoleAP->hTWD, &tTemplateStruct, NULL, NULL);
 }
 
 /** 
@@ -2203,4 +2445,30 @@ static void ResetRoleApDB(TI_HANDLE hRoleAP)
 	pRoleAP->DefaultKeyIndex = 0;
 	pRoleAP->keyType = KEY_NULL;
 	os_memoryZero (pRoleAP->hOs, (void *)&pRoleAP->tTwdKey, sizeof(pRoleAP->tTwdKey));
+}
+
+/** 
+ * \fn     roleAP_reportMicFailure
+ * \brief  The functions is called when Mic failure packet 
+ * is received
+ * 
+ * It's called by rxData_ReceivePacket
+ * 
+ * \note
+ * \param   hRoleAP - Handle to RoleAP object
+ *          sta address
+ */
+
+void roleAP_reportMicFailure(TI_HANDLE hRoleAP,TI_UINT8* pMac)
+{
+ TI_UINT32          uHlid;
+ TRoleAP *pRoleAP = (TRoleAP *)hRoleAP;
+
+ if (wlanLinks_FindLinkByMac(pRoleAP->hWlanLinks, pMac, &uHlid) == TI_OK)
+ {
+       sendEvent (pRoleAP, uHlid, AP_EVENT_STA_MIC_FAILURE);
+ }
+  else
+      WLAN_OS_REPORT(("%s: can't find hlid \n",__FUNCTION__));
+
 }

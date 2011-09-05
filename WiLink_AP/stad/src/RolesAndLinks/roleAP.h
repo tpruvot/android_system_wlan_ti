@@ -153,7 +153,7 @@ typedef struct
 	TI_UINT8                uNumBasicRates;
 	TI_UINT32               uBasicRateBitmap;
 	TI_UINT32               uMinBasicRate;
-
+    
     TI_UINT16               uRtsThreshold;
     TI_UINT8                countryStr[AP_MAX_CNT_CHAR];
     TI_BOOL                 bPrivacyEnabled;
@@ -222,11 +222,14 @@ void roleAP_init (TStadHandlesList *pStadHandles);
  * 
  * \note
  * \param	hRoleAP - Handle to roleAP object
+ * \param	tRoleApInitParams - Handle to roleAP init params
+ * structure
  * 
  * \return 	TI_OK
  * \sa     	drvMain_SetDefaults
  */ 
-TI_STATUS roleAP_SetDefaults (TI_HANDLE hRoleAP);
+TI_STATUS roleAP_SetDefaults (TI_HANDLE hRoleAP, TRoleApInitParams *tRoleApInitParams);
+
 
 
 /** 
@@ -340,6 +343,6 @@ TI_STATUS roleAp_getApState(TI_HANDLE hRoleAP, TI_UINT32 *pState);
  */
 TI_STATUS RoleAp_DrvResetNotifyUpperLayers(TI_HANDLE hRoleAP);
 
-
+void roleAP_reportMicFailure(TI_HANDLE hRoleAP,TI_UINT8* pMac);
 #endif /*  _ROLE_AP_API_H_*/
 

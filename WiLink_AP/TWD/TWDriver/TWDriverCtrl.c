@@ -1,31 +1,35 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * TWDriverCtrl.c
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 
 /** \file  TWDriver.c 
@@ -172,13 +176,15 @@ TI_STATUS TWD_SetParam (TI_HANDLE hTWD, TTwdParamInfo *pParamInfo)
 #ifdef XCC_MODULE_INCLUDED
         case TWD_RSN_XCC_SW_ENC_ENABLE_PARAM_ID:
         
-           TRACE1(pTWD->hReport, REPORT_SEVERITY_INFORMATION, "TWD: XCC_SW_ENC_ENABLE %d\n", pParamInfo->content.rsnCcxSwEncFlag);
+            TRACE1(pTWD->hReport, REPORT_SEVERITY_INFORMATION, "TWD: XCC_SW_ENC_ENABLE %d\n", pParamInfo->content.rsnXCCSwEncFlag);
+
             /* when SW encryption is ON, HW encryption should be turned OFF and vice versa */
 
-           TRACE1(pTWD->hReport, REPORT_SEVERITY_INFORMATION, "TWD: Set HwEncDecrEnable to %d\n", !pParamInfo->content.rsnCcxSwEncFlag);
+            TRACE1(pTWD->hReport, REPORT_SEVERITY_INFORMATION, "TWD: Set HwEncDecrEnable to %d\n", !pParamInfo->content.rsnXCCSwEncFlag);
+
             /* Set the Encryption/Decryption on the HW*/
-            if (cmdBld_CfgHwEncDecEnable (pTWD->hCmdBld, !pParamInfo->content.rsnCcxSwEncFlag, NULL, NULL) != TI_OK)
-		return TI_NOK;
+            if (cmdBld_CfgHwEncDecEnable (pTWD->hCmdBld, !pParamInfo->content.rsnXCCSwEncFlag, NULL, NULL) != TI_OK)
+                return TI_NOK;
             break;
              /* not supported - CKIP*/
         case TWD_RSN_XCC_MIC_FIELD_ENABLE_PARAM_ID:
@@ -952,8 +958,14 @@ TI_STATUS TWD_SendGenricCmdToFW(TI_HANDLE hTWD, TI_UINT16 uCmdID, TI_UINT8 *pCmd
 TI_STATUS TWD_AddSta(TI_HANDLE hTWD, TTwdAddStaParams *addStaParams)
 {
     TTwd *pTWD = (TTwd*)hTWD;
+    TI_STATUS status;
 
-    return cmdBld_CmdAddSta(pTWD->hCmdBld, addStaParams, NULL, NULL);
+    status = cmdBld_CmdAddSta(pTWD->hCmdBld, addStaParams, NULL, NULL);
+    if( status == TI_OK)
+    {
+        txHwQueue_AddLink(pTWD->hTxHwQueue);
+    }
+    return status;
 }
 
 /* \fn TWD_RemSta
@@ -963,8 +975,14 @@ TI_STATUS TWD_AddSta(TI_HANDLE hTWD, TTwdAddStaParams *addStaParams)
 TI_STATUS TWD_RemSta(TI_HANDLE hTWD, TI_UINT8 uHlid, TI_UINT8 uDeauthReason, TI_BOOL bSendDeauth)
 {
     TTwd *pTWD = (TTwd*)hTWD;
+    TI_STATUS status;
 
-    return cmdBld_CmdRemSta(pTWD->hCmdBld, uHlid, uDeauthReason, bSendDeauth, NULL, NULL);
+    status = cmdBld_CmdRemSta(pTWD->hCmdBld, uHlid, uDeauthReason, bSendDeauth, NULL, NULL);
+    if( status == TI_OK)
+    {
+        txHwQueue_RemoveLink(pTWD->hTxHwQueue);
+    }
+    return status;
 }
 
 /* \fn TWD_NopCmd
@@ -986,8 +1004,9 @@ TI_STATUS TWD_SetConnectionPhase(TI_HANDLE hTWD, TTwdConnPhaseParam *pParam, voi
 {
     TTwd *pTWD = (TTwd*)hTWD;
 
-    if (NULL == pParam)
-	return TI_NOK;
+	if (NULL == pParam)
+		return TI_NOK;
 
-    return cmdBld_CfgConnectionPhase (pTWD->hCmdBld, pParam->aMacAddr, pParam->uMode, fCb, hCb);
+	return cmdBld_CfgConnectionPhase (pTWD->hCmdBld, pParam->aMacAddr, fCb, hCb);
 }
+

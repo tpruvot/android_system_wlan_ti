@@ -1,155 +1,662 @@
-commit 3b2d55a379e28daa12128e8bb9b6dcac26eb52e7
-Author: Justin Philip <rqwt36@motorola.com>
-Date:   Fri Oct 15 11:03:47 2010 -0700
-
-    TQ-RFMD allign QOS_wmePsMode
-    
-    Change-Id: I2bdc2270d64d65aa9614ecc925603090749df063
-
-commit 7dca82329d979fe2d274030f30353dea87af11bc
+commit 0a31664376ba0e0b38e264401e151f24ba64b2ee
 Author: Thai Leav <w18918@motorola.com>
-Date:   Tue Aug 17 08:51:48 2010 -0500
+Date:   Thu Apr 28 09:15:40 2011 -0500
 
-    IKSTABLETWO-3546 : Workaround for SoftAP Panic : OMAPS00222634
-
-commit 5ad3502b9afccf534e377cd4882499d23eea4832
-Author: Justin Philip <rqwt36@motorola.com>
-Date:   Wed Sep 29 11:37:16 2010 -0700
-
-    IKSTABLETWOV-1056 RFMD tiwlan_rfmd.ini change as per factory FCC failure
+    IKSTABLEFOURV-8519 : Merge M6 INI changes
     
-    Change-Id: Icda6e9a2310d38b45341caeffc110d0bdaf19f17
+    Original issue raised for BT-WiFi coexistence use case on D2WE.
+    Root cause of the problem was with M6 upgrade of WLAN driver.
+    The tiwlan.ini changes did not get propagated to the tiwlan_<product>.ini
+    files, as well as the RFMD INI files.  Merging the deltas to the
+    appropriate product INI files.
+    
+    Change-Id: Iba3a9fab7a9453a0a742fc5829264bc0fddea7d4
+    Reviewed-on: http://gerrit.blurdev.com/81061
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
 
-commit 24dec9811c7e783ccac4c599a17eaa867b8c13df
+commit 4f62cf720831dc71f4c5af8702fd3e49c231cf8f
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Apr 19 09:00:12 2011 -0500
+
+    IKSTABLEFOURV-8242 : Enable Roaming Scan
+    
+    Initial propagation for enabling roaming scan was done
+    with IKSTABLETWOV-10040.  Looks like D2WE, Jordan, and
+    Kobe INI files missed this propagation on the stable-dev4.5
+    baseline.
+    
+    Change-Id: I421b72fece86fd1b2fa5915984558a8d5676de09
+    Reviewed-on: http://gerrit.blurdev.com/79011
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 0f4333dd4b170ac96ba3ba23072db1872afb6831
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Apr 12 08:45:58 2011 -0500
+
+    IKSTABLEFOURV-7196 : Update RFMD AP FW binary
+    
+    TI CSR OMAPS00236338
+    
+    Updating the fw_tiwlan_ap_rfmd.bin to match the
+    latest version for fw_tiwlan_ap.bin.  With TI
+    driver being M6 for both STA and softAP, the FW
+    binaries for RFMD and Triquint can be the same.
+    
+    Change-Id: Iea0b8deedc4ba0e8529fbc0ab6a642e26d9461fa
+    Reviewed-on: http://gerrit.blurdev.com/74793
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 9ab14c5c3a81bde9116b991a0830855e4dd0f3ce
+Author: Andrey Gostev <FGA022C@motorola.com>
+Date:   Thu Feb 10 09:52:10 2011 -0500
+
+    IKSTABLEFOURV-1345 Port TI WiLink 6.1 driver to QCOM MSM platform
+    
+    Change-Id: I91090cc8f038eab76e223ed057e95994e4b2ce0a
+    Reviewed-on: http://gerrit.blurdev.com/57116
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
+    Reviewed-by: Julie Regairaz <Julie.Regairaz@motorola.com>
+
+commit c5016fd837768bf940e806e19c218ee60fb4a321
+Author: Julie Regairaz <Julie.Regairaz@motorola.com>
+Date:   Thu Feb 10 00:40:19 2011 -0600
+
+    IKSTABLEFOUR-3658 : WLAN driver : M6 TI release
+    
+    Change-Id: I2995df83ab8ff0d6e7a92697e276149c1908ac27
+    Reviewed-on: http://gerrit.blurdev.com/53460
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Julie Regairaz <Julie.Regairaz@motorola.com>
+
+commit ffb2e9e4a0fdf613a4f8f3a2bc7f607fa9e4f79d
+Merge: 0d5c211 cdf61a1
+Author: Libin Tang <w16529@motorola.com>
+Date:   Sun Jan 30 20:33:16 2011 -0600
+
+    Merge main-dev-gb with main-dev
+    
+    Change-Id: If9a129ca6e8d59a575676c98d1d7a072d01859f7
+
+commit cdf61a1c37a0adee7db45700731ee68a25112826
+Author: Julie Regairaz <Julie.Regairaz@motorola.com>
+Date:   Fri Jan 28 14:47:40 2011 -0600
+
+    IKSTABLEFOURV-104 : fix early suspend panic when WLAN driver reload
+                      and WLAN driver : add late resume robustness mechanism
+    
+    Change-Id: I57e193395488c00ab9dd9b3e4952a3204b98dced
+    Reviewed-on: http://gerrit.blurdev.com/50259
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Julie Regairaz <Julie.Regairaz@motorola.com>
+
+commit 6bbff9945388fb3a0a9c4e405f4f1bc22399f35c
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Jan 21 17:34:44 2011 -0600
+
+    IKSTABLETWOV-6710 : Use triggered passive scan for choppy audio : OMAPS00230786
+    
+    Change-Id: Ie802ef4978954521327a86d4338238c718f545ef
+    Reviewed-on: http://gerrit.blurdev.com/47694
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 0d5c2113ff953f5c240880a443b14c8dc7a81f3b
+Merge: 3f4de5c e8713b1
+Author: Libin Tang <w16529@motorola.com>
+Date:   Thu Jan 20 00:33:53 2011 -0600
+
+    Merge /localrepo/w16529/gbmerge/system/wlan/ti into merge_gbfw_maindev
+
+commit 39b3cb9959f062e5f7a35d72e9f6751b093404cb
+Author: Thai Leav <w18918@motorola.com>
+Date:   Thu Jan 13 17:26:56 2011 -0600
+
+    IKSTABLEFOUR-465 : WPA-TKIP with EAP security fails : OMAPS00227871
+    
+    Change-Id: Ie15b3f23cac91256fb2f0601d73fa7eef1562c76
+    Reviewed-on: http://gerrit.blurdev.com/45728
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit e8713b1504fa0a41e7feb7e76528f4f13ad7e5fb
+Merge: d469f50 1a7762b
+Author: Libin Tang <w16529@motorola.com>
+Date:   Wed Jan 12 18:17:59 2011 -0600
+
+    Merge stable4 4.4.1-212 into merge_android-2.3.1_r1
+    
+    Change-Id: I53d541cd5770bf555b0b5ec2ec4a250af5b68e29
+
+commit 3f4de5ca8fad56a75bc3c9874a1b7c797a1efe12
+Author: Julie Regairaz <Julie.Regairaz@motorola.com>
+Date:   Thu Jan 6 14:06:58 2011 -0600
+
+    IKMAIN-8503 : port STA fix for OMAPS00221330
+    
+    Change-Id: I25e2b0076e734525ad596ac39ea50999307f592f
+    Reviewed-on: http://gerrit.blurdev.com/43043
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 82ee86c13de910589b264accff4bcce75217a376
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Wed Jan 5 11:43:26 2011 -0800
+
+    IKSTABLETWOV-1056 , IKSTABLETWOV-1086 , IKSTABLETWOV-1734 , IKSTABLETWOV-3538 , IKSTABLETWOV-5115
+    Propagate RFMD changes from stable-dev2.5 to main-dev
+    
+    Change-Id: I310c72a6c2e2a9d77b96cefbbb3418f0a3af5554
+    Reviewed-on: http://gerrit.blurdev.com/42661
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit fbebffbe84e7fb0eba04e1280c166c0ab6fe42fb
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Dec 31 10:17:24 2010 -0600
+
+    IKSTABLEFOUR-473 : Fix Adhoc ping issue from Auto IP : OMAPS00228901
+    
+    Change-Id: I05820f8449af9b278bf046f20366d096e39a6bf0
+    Reviewed-on: http://gerrit.blurdev.com/42334
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 360bd0a7e2c0ce54cb3d1621fd9856297091c1f3
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Dec 28 15:27:20 2010 -0600
+
+    IKMAIN-10895 : Move Solana WiFi repo to hardware/ti/wlan
+    
+    Change-Id: I8ed566aa769ed28233bc51c59603b6e4ec6dea89
+    Reviewed-on: http://gerrit.blurdev.com/41620
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit 76677a413b5f2099f1327fa5c91bff5b2309c9d5
+Author: Akila Varadarajan <Akila.Varadarajan@motorola.com>
+Date:   Tue Dec 21 11:11:34 2010 -0600
+
+    IKMAIN-9235 - Add Wins server info to dhcp conf
+    
+    Change-Id: I46076366febd31df50d17c1d1d64ac90ae94d8d1
+    Reviewed-on: http://gerrit.blurdev.com/40176
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: David Ding <dding@motorola.com>
+    Reviewed-by: Julie Regairaz <Julie.Regairaz@motorola.com>
+    Reviewed-by: Jeffrey Carlyle <jcarlyle@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit d469f50522de1c1cbbce612161ccb2326183d2cc
+Author: Liu Yu <e7664c@motorola.com>
+Date:   Tue Dec 21 23:09:33 2010 +0800
+
+    adding *.bin files
+    
+    Change-Id: Id873bda9d6af15b370884729325bafd2f2f3ad11
+
+commit 2ad531a6d0f02b6d8e4ef359056c4a9490df9ea2
+Author: Liu Yu <e7664c@motorola.com>
+Date:   Tue Dec 21 21:12:23 2010 +0800
+
+    gingerbread-bringup
+    
+    Change-Id: Ice7752b36f077b0da16c214e5984780805d2395d
+
+commit 3d2f9510b85eb6a6be68a49ca67b8f31a8613f0f
+Author: Thai Leav <w18918@motorola.com>
+Date:   Mon Dec 13 11:52:52 2010 -0600
+
+    IKMAIN-9854 : WiFi MCP 2.5.0.0.9 Driver for Solana
+    
+    Change-Id: I8eafec170b76fa32c1ba3724e06b48828a3eb2c9
+    Reviewed-on: http://gerrit.blurdev.com/38165
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit ab52778a2e0f33c0b986805624cd184760082aa8
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Dec 10 09:13:01 2010 -0600
+
+    IKSTABLETWOV-6737 : Propagate change to main-dev
+    
+    Change-Id: I9eb80c9f086644ef36c48e8030b5f4c252ecee6a
+    Reviewed-on: http://gerrit.blurdev.com/37272
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 74db32e129c51f9ebe68c9d273f8dc97295d97cd
+Author: Jins Varghese <dcw476@motorola.com>
+Date:   Wed Dec 8 15:28:20 2010 +0530
+
+    IKMAIN-10338 : New TI firmware for wifi AP mode
+    
+    Change-Id: Idd8d8329379cdf83d81fe714c81c47b7b9bcb2ec
+    Reviewed-on: http://gerrit.blurdev.com/36638
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit 1a7762bef156cc1c0f8c3044a96ab9df721ffa6b
+Author: Julie Regairaz <Julie.Regairaz@motorola.com>
+Date:   Fri Dec 3 00:22:03 2010 -0600
+
+    IKCONN-87 : 34790.1 - Wifi Always On feature
+                 DTIM skipping implemented in WLAN driver
+                 PNO implemented in wpa_supplicant_lib
+    
+    Change-Id: Ifb2b2f199f2bb8765d58e95173b89ac8c6b0a755
+    Change-Id: I7b87e7eb78331507d6b505ddea314f5dd40e7baa
+    Reviewed-on: http://gerrit.blurdev.com/34915
+    Reviewed-by: Julie Regairaz <Julie.Regairaz@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+    Tested-by: Jira Key <jirakey@motorola.com>
+
+commit 5d88c85a255b87c59b5be237eb1acb24ba85dbee
+Author: Thai Leav <w18918@motorola.com>
+Date:   Mon Nov 29 15:48:28 2010 -0600
+
+    IKMAIN-8438 : WLAN Driver & FW for MCP 2.5
+    
+    Change-Id: Iae32f7897139a3db697043c7d1e5b9571a2dbb1f
+    Reviewed-on: http://gerrit.blurdev.com/34945
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit dfb2e92f401d1a513d1d49afbfdbec604253f141
+Author: Thai Leav <w18918@motorola.com>
+Date:   Mon Nov 29 11:42:25 2010 -0600
+
+    IKMAIN-9155 : Fix WiLink 7 build issue due to IKCONN-343
+    
+    Change-Id: Icce28f52d2d90e3d03e8df52bb565f04cbcaf2f3
+    Reviewed-on: http://gerrit.blurdev.com/34656
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 4851e709c5e233b5a9a8d82dc6f54270e19248e6
+Author: Jins Varghese <dcw476@motorola.com>
+Date:   Mon Nov 29 12:23:16 2010 +0530
+
+    IKCONN-343 : Enhanced Mobile Hotspot solution for TI based products
+    
+    Change-Id: Ia0b9ef23b52391b2a8532fa444c752edb19d2ddf
+    Change-Id: Ibb6655fcd8c73e5c82f7f74e779caa72339ed002
+    Reviewed-on: http://gerrit.blurdev.com/34134
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit afde23068fe2c3735423310ac5062a054c57e2b6
+Author: Hari Srinivas <e50202@motorola.com>
+Date:   Tue Nov 23 15:17:05 2010 -0800
+
+    IKMAIN-8821: Fix TI merge error
+    
+    Change-Id: I5ec9da4f9d45ff082e7f908e2517abe765da8b89
+    Reviewed-on: http://gerrit.blurdev.com/33970
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 4987c7f3b54f954f163278f64027e0434371bbb8
+Author: Hari Srinivas <e50202@motorola.com>
+Date:   Wed Nov 17 15:39:53 2010 -0800
+
+    IKMAIN-8244 : Enable Roaming Scan
+    
+    Change-Id: Ic0376bcf4f83c5dcec916ee7845e128e39705a21
+    Reviewed-on: http://gerrit.blurdev.com/32681
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit 054c0b908ff1796255bc286161ec37052a33c99e
+Author: baozhong <e13358@motorola.com>
+Date:   Tue Nov 16 10:03:19 2010 +0800
+
+    IKMAIN-7948: Port IKSTABLETWOV-3519(Excessive wakeups for Wi-Fi causing
+                 high current drain)
+    Root cause:  ARP packages will wake up TI Wi-Fi driver, and it causes
+                 excessive wakeups.
+    Solution:    Set IP info to TI Wi-Fi chipset to avoid wakeups when handling
+                 ARP packages.
+    
+    Change-Id: I6fba878192663662d16c368052b0300a9b20572b
+    Reviewed-on: http://gerrit.blurdev.com/32432
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
+    Reviewed-by: Hai-Feng Xu <w19978@motorola.com>
+    Reviewed-by: Ming-Shu Jia <w19976@motorola.com>
+
+commit 39ba1fe0b0c84dbdeb722d5cfc24bdaa492be2eb
+Author: Hari Srinivas <e50202@motorola.com>
+Date:   Fri Nov 5 19:09:02 2010 -0700
+
+    IKMAIN-7358 : Fix WLAN-BT Coex related issues
+    
+    Change-Id: I3322f7966676a890664264c51cde3425de3c038e
+    Reviewed-on: http://gerrit.blurdev.com/30142
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit 2534f0eb762503154689e6d87e5fdf8828184c47
+Author: Emily Ren <e5949c@motorola.com>
+Date:   Tue Nov 2 18:29:57 2010 +0800
+
+    SCM team: Revert "SCM team: Revert "IKMAIN-6573: Port IKSTABLETWOV-2211 to main-dev" to fix build issue"
+    
+    This reverts commit f2b2ec2991d2b32b82895225b25b89551e7d18ce.
+
+commit f2b2ec2991d2b32b82895225b25b89551e7d18ce
+Author: Emily Ren <e5949c@motorola.com>
+Date:   Tue Nov 2 11:42:19 2010 +0800
+
+    SCM team: Revert "IKMAIN-6573: Port IKSTABLETWOV-2211 to main-dev" to fix build issue
+    
+    This reverts commit 23fa178b2a3fc0684b8a791eec91abf30ed5294f.
+
+commit 23fa178b2a3fc0684b8a791eec91abf30ed5294f
+Author: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+Date:   Mon Oct 25 12:08:55 2010 +0530
+
+    IKMAIN-6573: Port IKSTABLETWOV-2211 to main-dev
+    
+    Change-Id: I90799c4a92a01d8bb9bed38e43e743474d30a125
+    Reviewed-on: http://gerrit.blurdev.com/28098
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit e9e5b8fb2317f98bdaae8a3b956502f992ef7826
+Author: Julie Regairaz <Julie.Regairaz@motorola.com>
+Date:   Fri Oct 22 13:33:00 2010 -0500
+
+    IKMAIN-6530 : WLAN driver : upmerge to K35
+    
+    Change-Id: Ifa2da02b557df49abccc08dddf181f7673f65b78
+    Reviewed-on: http://gerrit.blurdev.com/27982
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 96b1e8bae65c95542367a6f47e45da8055f2ca81
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Oct 22 08:42:01 2010 -0500
+
+    IKMAIN-6517 : Propagate IKSTABLETWOV-2097 to main-dev
+    
+    Change-Id: Iaa63163ab2c54af7289d4b8b49d622b04d7aa147
+    Reviewed-on: http://gerrit.blurdev.com/27941
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 5f60080e223cc9969c8fdf28a8166cae707457d0
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Sep 28 14:40:56 2010 -0500
+
+    IKMAIN-4961 : Apply dos2unix for WiLink 7 files
+    
+    Change-Id: I996ed666c3786b1ecccc08dae354df24b8a49d6f
+    Change-Id: I1feb0654f9b7ee722e8156d22b5002951440d4ee
+    Reviewed-on: http://gerrit.blurdev.com/23890
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 3d4a093852b8b3390edd85930da5ba022a080ee4
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Sep 24 17:19:57 2010 -0500
+
+    IKMAIN-4961 : WiFi bringup on Solana
+    
+    Change-Id: Id6fb1bc0499ad57f6027d4fa790d3c1826d68424
+    Reviewed-on: http://gerrit.blurdev.com/23366
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit 1750737c8248093e967472e6c837a9cc32c7d429
+Author: Justin Philip <rqwt36@motorola.com>
+Date:   Thu Sep 23 15:34:18 2010 -0700
+
+    IKDROIDPRO-801  Load Product specific RFMD tiwlan_rfmd.ini for DROID2WE and VENUS
+    
+    Change-Id: I267559a999efb5c1fff8d44d82c9eee6feaca2e8
+    Reviewed-on: http://gerrit.blurdev.com/23148
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit f6371b3a617b18a547b02ff748d57abf2e95f744
 Author: Justin Philip <rqwt36@motorola.com>
 Date:   Tue Sep 14 17:35:23 2010 -0700
 
     IKSTABLETWO-6491 Integrate factory recomended changes for  tiwlan_rfmd.ini
+    
+    Change-Id: Iac2e0850ffa99031163bcbd3e460119055778829
+    Reviewed-on: http://gerrit.blurdev.com/21632
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
 
-commit 12ec8f6b5fc704cbca67b2a548dc9c03ec0740d9
+commit 042c69d136b724f6469e39005845f5d5bc7eff95
 Author: Justin Philip <rqwt36@motorola.com>
 Date:   Mon Aug 30 17:13:04 2010 -0700
 
     IKSTABLETWO-6491 Integrate New WIFI RFMD FW and tiwlan.ini
     
-    Change-Id: I9be3b18f9f458f1620f8f14594f5df0cfc124241
+    Change-Id: I7f765c9e1717cc6cf08b0ade85857ea2d0026e86
+    Reviewed-on: http://gerrit.blurdev.com/19218
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+    Reviewed-by: Klocwork kwcheck <kwcheck@motorola.com>
 
-commit 5292c432e0b6303343f2973354d94c85499f3b90
+commit 6fd2bc2362996c223e526b624d67ab1c4ad268f7
 Author: Thai Leav <w18918@motorola.com>
-Date:   Mon Aug 9 10:39:01 2010 -0500
+Date:   Thu Aug 26 12:42:18 2010 -0500
 
-    IKSTABLEONE-1172 : High current drain fix with wake lock : OMAPS00222147
+    IKMAIN-3003 : Fix GAN registration issue
+    
+    Change-Id: I13fae1a49e53f3ca839b37471cced1dfa144e830
+    Reviewed-on: http://gerrit.blurdev.com/18317
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
 
-commit e69f5e1275d22c199e207c301b668f8e5a5bc49e
+commit 5f7517c60a92cd60400165e1d7a7316089083a1f
+Author: Thai Leav <w18918@motorola.com>
+Date:   Fri Aug 27 12:02:52 2010 -0500
+
+    IKMAIN-3161 : Propagate IKMAP-10818 for GAN current drain fix
+    
+    Change-Id: Ic095f5983d626d267fc105bd2fe552e12d0b3c58
+    Reviewed-on: http://gerrit.blurdev.com/18536
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit 3d3f58486666cdcdf21ace1317a3a58f0a47a39b
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Aug 27 15:06:40 2010 +0530
+
+    IKSTABLETWO-5952 : Unstable WIFI connection
+    Use GFP_KERNEL instead of GFP_ATOMIC for alloc_skb for low memory pass
+    
+    Change-Id: I5e5927989e8297aea2e6f6665092504e654833ae
+    Reviewed-on: http://gerrit.blurdev.com/18498
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit 7197009a5fa609bf0466a8081fe3b6258673ac9a
+Author: Jeffrey Carlyle <jeff.carlyle@motorola.com>
+Date:   Mon Aug 23 10:32:23 2010 -0500
+
+    IKKRNBSP-59 Include of twl4030.h is superfluous
+    
+    The driver doesn't actually use any of the defines from twl4030.h, and
+    including it breaks the OMAP4 builds since twl4030.h has been renamed.
+    
+    Signed-off-by: Jeffrey Carlyle <jeff.carlyle@motorola.com>
+    Change-Id: Ia6357171f112280174c1f532b124b5f22d61d25c
+    Reviewed-on: http://gerrit.blurdev.com/17462
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit ce17ef8b5f88116deb04862f55d94b18842ab126
+Author: Thai Leav <w18918@motorola.com>
+Date:   Wed Aug 18 17:21:56 2010 -0500
+
+    IKMAIN-2316 : Remove debug prints left from IKSTABLEONE-1172
+    
+    Change-Id: I0e135c4b7227c065e215c22965507ce6c1c904f5
+    Reviewed-on: http://gerrit.blurdev.com/16695
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Thai Leav <w18918@motorola.com>
+
+commit ac50c065106b10e9f41858424a5020922762699f
+Author: Thai Leav <w18918@motorola.com>
+Date:   Tue Aug 17 13:52:05 2010 -0500
+
+    IKMAIN-2229 : Propagate IKSTABLETWO-3546 to main-dev
+    
+    Change-Id: I9e18ed3842d8de0d0a56de2052e7d20ba7b6370a
+    Reviewed-on: http://gerrit.blurdev.com/16344
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit 4bd733e55be96bac36e5f82d52f8ace32eadc68c
 Author: Justin Philip <rqwt36@motorola.com>
-Date:   Thu Aug 5 15:36:27 2010 -0700
+Date:   Tue Aug 10 17:50:14 2010 -0700
 
-    IKSTABLEONE-3404 WIFI tiwlan.ini change reviewed by Tony Kokab
+    IKSTABLEONE-3507 propagation
     
-    Change-Id: If04dcc1be42bdfe4eba34da9a0f80de98d7fa98d
-    Reviewed-on: http://gerrit.blurdev.com/14200
+    Change-Id: I40dd158dbb869342fdb0e327ef3c9cca4a69f87b
+    Reviewed-on: http://gerrit.blurdev.com/16233
     Tested-by: Jira Key <jirakey@motorola.com>
     Reviewed-by: Tony Kokab <e11370@motorola.com>
 
-commit cc2f3c6c058922bf9ec42417363b791510f1724d
-Author: Binesh B <binesh@motorola.com>
-Date:   Fri Jul 30 11:19:14 2010 +0530
+commit 1fb52820da0d674fde91252b49ac7e862fe0d397
+Author: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+Date:   Tue Aug 10 15:07:27 2010 +0530
 
-    IKSTABLEONE-2846 WiFi IOT improvements based on DroidX Forum feedback
+    IKSTABLEONE-1172: High current drain fix
     
-    Change-Id: I6a2030c333b071400c5e45875d6505d62a52a0ac
-    Reviewed-on: http://gerrit.blurdev.com/12990
+    Change-Id: I2a608e13034eaf2e04351b4fafd46112907463f4
+    Reviewed-on: http://gerrit.blurdev.com/14879
     Tested-by: Jira Key <jirakey@motorola.com>
-    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
 
-commit 0468631ed2da3424289153ac4b7e194929aeddaa
-Author: Tony Kokab <e11370@motorola.com>
-Date:   Sat Jul 24 14:01:10 2010 -0700
-
-    IKSTABLEONE-1605 WiFi Data Connectivity Improvements
-    
-    Change-Id: I919c0cbbde8f519e8cc02eaef8326504e5d66ad8
-    Reviewed-on: http://gerrit.blurdev.com/11894
-    Tested-by: Jira Key <jirakey@motorola.com>
-    Reviewed-by: Tony Kokab <e11370@motorola.com>
-
-commit a02d6bcc303a13354260c965d726b64faf1e9252
+commit daa431b4a000bf13ca3b5c19bacf8abfc7ea411f
 Author: Binesh B <binesh@motorola.com>
-Date:   Fri Jul 23 12:48:11 2010 +0530
+Date:   Wed Aug 4 15:16:08 2010 +0530
 
     IKSTABLEONE-2326 : Add a preventive null check to avoid kernel panic on low memory alloc failure
     
-    Change-Id: Ie6a3add048935302a8536272ed7f2c2fdefb4e28
-    Reviewed-on: http://gerrit.blurdev.com/11603
+    Change-Id: Ib2b76820bb62ec0de95b8b71cfc2daa3d22bf069
+    Reviewed-on: http://gerrit.blurdev.com/13817
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit 4805c7bc3f5948b7462fbb3bb69d93b40720e491
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 30 14:12:07 2010 +0530
+
+    IKSTABLEONE-2846 WiFi IOT improvements based on DroidX Forum feedback
+    
+    Change-Id: I71188fc499af05eba1e9b43fef138ac0d69c2716
+    Reviewed-on: http://gerrit.blurdev.com/13021
     Tested-by: Jira Key <jirakey@motorola.com>
     Reviewed-by: Binesh Balasingh <binesh@motorola.com>
 
-commit 13b31df417da86607843814a8a75efba1ac7386c
-Author: Thai Leav <w18918@motorola.com>
-Date:   Thu Jul 15 13:52:04 2010 -0500
+commit c9e3d3508913818da7bfbc162ea9c0e477532a59
+Author: Ishwara J A <dpn473@motorola.com>
+Date:   Tue Jul 27 13:52:28 2010 +0530
 
-    IKSTABLEONE-1603 : Fix SDIO failures seen on Shadow : OMAPS00221330
+    IKSTABLEONE-1605, propagated to maindev, dpn473, ti patch
     
-    Change-Id: I5eef7905dca978ab755ed4a2a474dd1cc1ec66f8
-    Reviewed-on: http://gerrit.blurdev.com/9996
+    Change-Id: I03fc1710bf8f440abd61ebb7a4432ae0d414f714
+    Reviewed-on: http://gerrit.blurdev.com/12164
     Tested-by: Jira Key <jirakey@motorola.com>
-    Reviewed-by: Tony Kokab <e11370@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
 
-commit bb2d83edafa6ce1a9c83aa36bc334d359b92c3d0
+commit bdc255b5a429e0ea60e6a31d00b7357761b14909
+Author: Sreenivas Rao <MKB386@motorola.com>
+Date:   Fri Jul 16 19:11:33 2010 +0530
+
+    IKSTABLEONE-1127 mkb386 :Propagation of changes from stable-dev1 to main-dev
+    
+    Change-Id: Ie2fa959db679d08d70e68abe12cb7f984767d83f
+    Reviewed-on: http://gerrit.blurdev.com/10507
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
+
+commit b3577068bf237178c40d176d60da654cabb31eac
 Author: Thai Leav <w18918@motorola.com>
-Date:   Thu Jul 15 14:45:43 2010 -0500
+Date:   Thu Jul 15 17:34:04 2010 -0500
 
     IKSTABLEONE-1860 : WiFi wake lock code is missing : Port IKMAP-9555
     
-    Change-Id: I08ef83f764d53d94f9237338138956b3bceea81b
-    Reviewed-on: http://gerrit.blurdev.com/9984
+    Change-Id: Ic0872819e50d753c7864af5f836f310e66fb4d88
+    Reviewed-on: http://gerrit.blurdev.com/10028
     Tested-by: Jira Key <jirakey@motorola.com>
     Reviewed-by: Tony Kokab <e11370@motorola.com>
 
-commit 8ec5e2796812db664f885b64a74e8335bfa8d053
-Author: Ishwara J A <dpn473@motorola.com>
-Date:   Wed Jul 14 18:47:29 2010 +0530
+commit 20cb6129b32e5e2905434dc21311aa9651aa9007
+Author: Thai Leav <w18918@motorola.com>
+Date:   Thu Jul 15 17:15:41 2010 -0500
 
-    IKSTABLEONE-1616, dpn473 , Enhancement for Faster WiFi Wakeup
+    IKSTABLEONE-1603 : Fix SDIO failures seen on Shadow : OMAPS00221330
     
-    Change-Id: Ic4617689040b97c826ec0a84a271af91d06e129a
-    Reviewed-on: http://gerrit.blurdev.com/9611
+    Change-Id: I23ace5a0b0ec6bc87f09d3ad04b47a966de90f4a
+    Reviewed-on: http://gerrit.blurdev.com/10020
+    Tested-by: Jira Key <jirakey@motorola.com>
+    Reviewed-by: Tony Kokab <e11370@motorola.com>
+
+commit a3629c017528986ec2dc17719afecc96ceaf32ad
+Author: Ishwara J A <dpn473@motorola.com>
+Date:   Wed Jul 14 18:53:18 2010 +0530
+
+    IKSTABLEONE-1616: dpn473, propagated to main-dev, Enhancement for Faster WiFi Wakeup
+    
+    Change-Id: I8fe5d949845aca8f9edba842d3e5a47d8d7a110b
+    Reviewed-on: http://gerrit.blurdev.com/9614
     Tested-by: Jira Key <jirakey@motorola.com>
     Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
 
-commit fddfe87c05362f35ead086fdab23cb7eacda9877
-Author: Sreenivas Rao <MKB386@motorola.com>
-Date:   Sat Jul 10 16:50:10 2010 +0530
-
-    IKSTABLEONE-1127 mkb386 :mergingshadowchangestostable-dev1
-    
-    Change-Id: I10a080241010ed060f7a4f33e5dd428e68a1d872
-    Reviewed-on: http://gerrit.blurdev.com/9073
-    Reviewed-by: Prashanth Chakravarthy <prashanth.chakravarthy@motorola.com>
-
-commit ee1a9cb7ad676034706bd6060c08f8eaea531c63
+commit 2a796ded9ce86586ad6086b2461ae3987b03b801
 Author: Binesh B <binesh@motorola.com>
-Date:   Fri Jul 9 15:40:53 2010 +0530
-
-    IKSTABLEONE-1238 : Port IKMAPFOUR-1448
-    
-    Change-Id: Ia890d42bc0172b2804ff4d0c717fd8edfc9a9c37
-    Reviewed-on: http://gerrit.blurdev.com/8888
-    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
-
-commit 4dc1f2cd7b8f7bdc04f1f6a131b24bde1acd4c7a
-Author: Binesh B <binesh@motorola.com>
-Date:   Fri Jul 9 14:15:35 2010 +0530
+Date:   Fri Jul 9 14:19:44 2010 +0530
 
     IKSTABLEONE-1238: Propagate IKSHADOW-7661
     
-    Change-Id: I75aaecbc466b38e3d4fca74e362da05b231604e5
-    Reviewed-on: http://gerrit.blurdev.com/8876
+    Change-Id: I87c4de6306e816d5744d7d90c51e2570b1f16a18
+    Reviewed-on: http://gerrit.blurdev.com/8877
     Reviewed-by: Binesh Balasingh <binesh@motorola.com>
 
-commit cdcb5d350c34ac690290865ba0dbd8d4df38c244
+commit e853dedad87e298bd102827546b0b19625cbf0db
+Author: Liu Yu <e7664c@motorola.com>
+Date:   Mon Jul 12 17:12:59 2010 +0800
+
+    SCM: revert 0d6b573d9f99eba4aa2563d8e8e886a0f13ab2b0
+
+commit b3fc02659b9151157c4278eeb70c2203f4ab3632
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 9 15:42:30 2010 +0530
+
+    IKSTABLEONE-1238: Port IKMAPFOUR-1448
+    
+    Change-Id: I5ceb47263ca089a2e1124fd9e835cfa1c5d00e16
+    Reviewed-on: http://gerrit.blurdev.com/8889
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit 0d6b573d9f99eba4aa2563d8e8e886a0f13ab2b0
+Author: Binesh B <binesh@motorola.com>
+Date:   Fri Jul 9 14:19:44 2010 +0530
+
+    IKSTABLEONE-1238: Propagate IKSHADOW-7661
+    
+    Change-Id: I87c4de6306e816d5744d7d90c51e2570b1f16a18
+    Reviewed-on: http://gerrit.blurdev.com/8877
+    Reviewed-by: Binesh Balasingh <binesh@motorola.com>
+
+commit a154c3045337f4725e743c83c1719105c5daeb90
 Author: Fred Fettinger <fred.fettinger@motorola.com>
-Date:   Wed Jun 30 16:27:18 2010 -0500
+Date:   Wed Jun 30 17:24:41 2010 -0500
 
     IKSTABLEONE-629: wpa_supplicant_lib: fix linker error
     
@@ -161,23 +668,23 @@ Date:   Wed Jun 30 16:27:18 2010 -0500
     system/wlan/ti/wilink_6_1/wpa_supplicant_lib/Android.mk
     external/wpa_supplicant_6/wpa_supplicant/Android.mk
     
-    Change-Id: I6d1515167b70e402e9e948566c58c2d3138da3c7
+    Change-Id: I7f7bb9fbee9fc2abd84116ef348587dc77a8a76f
     Signed-off-by: Fred Fettinger <fred.fettinger@motorola.com>
-    Reviewed-on: http://gerrit.blurdev.com/7225
+    Reviewed-on: http://gerrit.blurdev.com/7227
     Reviewed-by: David Ding <dding@motorola.com>
     Reviewed-by: Joseph Swantek <w98568@motorola.com>
     Reviewed-by: Tony Kokab <e11370@motorola.com>
     Reviewed-by: Julien Brongniart <jbro01@motorola.com>
 
-commit 5c387a4600f627cef53b3e475da8fc9554c680de
+commit 569aaaec5ed54ca68e048872b6cdbe94fc40dabd
 Author: Tony Kokab <e11370@motorola.com>
-Date:   Thu Jun 24 13:10:05 2010 -0700
+Date:   Sat Jun 26 14:48:10 2010 -0700
 
     IKSTABLEONE-12 - WiFi Froyo Merges
     Update to Latest TI WiFi Driver and add AP Mode WiFi Driver
     
-    Change-Id: I0b3ad2a3f543f9e39e760e9dd44e9a0bb727e4c3
-    Reviewed-on: http://gerrit.blurdev.com/6338
+    Change-Id: I979b2ebf1a4a6c565ffe900da8f1e3194305a541
+    Reviewed-on: http://gerrit.blurdev.com/6694
     Reviewed-by: Tony Kokab <e11370@motorola.com>
     Reviewed-by: Julien Brongniart <jbro01@motorola.com>
 

@@ -132,15 +132,17 @@ typedef enum
     /* RX data section */
     RX_DATA_COUNTERS_PARAM                          =           GET_BIT | RX_DATA_MODULE_PARAM | 0x01,
     RX_DATA_EXCLUDE_UNENCRYPTED_PARAM               = SET_BIT | GET_BIT | RX_DATA_MODULE_PARAM | 0x02,
-    RX_DATA_EXCLUDE_BROADCAST_UNENCRYPTED_PARAM = SET_BIT | GET_BIT | RX_DATA_MODULE_PARAM | 0x03,
+    RX_DATA_EXCLUDE_BROADCAST_UNENCRYPTED_PARAM 	= SET_BIT | GET_BIT | RX_DATA_MODULE_PARAM | 0x03,
     RX_DATA_RATE_PARAM                              =           GET_BIT | RX_DATA_MODULE_PARAM | 0x08,
     RX_DATA_GENERIC_ETHERTYPE_PARAM                 = SET_BIT           | RX_DATA_MODULE_PARAM | 0x09,
+	RX_DATA_LINK_COUNTERS			                =           GET_BIT | RX_DATA_MODULE_PARAM | 0x0A,
      
     /* TX data section */
     TX_CTRL_GET_MEDIUM_USAGE_THRESHOLD              = SET_BIT | GET_BIT | TX_CTRL_MODULE_PARAM | 0x04,
-    TX_CTRL_POLL_AP_PACKETS_FROM_AC                     = SET_BIT           | TX_CTRL_MODULE_PARAM | 0x05,
-    TX_CTRL_REPORT_TS_STATISTICS                        =           GET_BIT | TX_CTRL_MODULE_PARAM | 0x06,
+    TX_CTRL_POLL_AP_PACKETS_FROM_AC                 = SET_BIT           | TX_CTRL_MODULE_PARAM | 0x05,
+    TX_CTRL_REPORT_TS_STATISTICS                    =           GET_BIT | TX_CTRL_MODULE_PARAM | 0x06,
     TX_CTRL_GET_DATA_FRAME_COUNTER                  =           GET_BIT | TX_CTRL_MODULE_PARAM | 0x07,
+	TX_CTRL_GET_DATA_LINK_COUNTER                   =           GET_BIT | TX_CTRL_MODULE_PARAM | 0x08,
     
     /* CTRL data section */
     CTRL_DATA_RATE_CONTROL_ENABLE_PARAM             = SET_BIT           | CTRL_DATA_MODULE_PARAM | 0x02,

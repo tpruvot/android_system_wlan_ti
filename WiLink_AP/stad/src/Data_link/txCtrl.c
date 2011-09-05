@@ -234,10 +234,8 @@ void txCtrl_Init (TStadHandlesList *pStadHandles)
 
     /* Reset counters */
     txCtrlParams_resetCounters (pStadHandles->hTxCtrl);
-
-#ifdef TI_DBG
     txCtrlParams_resetDbgCounters (pStadHandles->hTxCtrl);
-#endif
+
 
     /* Register the Tx-Complete callback function. */
 	TWD_RegisterCb (pTxCtrl->hTWD, 
@@ -345,13 +343,11 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	SELECT_AC_FOR_TID (pTxCtrl, pPktCtrlBlk->tTxDescriptor.tid, uAc);
 	uHlid = pPktCtrlBlk->tTxDescriptor.hlid;
 
-#ifdef TI_DBG
 	TRACE4(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitData(): Pkt Tx, DescID=%d, AC=%d, LINK=%d, Len=%d\n", pPktCtrlBlk->tTxDescriptor.descID, uAc, uHlid, pPktCtrlBlk->tTxDescriptor.length );
 
 	pTxCtrl->dbgCounters.dbgNumPktsSent[uAc]++;
 	pTxCtrl->dbgLinkCounters.dbgNumPktsSent[uHlid]++;
-#endif
-
+    
 	/* Call TxHwQueue for Hw resources allocation. */
 	{
 		CL_TRACE_START_L4();
@@ -367,11 +363,10 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If the current LINK can't get more packets, stop it in data-queue module. */
 	if (eHwQueStatus & TX_HW_LINK_STATUS_STOP_NEXT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsLinkBackpressure[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsBackpressure[uHlid]++;
 		TRACE2(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitData(): Backpressure = 0x%x, link = %d\n", uBackpressure, uHlid);
-#endif
+
 		uBackpressure = 1 << uHlid;
 		pTxCtrl->busyLinkBitmap |= uBackpressure; /* Set the busy bit of the current AC. */
 		txDataQ_StopLink (pTxCtrl->hTxDataQ, uHlid);
@@ -380,11 +375,10 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If current packet can't be transmitted due to lack of resources, return with BUSY value. */
 	else if (eHwQueStatus & TX_HW_LINK_STATUS_STOP_CURRENT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsLinkBusy[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsBusy[uHlid]++;
 		TRACE1(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitData(): Link busy - Packet dropped, link = %d\n", uHlid);
-#endif
+
 		txDataQ_StopLink (pTxCtrl->hTxDataQ, uHlid);
 		CL_TRACE_END_L3("tiwlan_drv.ko", "INHERIT", "TX", "");
 		return STATUS_XMIT_BUSY;
@@ -394,11 +388,10 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If the current AC can't get more packets, stop it in data-queue module. */
 	if (eHwQueStatus & TX_HW_QUE_STATUS_STOP_NEXT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsBackpressure[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBackpressure[uHlid]++;
 		TRACE2(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitData(): Backpressure = 0x%x, queue = %d\n", uBackpressure, uAc);
-#endif
+
 		uBackpressure = 1 << uAc;
 		pTxCtrl->busyAcBitmap |= uBackpressure; /* Set the busy bit of the current AC. */
 		txDataQ_StopQueue (pTxCtrl->hTxDataQ, pTxCtrl->admittedAcToTidMap[uAc]);
@@ -407,11 +400,10 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If current packet can't be transmitted due to lack of resources, return with BUSY value. */
 	else if (eHwQueStatus & TX_HW_QUE_STATUS_STOP_CURRENT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsBusy[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBusy[uHlid]++;
 		TRACE1(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitData(): Queue busy - Packet dropped, queue = %d\n", uAc);
-#endif
+
 		txDataQ_StopQueue (pTxCtrl->hTxDataQ, pTxCtrl->admittedAcToTidMap[uAc]);
 		CL_TRACE_END_L3("tiwlan_drv.ko", "INHERIT", "TX", "");
 		return STATUS_XMIT_BUSY;
@@ -433,11 +425,9 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 
 	if (eStatus == TXN_STATUS_ERROR)
 	{
-#ifdef TI_DBG  
 		TRACE3(pTxCtrl->hReport, REPORT_SEVERITY_ERROR, "txCtrl_XmitData(): Xfer Error, queue = %d, link = %d, Status = %d\n", uAc, uHlid, eStatus);
 		pTxCtrl->dbgCounters.dbgNumPktsError[uAc]++;	
 		pTxCtrl->dbgLinkCounters.dbgNumPktsError[uHlid]++;	
-#endif
 
 		/* Free the packet resources (packet and CtrlBlk)  */
 		txCtrl_FreePacket (pTxCtrl, pPktCtrlBlk, TI_NOK);
@@ -446,10 +436,9 @@ TI_STATUS txCtrl_XmitData (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 		return STATUS_XMIT_ERROR;
 	}
 
-#ifdef TI_DBG  
 	pTxCtrl->dbgCounters.dbgNumPktsSuccess[uAc]++;	
 	pTxCtrl->dbgLinkCounters.dbgNumPktsSuccess[uHlid]++;	
-#endif
+
 	CL_TRACE_END_L3("tiwlan_drv.ko", "INHERIT", "TX", "");
 	return STATUS_XMIT_SUCCESS;
 }
@@ -480,10 +469,8 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	 */
 	SELECT_AC_FOR_TID (pTxCtrl, pPktCtrlBlk->tTxDescriptor.tid, uAc);
 	uHlid = pPktCtrlBlk->tTxDescriptor.hlid;
-#ifdef TI_DBG
 	pTxCtrl->dbgCounters.dbgNumPktsSent[uAc]++;
 	pTxCtrl->dbgLinkCounters.dbgNumPktsSent[uHlid]++;
-#endif
 
 	/* Call TxHwQueue for Hw resources allocation. */
 	eHwQueStatus = TWD_txHwQueue_AllocResources (pTxCtrl->hTWD, pPktCtrlBlk);
@@ -496,11 +483,10 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If the current LINK can't get more packets, stop it in data-queue module. */
 	if (eHwQueStatus & TX_HW_LINK_STATUS_STOP_NEXT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsLinkBackpressure[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsBackpressure[uHlid]++;
 		TRACE2(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitMgmt(): Backpressure = 0x%x, link = %d\n", uBackpressure, uHlid);
-#endif
+
 		uBackpressure = 1 << uHlid;
 		pTxCtrl->busyLinkBitmap |= uBackpressure; /* Set the busy bit of the current AC. */
 		txMgmtQ_StopLink (pTxCtrl->hTxMgmtQ, uHlid);
@@ -509,11 +495,10 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If current packet can't be transmitted due to lack of resources, return with BUSY value. */
 	else if (eHwQueStatus & TX_HW_LINK_STATUS_STOP_CURRENT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsLinkBusy[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsBusy[uHlid]++;
 		TRACE1(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitMgmt(): Link busy - Packet dropped, link = %d\n", uHlid);
-#endif
+
 		txMgmtQ_StopLink (pTxCtrl->hTxMgmtQ, uHlid);
 		CL_TRACE_END_L3("tiwlan_drv.ko", "INHERIT", "TX", "");
 		return STATUS_XMIT_BUSY;
@@ -523,11 +508,10 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If the used AC can't get more packets, stop it in mgmt-queue module. */
 	if (eHwQueStatus & TX_HW_QUE_STATUS_STOP_NEXT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsBackpressure[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBackpressure[uHlid]++;
 		TRACE2(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitMgmt(): Backpressure = 0x%x, queue = %d\n", uBackpressure, uAc);
-#endif
+
 		uBackpressure = 1 << uAc;
 		pTxCtrl->busyAcBitmap |= uBackpressure; /* Set the busy bit of the current AC. */
 		txMgmtQ_StopQueue (pTxCtrl->hTxMgmtQ, pTxCtrl->admittedAcToTidMap[uAc]);
@@ -536,11 +520,10 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 	/* If current packet can't be transmitted due to lack of resources, return with BUSY value. */
 	else if (eHwQueStatus & TX_HW_QUE_STATUS_STOP_CURRENT)
 	{
-#ifdef TI_DBG
 		pTxCtrl->dbgCounters.dbgNumPktsBusy[uAc]++;
 		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBusy[uHlid]++;
 		TRACE1(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_XmitMgmt(): Queue busy - Packet dropped, queue = %d\n", uAc);
-#endif
+
 		txMgmtQ_StopQueue (pTxCtrl->hTxMgmtQ, pTxCtrl->admittedAcToTidMap[uAc]);
 		return STATUS_XMIT_BUSY;
 	}
@@ -553,20 +536,30 @@ TI_STATUS txCtrl_XmitMgmt (TI_HANDLE hTxCtrl, TTxCtrlBlk *pPktCtrlBlk)
 
 	if (eStatus == TXN_STATUS_ERROR)
 	{
-#ifdef TI_DBG  
 		TRACE3(pTxCtrl->hReport, REPORT_SEVERITY_ERROR, "txCtrl_XmitMgmt(): Xfer Error, queue=%d, link=%d, Status = %d\n", uAc, uHlid, eStatus);
 		pTxCtrl->dbgCounters.dbgNumPktsError[uAc]++;	
 		pTxCtrl->dbgLinkCounters.dbgNumPktsError[uHlid]++;	
-#endif
+
+        /* On mgmt frames, send Tx complete packet with error indication to hostapd */
+        if (IS_PKT_TYPE_IF_ROLE_AP(pPktCtrlBlk) && (pPktCtrlBlk->tTxPktParams.uPktType == TX_PKT_TYPE_MGMT))
+        {
+            rxData_mgmtPacketComplete(pTxCtrl->hRxData, pPktCtrlBlk->tTxnStruct.aBuf[1], pPktCtrlBlk->tTxPktParams.uInputPktLen , TI_FALSE);
+        }
+
 		/* Free the packet resources (packet and CtrlBlk)  */
 		txCtrl_FreePacket (pTxCtrl, pPktCtrlBlk, TI_NOK);
 		return STATUS_XMIT_ERROR;
 	}
 
-#ifdef TI_DBG  
 	pTxCtrl->dbgCounters.dbgNumPktsSuccess[uAc]++;	
 	pTxCtrl->dbgLinkCounters.dbgNumPktsSuccess[uHlid]++;	
-#endif
+
+    /* On mgmt frames, send Tx complete packet with success indication to hostapd */
+    if (IS_PKT_TYPE_IF_ROLE_AP(pPktCtrlBlk) && (pPktCtrlBlk->tTxPktParams.uPktType == TX_PKT_TYPE_MGMT))
+    {
+        rxData_mgmtPacketComplete(pTxCtrl->hRxData, pPktCtrlBlk->tTxnStruct.aBuf[1], pPktCtrlBlk->tTxPktParams.uInputPktLen , TI_TRUE);
+    }
+
 	return STATUS_XMIT_SUCCESS;
 }
 
@@ -733,13 +726,7 @@ TRACE3(pTxCtrl->hReport, REPORT_SEVERITY_INFORMATION, "txCtrl_TxCompleteCb(): Pk
         CL_TRACE_END_L4("tiwlan_drv.ko", "INHERIT", "TX_Cmplt", ".Cntrs");
     }
 
-    /* On mgmt frames, send Tx complete packet to hostapd */
-    if (IS_PKT_TYPE_IF_ROLE_AP(pPktCtrlBlk) && (pPktCtrlBlk->tTxPktParams.uPktType == TX_PKT_TYPE_MGMT))
-    {
-        rxData_mgmtPacketComplete(pTxCtrl->hRxData, pPktCtrlBlk->tTxnStruct.aBuf[1], pPktCtrlBlk->tTxPktParams.uInputPktLen , pTxResultInfo->status == TX_SUCCESS);
-    }
-
-	/* Free the packet resources (packet and CtrlBlk)  */
+    /* Free the packet resources (packet and CtrlBlk)  */
     txCtrl_FreePacket (pTxCtrl, pPktCtrlBlk, TI_OK);
 
 	CL_TRACE_END_L3("tiwlan_drv.ko", "INHERIT", "TX_Cmplt", "");
@@ -975,6 +962,10 @@ static void txCtrl_BuildDataPkt (txCtrl_t *pTxCtrl, TTxCtrlBlk *pPktCtrlBlk,
 	/* Build packet header (including MAC, LLC/SNAP, security padding, header alignment padding). */
     uHdrAlignPad = txCtrl_BuildDataPktHdr ((TI_HANDLE)pTxCtrl, pPktCtrlBlk, eAckPolicy);
 
+    /* Update link byte counter*/
+	pTxCtrl->dbgLinkCounters.dbgNumBytesSent[pPktCtrlBlk->tTxDescriptor.hlid] +=
+		(pPktCtrlBlk->tTxDescriptor.length - sizeof(TxIfDescriptor_t));
+
 	/* Update packet length in the descriptor according to HW interface requirements */
     uLastWordPad = txCtrl_TranslateLengthToFw (pPktCtrlBlk);
 
@@ -1014,11 +1005,9 @@ static void txCtrl_BuildDataPkt (txCtrl_t *pTxCtrl, TTxCtrlBlk *pPktCtrlBlk,
     /* Indicate that the packet is transfered to the FW, and the descriptor fields are in FW format! */
     pPktCtrlBlk->tTxPktParams.uFlags |= TX_CTRL_FLAG_SENT_TO_FW;
 
-#ifdef TI_DBG  
 	pTxCtrl->dbgPktSeqNum++;
 	pTxCtrl->dbgCounters.dbgNumPktsXfered[uAc]++;	/* Count packets sent to Xfer. */
 	pTxCtrl->dbgLinkCounters.dbgNumPktsXfered[pPktCtrlBlk->tTxDescriptor.hlid]++;	/* Count packets sent to Xfer. */
-#endif
 }
 
 
@@ -1040,8 +1029,8 @@ static void txCtrl_BuildMgmtPkt (txCtrl_t *pTxCtrl, TTxCtrlBlk *pPktCtrlBlk, TI_
 	if (uPktType == TX_PKT_TYPE_EAPOL)
 	{
         uHdrAlignPad = txCtrl_BuildDataPktHdr ((TI_HANDLE)pTxCtrl, pPktCtrlBlk, ACK_POLICY_LEGACY);
-
-		uRatePolicy = pTxCtrl->dataRatePolicy[uAc];
+        /* Use Managment policy for EAPOL transmit*/
+		uRatePolicy = pTxCtrl->mgmtRatePolicy[0];
 	}
 
 	/*  Other types are already in WLAN format so copy header from Wbuf to Ctrl-Blk. */
@@ -1080,6 +1069,10 @@ static void txCtrl_BuildMgmtPkt (txCtrl_t *pTxCtrl, TTxCtrlBlk *pPktCtrlBlk, TI_
 		}
 	}
 
+	/* Update link byte counter*/
+	pTxCtrl->dbgLinkCounters.dbgNumBytesSent[pPktCtrlBlk->tTxDescriptor.hlid] +=
+		(pPktCtrlBlk->tTxDescriptor.length - sizeof(TxIfDescriptor_t));
+
 	/* Update packet length in the descriptor according to HW interface requirements */
     uLastWordPad = txCtrl_TranslateLengthToFw (pPktCtrlBlk);
 
@@ -1100,11 +1093,9 @@ static void txCtrl_BuildMgmtPkt (txCtrl_t *pTxCtrl, TTxCtrlBlk *pPktCtrlBlk, TI_
     /* Indicate that the packet is transfered to the FW, and the descriptor fields are in FW format! */
     pPktCtrlBlk->tTxPktParams.uFlags |= TX_CTRL_FLAG_SENT_TO_FW;
 
-#ifdef TI_DBG  
 	pTxCtrl->dbgPktSeqNum++;
 	pTxCtrl->dbgCounters.dbgNumPktsXfered[uAc]++;	/* Count packets sent to Xfer. */
 	pTxCtrl->dbgLinkCounters.dbgNumPktsXfered[pPktCtrlBlk->tTxDescriptor.hlid]++;	/* Count packets sent to Xfer. */
-#endif
 }
 
 
@@ -1329,8 +1320,6 @@ static void txCtrl_UpdateTxCounters (txCtrl_t *pTxCtrl,
     pktLen = (TI_UINT32)ENDIAN_HANDLE_WORD(pPktCtrlBlk->tTxDescriptor.length);
     pktLen = pktLen << 2;
 
-#ifdef TI_DBG
-
 	/* update debug counters. */
 	pTxCtrl->dbgCounters.dbgNumTxCmplt[ac]++;
 	pTxCtrl->dbgLinkCounters.dbgNumTxCmplt[uHlid]++;
@@ -1358,7 +1347,6 @@ TRACE1(pTxCtrl->hReport, REPORT_SEVERITY_WARNING, "txCtrl_UpdateTxCounters(): Tx
         }
 	}
 
-#endif /* TI_DBG */
 
 	/* If it's not a data packet, exit (the formal statistics are only on network stack traffic). */
 	if ( !bIsDataPkt )

@@ -1,31 +1,36 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * TWDriver.h
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
  
 /** \file  TWDriver.h 
  *  \brief TWDriver APIs
@@ -226,6 +231,9 @@
 #define SMART_REFLEX_DEBUG_DEF        0
 
 #define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE  "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+#define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE_SRF1  "07,03,18,10,05,fb,f0,e8, 0,0,0,0,0,0,0f,3f"
+#define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE_SRF2  "07,03,18,10,05,f6,f0,e8"
+#define SMART_REFLEX_CONFIG_PARAMS_DEF_TABLE_SRF3  "07,03,18,10,05,fb,f0,e8"
 
 #define TWD_FRAG_THRESHOLD_MIN          256
 #define TWD_FRAG_THRESHOLD_MAX          4096
@@ -261,6 +269,12 @@
 #define TWD_RX_ANTENNA_MAX              RX_ANTENNA_PARTIAL
 #define TWD_RX_ANTENNA_DEF              RX_ANTENNA_FULL
 
+/*
+ * Host I/f configuration
+ */
+#define TWD_HOST_IF_CFG_BITMAP_DEF      1
+#define TWD_HOST_IF_CFG_BITMAP_MIN      0
+#define TWD_HOST_IF_CFG_BITMAP_MAX      0xffffffff
 /*
  * Tx and Rx interrupts pacing (threshold in packets, timeouts in milliseconds)
  */
@@ -470,6 +484,7 @@
 #define HT_INF_NON_GF_PRES_BITMASK             0x04
 #define HT_INF_TX_BURST_LIMIT_BITMASK          0x08
 #define HT_INF_DUAL_BEACON_BITMASK             0x40
+#define HT_INF_DUAL_CTS_PROTECTION_BITMASK     0x80
 
 /* 
  * TWD HT capabilities, physical capabilities of the STA.
@@ -921,9 +936,9 @@ typedef enum
 /*	6	*/	KEEP_ALIVE_TEMPLATE,		/**< Keep Alive Template 					*/
 /*	7	*/	DISCONN_TEMPLATE,			/**< Disconn (Deauth/Disassoc) Template		*/
 /*	8	*/	ARP_RSP_TEMPLATE,			/**< ARP Ressponse Template		            */
-/*	7	*/	AP_BEACON_TEMPLATE,			/**< AP beacon Template             		*/
-/*	8	*/	AP_PROBE_RESPONSE_TEMPLATE,	/**< AP Probe Response Template		        */
-/*	9	*/	AP_DEAUTH_TEMPLATE			/**< AP Deauth Station Template		        */
+/*	9	*/	AP_BEACON_TEMPLATE,			/**< AP beacon Template             		*/
+/*	10	*/	AP_PROBE_RESPONSE_TEMPLATE,	/**< AP Probe Response Template		        */
+/*	11  */	AP_DEAUTH_TEMPLATE			/**< AP Deauth Station Template		        */
 
 } ETemplateType;
 
@@ -1244,11 +1259,14 @@ typedef enum
  */
 typedef enum
 {   
-/*	0	*/	MAX_MPDU_8191_OCTETS = 0,	/**< Maximum MPDU Octets Number: 8191	*/
+            MAX_MPDU_MIN_VALUE = 0,
+
+/*	0	*/	MAX_MPDU_8191_OCTETS = MAX_MPDU_MIN_VALUE,	/**< Maximum MPDU Octets Number: 8191	*/
 /*	1	*/  MAX_MPDU_16383_OCTETS,		/**< Maximum MPDU Octets Number: 16383	*/
 /*	2	*/  MAX_MPDU_32767_OCTETS,		/**< Maximum MPDU Octets Number: 32767	*/
-/*	3	*/  MAX_MPDU_65535_OCTETS		/**< Maximum MPDU Octets Number: 65535	*/
+/*	3	*/  MAX_MPDU_65535_OCTETS,		                /**< Maximum MPDU Octets Number: 65535	*/
 
+            MAX_MPDU_MAX_VALUE = MAX_MPDU_65535_OCTETS
 } ETwdMaxAMPDU;
 
 /** \enum ETwdAMPDUSpacing
@@ -2476,8 +2494,8 @@ typedef union
     
     /* Security related parameters */
 #ifdef XCC_MODULE_INCLUDED
-    TI_BOOL                             rsnCcxSwEncFlag;				/**< */
-    TI_BOOL                             rsnCcxMicFieldFlag;				/**< */
+    TI_BOOL                             rsnXCCSwEncFlag;				/**< */
+    TI_BOOL                             rsnXCCMicFieldFlag;				/**< */
 #endif
     ECipherSuite                        rsnEncryptionStatus;			/**< */
     TI_UINT8                            rsnHwEncDecrEnable; 			/**< 0- disable, 1- enable */
@@ -2562,7 +2580,7 @@ typedef struct
  */ 
 typedef struct
 {
-    PacketClassTag_enum                 ePacketType;    /**< */
+    PacketClassTag_e                    ePacketType;    /**< */
     TI_STATUS                           status;			/**< */
     ERate                               Rate;   		/**< */
     TI_UINT8                            SNR;			/**< */
@@ -2599,7 +2617,7 @@ typedef struct
     TI_UINT8                            halCtrlArmClock;					/**< */
     TI_UINT16                           halCtrlBcnRxTime;					/**< */
     TI_BOOL                             halCtrlRxEnergyDetection;    		/**< */
-    TI_BOOL                             halCtrlTxEnergyDetection;			/**< */
+    TI_BOOL                             halCtrlCh14TelecCca;				/**< */
     TI_BOOL                             halCtrlEepromLessEnable;			/**< */
     TI_BOOL                             halCtrlRxDisableBroadcast;			/**< */
     TI_BOOL                             halCtrlRecoveryEnable;				/**< */
@@ -2614,6 +2632,9 @@ typedef struct
     TI_UINT16                           RxIntrPacingThreshold;			    /**< */
     TI_UINT16                           RxIntrPacingTimeout;			    /**< */
 
+    TI_UINT8                            GenFwCmd[GEN_FW_CMD_SIZE];		    /**< */
+    TI_UINT32                           HostIfCfgBitmap;					/**< */
+    
     TI_UINT32                           uRxAggregPktsLimit;					/**< */
     TI_UINT32                           uTxAggregPktsLimit;					/**< */
     TI_UINT8                            hwAccessMethod;						/**< */
@@ -2650,7 +2671,16 @@ typedef struct
     TI_UINT8                            uHostFastWakeupSupport;             /**< */
     THalCoexActivityTable               halCoexActivityTable;               /**< */
     TFmCoexParams                       tFmCoexParams;                      /**< */
+    TI_UINT8                            uMaxAMPDU;                          /**< */
 
+#ifdef TNETW1283
+    /* TCXO parameters */
+    TI_UINT8                            TcxoRefClk;                         /**< */
+    TI_UINT8                            TcxoSettlingTime;                   /**< */
+    TI_UINT8                            TcxoValidOnWakeup;                  /**< */
+    TI_UINT8                            TcxoLdoVoltage;                     /**< */
+    TI_UINT8                            NewPllAlgo; 
+#endif
 } TGeneralInitParams;
 
 /** \struct TPowerSrvInitParams
@@ -2838,9 +2868,7 @@ typedef struct
 typedef struct
 {
     TMacAddr   aMacAddr;
-    TI_UINT32   uMode;
 }TTwdConnPhaseParam;
-
 /*
  * --------------------------------------------------------------
  *	APIs
@@ -4856,7 +4884,7 @@ TI_STATUS TWD_RemSta(TI_HANDLE hTWD, TI_UINT8 uHlid, TI_UINT8 uDeauthReason, TI_
  */ 
 TI_STATUS TWD_NopCmd(TI_HANDLE hTWD, void *fCb, TI_HANDLE  hCb);
 
-/*
+/** 
  * \fn     TWD_SetConnectionPhase
  * \brief  Set in connection phase for a STA
  * 

@@ -1350,7 +1350,6 @@ typedef enum
 																															* GET Bit: OFF	\n
 																															* SET Bit: ON	\n
 																															*/
-
     TX_CTRL_GENERIC_ETHERTYPE         			=	SET_BIT | GET_BIT | TX_CTRL_MODULE_PARAM | 0x10,						/**< TX Control Get/Set Generic Ethertype (TX Control Module Get/Set Command): \n  
 																															* Used for setting the Generic Ethertype for authentication packets\n
 																															* Done Sync with no memory allocation\n 
@@ -1403,8 +1402,6 @@ typedef enum
 																															* GET Bit: ON	\n
 																															* SET Bit: OFF	\n
 																															*/
-    
-
 	/* measurement section */
     MEASUREMENT_ENABLE_DISABLE_PARAM			=	SET_BIT |           MEASUREMENT_MODULE_PARAM | 0x01,	/**< Measurement Enable/Disable Parameter (Measurement Module Set Command): \n  
 																											* Used for Enabling/Disabling Measurement Management Module\n
@@ -1499,6 +1496,8 @@ typedef enum
     ROLE_AP_SET_SSID_PARAM                          =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x07,
     ROLE_AP_SET_GENERIC_CMD_TO_FW_PARAM             =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x08,
     ROLE_AP_PRINT_DB				                =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x09,
+
+	ROLE_AP_GET_LINK_COUNTERS               		=   GET_BIT | ROLE_AP_MODULE_PARAM | 0x0A,
 
 
 /* ********************************************************************************************/

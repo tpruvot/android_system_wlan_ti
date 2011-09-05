@@ -45,6 +45,8 @@
 
 
 #define __FILE_ID__  FILE_ID_125
+
+#include "linux/kernel.h"
 #include "osApi.h"
 #include "report.h"
 #include "context.h"
@@ -274,7 +276,6 @@ TI_UINT32 context_RegisterClient (TI_HANDLE       hContext,
 void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
 {
 	TContext *pContext = (TContext *)hContext;
-
 #ifdef TI_DBG
     pContext->aRequestCount[uClientId]++; 
     TRACE3(pContext->hReport, REPORT_SEVERITY_INFORMATION , "context_RequestSchedule(): Client=, ID=%d, enabled=%d, pending=%d\n", uClientId, pContext->aClientEnabled[uClientId], pContext->aClientPending[uClientId]);
@@ -288,10 +289,11 @@ void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
      * Else (context switch not required) call the driver task directly. 
      */
     if (pContext->bContextSwitchRequired)
-    {
+     {
         os_RequestSchedule (pContext->hOs);
     }
     else 
+
     {
         context_DriverTask (hContext);
     }
@@ -320,7 +322,6 @@ void context_DriverTask (TI_HANDLE hContext)
     CL_TRACE_START_L1();
 
     TRACE0(pContext->hReport, REPORT_SEVERITY_INFORMATION , "context_DriverTask():\n");
-
     /* For all registered clients do: */
 	for (i = 0; i < pContext->uNumClients; i++)
     {
@@ -341,7 +342,6 @@ void context_DriverTask (TI_HANDLE hContext)
             fCbFunc(hCbHndl);
         }
     }
-
     CL_TRACE_END_L1("tiwlan_drv.ko", "CONTEXT", "TASK", "");
 }
 

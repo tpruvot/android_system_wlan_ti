@@ -128,6 +128,7 @@ TI_STATUS rxData_mgmtPacketComplete (TI_HANDLE hRxData, void *pBuffer, TI_UINT32
 
 /* debug functions */
 void rxData_resetDbgCounters(TI_HANDLE hRxData);
+void rxData_resetLinkCounters(TI_HANDLE hRxData, TI_UINT32 uHlid);
 void rxData_printRxBlock(TI_HANDLE hRxData);
 void rxData_printRxCounters(TI_HANDLE hRxData);
 void rxData_startRxThroughputTimer(TI_HANDLE hRxData); 

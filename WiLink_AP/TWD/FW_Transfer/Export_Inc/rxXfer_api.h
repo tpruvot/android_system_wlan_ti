@@ -44,6 +44,7 @@
 #define _RX_XFER_API_H
 
 
+#include "TWDriver.h"
 #include "TWDriverInternal.h"
 
 /* Public Function Definitions */
@@ -82,6 +83,7 @@ void rxXfer_PrintStats( TI_HANDLE hRxXfer );
 
 #endif /* TI_DBG */
 
+TI_STATUS rxXfer_Config (TI_HANDLE hRxXfer, TTwdInitParams *pInitParams);
 
 #endif /* _RX_XFER_API_H */
 

@@ -89,6 +89,15 @@ typedef enum
     HOSTAPD_PARAM_WPS_CONFIG_METHODS,
     HOSTAPD_PARAM_WPS_PIN,
     HOSTAPD_PARAM_AP_INACTIVITY,
+    HOSTAPD_PARAM_AP_HIDDEN_SSID,
+    HOSTAPD_PARAM_AP_SETUP_LOCKED,
+    HOSTAPD_PARAM_EAP_SERVER,
+    HOSTAPD_PARAM_MAC_ADDR_ACL,
+    HOSTAPD_PARAM_ACCEPT_MAC_FILE,
+    HOSTAPD_PARAM_DENY_MAC_FILE,
+    HOSTAPD_PARAM_IGNORE_BROADCAST_SSID,
+	HOSTAPD_PARAM_AP_TABLE_MAX_SIZE,
+	HOSTAPD_PARAM_AP_TABLE_EXP_TIME,
     HOSTAPD_PARAM_LAST
 
 } EHostapdParams;
@@ -133,10 +142,18 @@ static keyInfo hostapdKeysList[HOSTAPD_PARAM_LAST] =
     {"wps_state", "0 = WPS disabled (default), 1 = WPS enabled, not configured, 2 = WPS enabled, configured"},
     {"config_methods","List of the supported configuration methods, values: label display push_button keypad"},
     {"ap_pin","Access point PIN for initial configuration and adding Registrars"},
-    {"ap_max_inactivity","Inactivity time to disaccociate station"}
-
-    
+    {"ap_max_inactivity","Inactivity time to disaccociate station"},
+    {"ignore_broadcast_ssid","Hidden SSID configuration: 0=Disabled, 1=Enabled, 2=Clear SSID(ASCII 0)"},
+    {"ap_setup_locked","0 = can't add new Enrollees 1 = can continue to add new Enrollees"},
+    {"eap_server","0 = external RADIUS authentication  1 = integrated EAP server"},
+    {"macaddr_acl","0 = accept unless in deny list 1 = deny unless in accept list 2 = use external RADIUS server"},
+    {"accept_mac_file","0 = Accept/deny lists are read from separate files /etc/hostapd.accept"},
+    {"deny_mac_file","0 = Accept/deny lists are read from separate files /etc/hostapd.deny"},
+    {"ignore_broadcast_ssid","0 = disable 1 = send empty SSID in beacon 2 = clear SSID but keep the original length"},
+	{"ap_table_max_size", "Maximum number of entries kept in AP table for detecting OLBC"},
+	{"ap_table_expiration_time", "Number of seconds of no frames received after which entry may be deleted"}
 };
+
 
 void CuHostapd_ShowStatus(void);
 void CuHostapd_SaveChanges(void);

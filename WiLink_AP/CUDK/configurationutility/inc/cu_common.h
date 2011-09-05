@@ -58,6 +58,7 @@ S32 CuCommon_GetRssi(THandle hCuCommon, PS8 pdRssi, PS8 pbRssi);
 S32 CuCommon_GetSnr(THandle hCuCommon, PU32 pdSnr, PU32 pbSnr);
 S32 CuCommon_GetdesiredPreambleType(THandle hCuCommon, PU32 pDesiredPreambleType);
 S32 CuCommon_GetTxStatistics(THandle hCuCommon, TIWLN_TX_STATISTICS* pTxCounters, U32 doReset); 
+S32 CuCommon_GetTxRxLinkStatistics(THandle hCuCommon, TLinkDataCounters *pLinkCounters);
 
 S32 CuCommon_Radio_Test(THandle hCuCommon,TTestCmd* data);
 

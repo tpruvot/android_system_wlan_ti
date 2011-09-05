@@ -1569,12 +1569,13 @@ void regDomain_GetActiveChannel(TI_HANDLE hRegulatoryDomain,TApChanHwInfo *pChan
  {
   if (pRegulatoryDomain->scanControlTable.ScanControlTable24.tableString[i])
   {
-   pChanInfo->ChanGstr[index] = i + 1; 
+   pChanInfo->Chan24str[index] = i + 1; 
    index++;
   }
  }
 
  pChanInfo->numOfGChan = index;
+ pChanInfo->numOfBChan = index;
 
  index = 0;
 
@@ -1582,7 +1583,7 @@ void regDomain_GetActiveChannel(TI_HANDLE hRegulatoryDomain,TApChanHwInfo *pChan
   {
    if (pRegulatoryDomain->scanControlTable.ScanControlTable5.tableString[i])
    {
-    pChanInfo->ChanAstr[index] = i + A_5G_BAND_MIN_CHANNEL; 
+    pChanInfo->Chan5str[index] = i + A_5G_BAND_MIN_CHANNEL; 
     index++;
    }
   }

@@ -1,31 +1,36 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * CmdBldCfgIE.c
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 /** \file  CmdBldCfgIE.c 
  *  \brief Command builder. Configuration commands information elements
@@ -77,34 +82,6 @@ TI_STATUS cmdBld_CfgIeConfigMemory (TI_HANDLE hCmdBld, TDmaParams *pDmaParams, v
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
 }
 
-/****************************************************************************
- *                      cmdBld_CfgIeConnectPhase()
- ****************************************************************************
- * DESCRIPTION: Set Connection Phase
- *
- * INPUTS:
- *
- * OUTPUT:  None
- *
- * RETURNS: TI_OK or TI_NOK
- ****************************************************************************/
-TI_STATUS cmdBld_CfgIeConnectPhase (TI_HANDLE hCmdBld, TMacAddr aMacAddr, TI_UINT32 uMode, void *fCb, TI_HANDLE hCb)
-{
-	TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
-    ACXInConnectionSTA_t ACXInConnectionSTAParam;
-    ACXInConnectionSTA_t *pCfg = &ACXInConnectionSTAParam;
-
-    
-    /* Set information element header */
-    pCfg->EleHdr.id = ACX_UPDATE_INCONNECTION_STA_LIST;
-    pCfg->EleHdr.len = sizeof(ACXInConnectionSTAParam) - sizeof(EleHdrStruct);
-	pCfg->enable = (Bool_e)uMode;
-	os_memoryCopy(pCmdBld->hOs, pCfg->mac_address, aMacAddr, sizeof(TMacAddr));
-    
-    TRACE8(pCmdBld->hReport, REPORT_SEVERITY_INFORMATION , "ID=%u: MAC: %x:%x:%x:%x:%x:%x, enable=%u\n", pCfg->EleHdr.id, pCfg->mac_address[0], pCfg->mac_address[1], pCfg->mac_address[2], pCfg->mac_address[3], pCfg->mac_address[4], pCfg->mac_address[5], pCfg->enable);
-    
-    return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(ACXInConnectionSTA_t), fCb, hCb, NULL);
-}
 
 /* WoneIndex value when running as station */
 #define STATION_WONE_INDEX                  0
@@ -1482,6 +1459,71 @@ TI_STATUS cmdBld_CfgIeRxIntrPacing (TI_HANDLE  hCmdBld,
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
 }
 
+/****************************************************************************
+ *                      cmdBld_CfgIeGenFwCmd()
+ ****************************************************************************
+ * DESCRIPTION: send general firmware command - 16 bytes
+ *
+ * INPUTS:  None
+ *
+ * OUTPUT:  None
+ *
+ * RETURNS: TI_OK or TI_NOK
+ ****************************************************************************/
+TI_STATUS cmdBld_CfgIeGenFwCmd (TI_HANDLE  hCmdBld,
+                                    TI_UINT8  *pGenFwCmd,
+                                    void *     fCb, 
+                                    TI_HANDLE  hCb)
+{
+    TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
+    ACXGenFwCmd_t  tGenFwCmd;
+    ACXGenFwCmd_t  *pCfg = &tGenFwCmd;
+    int i;
+
+    /* Set information element header */
+    pCfg->EleHdr.id  = ACX_GEN_FW_CMD;
+    pCfg->EleHdr.len = sizeof(*pCfg) - sizeof(EleHdrStruct);
+
+    for (i=0; i<GEN_FW_CMD_SIZE; i++)
+        pCfg->genFwCmdBytes[i] = ENDIAN_HANDLE_LONG(pGenFwCmd[i]);
+
+    WLAN_OS_REPORT(("cmdBld_CfgIeGenFwCmd: bytes 00..07 = %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x\n", 
+        pCfg->genFwCmdBytes[0], pCfg->genFwCmdBytes[1], pCfg->genFwCmdBytes[2], pCfg->genFwCmdBytes[3], pCfg->genFwCmdBytes[4], pCfg->genFwCmdBytes[5], pCfg->genFwCmdBytes[6], pCfg->genFwCmdBytes[7]));
+    WLAN_OS_REPORT(("cmdBld_CfgIeGenFwCmd: bytes 08..15 = %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x\n", 
+        pCfg->genFwCmdBytes[8], pCfg->genFwCmdBytes[9], pCfg->genFwCmdBytes[10], pCfg->genFwCmdBytes[11], pCfg->genFwCmdBytes[12], pCfg->genFwCmdBytes[13], pCfg->genFwCmdBytes[14], pCfg->genFwCmdBytes[15]));
+
+    return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
+}
+/****************************************************************************
+ *                      cmdBld_CfgIeHostIfCfgBitmap()
+ ****************************************************************************
+ * DESCRIPTION: Configure host interface bitmap
+ *
+ * INPUTS:  None
+ *
+ * OUTPUT:  None
+ *
+ * RETURNS: TI_OK or TI_NOK
+ ****************************************************************************/
+TI_STATUS cmdBld_CfgIeHostIfCfgBitmap (TI_HANDLE  hCmdBld,
+                                    TI_UINT32  uHostIfCfgBitmap,
+                                    void *     fCb, 
+                                    TI_HANDLE  hCb)
+{
+    TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
+    ACXHostIfCfgBitmap_t  tHostIfCfgBitmap;
+    ACXHostIfCfgBitmap_t  *pCfg = &tHostIfCfgBitmap;
+
+    /* Set information element header */
+    pCfg->EleHdr.id  = ACX_HOST_IF_CFG_BITMAP;
+    pCfg->EleHdr.len = sizeof(*pCfg) - sizeof(EleHdrStruct);
+
+    pCfg->HostIfCfgBitmap    = ENDIAN_HANDLE_LONG(uHostIfCfgBitmap);
+
+    WLAN_OS_REPORT(("cmdBld_CfgIeHostIfCfgBitmap: Value = 0x%x\n", pCfg->HostIfCfgBitmap));
+
+    return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
+}
 
 /****************************************************************************
 *                      cmdBld_CfgIeCtsProtection()
@@ -1596,6 +1638,7 @@ TI_STATUS cmdBld_CfgIePsWmm (TI_HANDLE hCmdBld, TI_BOOL enableWA, void *fCb, TI_
     if (enableWA)
     {
         TRACE0(pCmdBld->hReport, REPORT_SEVERITY_CONSOLE, "cmdBld_CfgIePsWmm: PS is on WMM mode\n");
+        WLAN_OS_REPORT(("%s PS is on WMM mode\n",__FUNCTION__));
     }
     
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(*pCfg), fCb, hCb, NULL);
@@ -2090,6 +2133,35 @@ TI_STATUS cmdBld_CfgIeDcoItrimParams (TI_HANDLE hCmdBld, TI_BOOL enable, TI_UINT
     TRACE3(pCmdBld->hReport, REPORT_SEVERITY_INFORMATION , "ID=%u: enable=%u, moderation_timeout_usec=%u\n", pCfg->EleHdr.id, enable, moderationTimeoutUsec);
 
     return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(ACXDCOItrimParams_t), fCb, hCb, NULL);
+}
+
+
+/****************************************************************************
+ *                      cmdBld_CfgIeConnectPhase()
+ ****************************************************************************
+ * DESCRIPTION: Set Connection Phase
+ *
+ * INPUTS:
+ *
+ * OUTPUT:  None
+ *
+ * RETURNS: TI_OK or TI_NOK
+ ****************************************************************************/
+TI_STATUS cmdBld_CfgIeConnectPhase (TI_HANDLE hCmdBld, TMacAddr aMacAddr, void *fCb, TI_HANDLE hCb)
+{
+	TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
+    ACXInConnectionSTA_t ACXInConnectionSTAParam;
+    ACXInConnectionSTA_t *pCfg = &ACXInConnectionSTAParam;
+
+    
+    /* Set information element header */
+    pCfg->EleHdr.id = ACX_UPDATE_INCONNECTION_STA_LIST;
+    pCfg->EleHdr.len = sizeof(ACXInConnectionSTAParam) - sizeof(EleHdrStruct);
+    os_memoryCopy(pCmdBld->hOs, pCfg->mac_address, aMacAddr, sizeof(TMacAddr));
+    
+    TRACE7(pCmdBld->hReport, REPORT_SEVERITY_INFORMATION , "ID=%u: MAC: %x:%x:%x:%x:%x:%x\n", pCfg->EleHdr.id, pCfg->mac_address[0], pCfg->mac_address[1], pCfg->mac_address[2], pCfg->mac_address[3], pCfg->mac_address[4], pCfg->mac_address[5]);
+    
+    return cmdQueue_SendCommand (pCmdBld->hCmdQueue, CMD_CONFIGURE, pCfg, sizeof(ACXInConnectionSTA_t), fCb, hCb, NULL);
 }
 
 							   

@@ -62,6 +62,8 @@
 /* defines */
 /***********/
 
+#define WLANLINKS_MAX_LINKS         		7
+
 #define NUM_OF_CONFIG_PARAMS_IN_SG  	    2
 #define NUM_OF_STATUS_PARAMS_IN_SG  		11
 #define NUM_OF_COEX_ACTIVITY_PARAMS_IN_SG 	6
@@ -139,6 +141,14 @@ typedef enum
 
 } EDraftNumber;
 
+
+typedef enum
+{
+    WLANLINK_TYPE_SPECIFIC,
+    WLANLINK_TYPE_BRCST,
+    WLANLINK_TYPE_GLOBAL,
+}EWlanLinkType;
+
 /********************/
 /* Structures types */
 /********************/
@@ -190,6 +200,28 @@ typedef struct
 {
     TTxDataCounters  txCounters[MAX_NUM_OF_AC];	/**< Table which holds Tx statistics of each Tx-queue */
 } TIWLN_TX_STATISTICS;
+
+
+/** \struct TIWLN_TX_STATISTICS
+ * \brief TI WLAN TX Statistics
+ * 
+ * \par Description
+ * All Tx statistics of all Tx Queues Tx-queue 
+ * 
+ * \sa
+ */
+typedef struct
+{
+	TI_BOOL			validLink;
+	EWlanLinkType	linkType;
+	TMacAddr    	aMacAddr;
+    TI_UINT32		recvPktsFromWlan;
+	TI_UINT32		recvBytesFromWlan;
+	TI_UINT32		sentPkts;  
+	TI_UINT32		sentBytes;
+	TI_UINT32		sentPktsError;
+
+} TLinkDataCounters;
 
 /** \struct TDfsChannelRange
  * \brief DFS Channel Range

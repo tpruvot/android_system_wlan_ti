@@ -79,7 +79,8 @@ typedef struct
     TI_UINT16                  TxCompletePacingTimeout; 
     TI_UINT16                  RxIntrPacingThreshold;	 
     TI_UINT16                  RxIntrPacingTimeout;	 
-
+    TI_UINT8                   GenFwCmd[GEN_FW_CMD_SIZE];
+    TI_UINT32                  HostIfCfgBitmap;
     /* ARP IP Addr table */
     TI_UINT32                  arp_IP_ver;
     EArpFilterType             arpFilterType;
@@ -111,7 +112,7 @@ typedef struct
     TI_UINT32                  PsPollTemplateSize;
     TI_UINT32                  qosNullDataTemplateSize;
     TI_UINT32                  ArpRspTemplateSize;
-    TI_BOOL                    EnergyDetection;
+    TI_BOOL                    ch14TelecCca;
     TI_UINT8                   PacketDetectionThreshold;
     TI_UINT8                   FcsErrThrsh;
     TI_UINT8                   UseDeviceErrorInterrupt;
@@ -157,6 +158,14 @@ typedef struct
     /* DCO Itrim params */
     TI_BOOL                    dcoItrimEnabled;
     TI_UINT32                  dcoItrimModerationTimeoutUsec;
+#ifdef TNETW1283
+    /* TCXO parameters */
+    TI_UINT8                   TcxoRefClk;
+    TI_UINT8                   TcxoSettlingTime;
+    TI_UINT8                   TcxoValidOnWakeup;
+    TI_UINT8                   TcxoLdoVoltage; 
+    TI_UINT8                   NewPllAlgo; 
+#endif
     
 } TWlanParams;
 

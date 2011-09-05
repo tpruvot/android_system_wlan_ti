@@ -373,6 +373,17 @@ TI_STATUS txCtrlParams_getParam(TI_HANDLE hTxCtrl, paramInfo_t *pParamInfo)
 		pParamInfo->content.txGenericEthertype = pTxCtrl->genericEthertype;
 		break;
 
+	case TX_CTRL_GET_DATA_LINK_COUNTER:
+		{
+			TI_UINT32 uHlid;
+			for (uHlid = 0; uHlid < WLANLINKS_MAX_LINKS; uHlid++)
+			{
+				pParamInfo->content.linkDataCounters[uHlid].sentPkts = pTxCtrl->dbgLinkCounters.dbgNumPktsSent[uHlid];
+				pParamInfo->content.linkDataCounters[uHlid].sentBytes = pTxCtrl->dbgLinkCounters.dbgNumBytesSent[uHlid];
+				pParamInfo->content.linkDataCounters[uHlid].sentPktsError = pTxCtrl->dbgLinkCounters.dbgNumPktsError[uHlid];
+			}
+		}
+		break;
 
     default:
         TRACE0(pTxCtrl->hReport, REPORT_SEVERITY_ERROR, ": PARAMETER NOT SUPPORTED\n");
@@ -777,6 +788,7 @@ void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl)
     {
         WLAN_OS_REPORT(("====    Link %d    ===================================\n", uHlid));
         WLAN_OS_REPORT(("dbgNumPktsSent:         %8d\n", pLinkDbg->dbgNumPktsSent[uHlid]));
+		WLAN_OS_REPORT(("NumBytesSent:        %8d\n", pLinkDbg->dbgNumBytesSent[uHlid]));
         WLAN_OS_REPORT(("dbgNumPktsBackpressure: %8d, dbgNumPktsAcBackpres: %8d, dbgNumPktsBusy:       %8d, dbgNumPktsBusy: %8d\n", pLinkDbg->dbgNumPktsBackpressure[uHlid], pLinkDbg->dbgNumPktsAcBackpressure[uHlid], pLinkDbg->dbgNumPktsBusy[uHlid]));
         WLAN_OS_REPORT(("dbgNumPktsXfered:       %8d\n", pLinkDbg->dbgNumPktsXfered[uHlid]));
         WLAN_OS_REPORT(("dbgNumPktsSuccess:      %8d, dbgNumPktsError:      %8d\n", pLinkDbg->dbgNumPktsSuccess[uHlid], pLinkDbg->dbgNumPktsError[uHlid]));
@@ -786,6 +798,8 @@ void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl)
 
     WLAN_OS_REPORT(("========================================================\n\n"));
 }
+
+#endif   /* TI_DBG */
 
 
 /***************************************************************************
@@ -798,9 +812,36 @@ void txCtrlParams_resetDbgCounters(TI_HANDLE hTxCtrl)
     txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
 
     os_memoryZero(pTxCtrl->hOs, &pTxCtrl->dbgCounters, sizeof(txDataDbgCounters_t));
-    os_memoryZero(pTxCtrl->hOs, &pTxCtrl->dbgLinkCounters, sizeof(txDataDbgLinkCounters_t));
+	os_memoryZero(pTxCtrl->hOs, &pTxCtrl->dbgLinkCounters, sizeof(txDataDbgLinkCounters_t));
+}
+
+/***************************************************************************
+*                       txCtrlParams_resetLinkCounters                       
+****************************************************************************
+* DESCRIPTION:  Reset the tx data module Link counters
+***************************************************************************/
+void txCtrlParams_resetLinkCounters(TI_HANDLE hTxCtrl, TI_UINT32 uHlid)
+{
+    txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
+
+    if (uHlid < WLANLINKS_MAX_LINKS)
+	{
+		pTxCtrl->dbgLinkCounters.dbgNumPktsSent[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumBytesSent[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsBackpressure[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBackpressure[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsBusy[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsAcBusy[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsXfered[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsSuccess[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumPktsError[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumTxCmplt[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumTxCmpltOk[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumTxCmpltError[uHlid] = 0;
+		pTxCtrl->dbgLinkCounters.dbgNumTxCmpltOkBytes[uHlid] = 0;
+	}
 }
 
 
 
-#endif   /* TI_DBG */
+

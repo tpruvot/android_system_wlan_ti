@@ -327,8 +327,6 @@ int sdiodrv_dma_init(void)
   
 	return 0;
 
-freerx:
-	omap_free_dma(g_drv.dma_rx_channel);	
 freetx:
 	omap_free_dma(g_drv.dma_tx_channel);
 out:

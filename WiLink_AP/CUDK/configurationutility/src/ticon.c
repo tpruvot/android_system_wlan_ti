@@ -239,7 +239,7 @@ static S32 TiCon_Init_Console_Menu(TiCon_t* pTiCon)
               Console_AddToken(pTiCon->hConsole, h1, (PS8)"sHow status",  (PS8)"show status", (FuncToken_t) CuCmd_ApRoleShowStatus, aaa );
         }
         {
-              ConParm_t aaa[]  = { { (PS8)"cmdName", CON_PARM_RANGE | CON_PARM_OPTIONAL, 1, 10, 1 },
+              ConParm_t aaa[]  = { { (PS8)"cmdName", CON_PARM_RANGE | CON_PARM_OPTIONAL, 1, 12, 1 },
                                    { (PS8)"param0", CON_PARM_STRING | CON_PARM_OPTIONAL, 0, 32, 0 }, 
                                    { (PS8)"param1", CON_PARM_STRING | CON_PARM_OPTIONAL, 0, 32, 0 },
                                    { (PS8)"param2", CON_PARM_STRING | CON_PARM_OPTIONAL, 0, 32, 0 },
@@ -312,6 +312,9 @@ static S32 TiCon_Init_Console_Menu(TiCon_t* pTiCon)
 		ConParm_t aaa[]  = { {(PS8)"Clear stats on read", CON_PARM_OPTIONAL | CON_PARM_RANGE, 0, 1, 0 }, CON_LAST_PARM };
 		Console_AddToken(pTiCon->hConsole,h, (PS8)"Txstatistics", (PS8)"Show tx statistics", (FuncToken_t) CuCmd_ShowTxStatistics, aaa );
 	}
+
+	Console_AddToken(pTiCon->hConsole, h, (PS8)"Link statistics", (PS8)"Show per link statistics", (FuncToken_t) CuCmd_ShowLinkStatistics, NULL );
+
     Console_AddToken(pTiCon->hConsole,h, (PS8)"Advanced", (PS8)"Show advanced params", (FuncToken_t) CuCmd_ShowAdvancedParams, NULL );
 
     Console_AddToken(pTiCon->hConsole,h, (PS8)"Power consumption",  (PS8)"Show power consumption statistics", (FuncToken_t) Cucmd_ShowPowerConsumptionStats, NULL );

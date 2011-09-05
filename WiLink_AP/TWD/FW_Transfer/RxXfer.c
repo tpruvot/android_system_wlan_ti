@@ -54,6 +54,11 @@
 #include "bmtrace_api.h"
 
 #define RX_DRIVER_COUNTER_ADDRESS 0x300538
+#ifdef TNETW1283
+    /* Skip EOT and Rx counter workarounds */
+#else
+#define RX_DRIVER_DUMMY_WRITE_ADDRESS 0x300534
+#endif
 #define PLCP_HEADER_LENGTH 8
 #define WORD_SIZE   4
 #define UNALIGNED_PAYLOAD   0x1
@@ -73,6 +78,28 @@
 
 #if (NUM_RX_PKT_DESC & (NUM_RX_PKT_DESC - 1))
     #error  NUM_RX_PKT_DESC is not a power of 2 which may degrade performance when we calculate modulo!!
+#endif
+#define DBG_TRACE
+#ifdef DBG_TRACE
+/* 
+ * Debug trace
+ * -----------
+ */
+#define DBG_TBL_SIZE        256
+typedef struct 
+{
+    TI_UINT32       uEvent;
+    TI_UINT32       uData1;
+    TI_UINT32       uData2;
+} TTraceEntry;	
+static TTraceEntry aDbgTrace[DBG_TBL_SIZE];
+static TI_UINT32 aDbgIndex;
+#define ADD_DBG_TRACE(a_uEvent, a_uData1, a_uData2) do { \
+        aDbgTrace[aDbgIndex].uEvent = (TI_UINT32)(a_uEvent); \
+        aDbgTrace[aDbgIndex].uData1 = (TI_UINT32)(a_uData1); \
+        aDbgTrace[aDbgIndex].uData2 = (TI_UINT32)(a_uData2); \
+        aDbgIndex = (aDbgIndex+1)%DBG_TBL_SIZE; \
+    } while (0)
 #endif
 
 
@@ -125,14 +152,18 @@ typedef struct
     TI_UINT32           uAvailableTxn;                          /* Number of Txn structures currently available */
     TRegTxn             aSlaveRegTxn[MAX_CONSECUTIVE_READ_TXN]; /* Txn structures for writing mem-block address reg */
     TTxnStruct          aTxnStruct[MAX_CONSECUTIVE_READ_TXN];   /* Txn structures for reading the Rx packets */
+#ifndef TNETW1283
     TCounterTxn         aCounterTxn[MAX_CONSECUTIVE_READ_TXN];  /* Txn structures for writing the driver counter */
+#endif
 
     TI_UINT8            aTempBuffer[MAX_PACKET_SIZE];           /* Dummy buffer to use if we couldn't get a buffer for the packet (so drop the packet) */
     TFailureEventCb     fErrCb;                                 /* The upper layer CB function for error handling */
     TI_HANDLE           hErrCb;                                 /* The CB function handle */
+    TI_UINT32           uHostIfCfgBitmap;                       /* Host interface configuration bitmap */
 
 #ifdef TI_DBG
     TRxXferDbgStat      tDbgStat;
+    TI_UINT32           uRxFifoWa;
 #endif
 
 } TRxXfer;
@@ -142,7 +173,7 @@ typedef struct
 static TI_STATUS    rxXfer_Handle(TI_HANDLE hRxXfer);
 static void         rxXfer_TxnDoneCb (TI_HANDLE hRxXfer, TTxnStruct* pTxn);
 static void         rxXfer_PktDropTxnDoneCb (TI_HANDLE hRxXfer, TTxnStruct *pTxn);
-static ETxnStatus   rxXfer_IssueTxn (TI_HANDLE hRxXfer, TI_UINT32 uFirstMemBlkAddr);
+static ETxnStatus   rxXfer_IssueTxn (TI_HANDLE hRxXfer, TI_UINT32 uRxDesc, TI_UINT32 uFirstMemBlkAddr);
 static void         rxXfer_ForwardPacket (TRxXfer* pRxXfer, TTxnStruct* pTxn);
 
 
@@ -169,6 +200,10 @@ TI_HANDLE rxXfer_Create (TI_HANDLE hOs)
     os_memoryZero (hOs, pRxXfer, sizeof(TRxXfer));
 
     pRxXfer->hOs = hOs;
+#ifdef DBG_TRACE
+    os_memoryZero(hOs, aDbgTrace, (sizeof(aDbgTrace)));
+    aDbgIndex = 0;
+#endif
 
     return (TI_HANDLE)pRxXfer;
 }
@@ -227,6 +262,25 @@ void rxXfer_Init(TI_HANDLE hRxXfer,
 #endif
 }
 
+/****************************************************************************
+ *                      txHwQueue_Config()
+ ****************************************************************************
+ * DESCRIPTION: configure module object 
+ * 
+ * INPUTS:      
+ * 
+ * OUTPUT:  None
+ * 
+ * RETURNS: None
+ ****************************************************************************/
+TI_STATUS rxXfer_Config (TI_HANDLE hRxXfer, TTwdInitParams *pInitParams)
+{
+    TRxXfer  *pRxXfer = (TRxXfer *)hRxXfer;
+    
+    pRxXfer->uHostIfCfgBitmap = pInitParams->tGeneral.HostIfCfgBitmap;
+
+    return TI_OK;
+}
 
 /****************************************************************************
  *                      rxXfer_SetDefaults()
@@ -309,11 +363,14 @@ void rxXfer_Register_CB (TI_HANDLE hRxXfer, TI_UINT32 CallBackID, void *CBFunc, 
  * 
  * RETURNS:     
  ****************************************************************************/
+#ifdef DEBUG_GPIO
+extern void debug_gpio_set_dataout(void);
+#endif    
 static void rxXfer_ForwardPacket (TRxXfer *pRxXfer, TTxnStruct *pTxn)
 {
     TI_UINT32 uBufNum;
-#ifdef TI_DBG   /* for packet sanity check */
     RxIfDescriptor_t *pRxInfo  = (RxIfDescriptor_t*)(pTxn->aBuf[0]);
+#ifdef TI_DBG   /* for packet sanity check */
     TI_UINT16        uLenFromRxInfo;
 #endif
 
@@ -331,10 +388,25 @@ static void rxXfer_ForwardPacket (TRxXfer *pRxXfer, TTxnStruct *pTxn)
         pRxInfo = (RxIfDescriptor_t*)(pTxn->aBuf[uBufNum]);
         uLenFromRxInfo = ENDIAN_HANDLE_WORD(pRxInfo->length) << 2;
     
+#ifdef TNETW1283 
+        /* print saved uRxDesc, use aWspiPad field only for debug */
+        ADD_DBG_TRACE(50, ((TI_UINT32 *)pTxn->aWspiPad)[0], uLenFromRxInfo);
+#else
+        ADD_DBG_TRACE(50, 999, uLenFromRxInfo);
+#endif
         /* If the length in the RxInfo is different than in the short descriptor, set error status */
         if (pTxn->aLen[uBufNum] != uLenFromRxInfo) 
         {
+            ADD_DBG_TRACE(55, pTxn->aLen[uBufNum], uLenFromRxInfo);
+#ifdef TNETW1283 
+            TRACE4(pRxXfer->hReport, REPORT_SEVERITY_ERROR , "rxXfer_ForwardPacket: Bad Length!! RxInfoLength=%d, ShortDescLen=%d, RxInfoStatus=0x%x, uRxDesc=0x%x\n", uLenFromRxInfo, pTxn->aLen[uBufNum], pRxInfo->status, ((TI_UINT32 *)pTxn->aWspiPad)[0]);
+#else
             TRACE3(pRxXfer->hReport, REPORT_SEVERITY_ERROR , "rxXfer_ForwardPacket: Bad Length!! RxInfoLength=%d, ShortDescLen=%d, RxInfoStatus=0x%x\n", uLenFromRxInfo, pTxn->aLen[uBufNum], pRxInfo->status);
+#endif
+#ifdef DEBUG_GPIO
+            debug_gpio_set_dataout();
+#endif    
+            report_PrintDump(pTxn->aBuf[0], 128 /*pTxn->aLen[0]*/);
     
             pRxInfo->status &= ~RX_DESC_STATUS_MASK;
             pRxInfo->status |= RX_DESC_STATUS_DRIVER_RX_Q_FAIL;
@@ -393,6 +465,7 @@ ETxnStatus rxXfer_RxEvent (TI_HANDLE hRxXfer, FwStatus_t *pFwStatus)
   
     uTempCounters = ENDIAN_HANDLE_LONG (pFwStatus->counters);
     pFwStatusCounters = (FwStatCntrs_t*)(&uTempCounters);
+    ADD_DBG_TRACE(10, ((TI_UINT32)pFwStatusCounters->fwRxCntr), pRxXfer->uFwRxCntr);
 
     TRACE2(pRxXfer->hReport, REPORT_SEVERITY_INFORMATION , "rxXfer_RxEvent: NewFwCntr=%d, OldFwCntr=%d\n", pFwStatusCounters->fwRxCntr, pRxXfer->uFwRxCntr);
 
@@ -475,6 +548,7 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
         {
             /* Get next packte info */
             uRxDesc       = pRxXfer->aRxPktsDesc[uDrvIndex];
+        ADD_DBG_TRACE(20, uDrvIndex, uRxDesc);
             uBuffSize     = RX_DESC_GET_LENGTH(uRxDesc) << 2;
             eRxPacketType = (PacketClassTag_e)RX_DESC_GET_PACKET_CLASS_TAG (uRxDesc);
 
@@ -484,6 +558,43 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
                 bIssueTxn = TI_TRUE;
             }
 
+#ifdef TNETW1283            
+            /*
+             * RX_FIFO_WORKAROUND
+             * First the driver send the reminder and then it send the packets as blocks of 512 bytes
+             * Check in aggregation if to accept the new packet (length is uBuffSize)
+             * The driver should check that each start of next packet is not in first 16 bytes of 512 block
+             */
+            #define BLOCK_MASK 0x1FF
+            else if ((pRxXfer->uHostIfCfgBitmap & HOST_IF_CFG_BITMAP_RX_AGGR_WA_ENABLE) &&
+                     (uAggregPktsNum > 0) && ((uTotalAggregLen+uBuffSize) > BLOCK_MASK))
+            {  
+                TI_UINT32 uRemainder = (uTotalAggregLen + uBuffSize) & BLOCK_MASK;
+                TI_UINT32 uIncrementLen = 0;
+                TI_UINT32 uPktIndex;
+
+                
+                /* new reminder means that all packets till now should be checked again */
+                for (uPktIndex=0; uPktIndex<uAggregPktsNum; uPktIndex++)
+                {
+                    uIncrementLen += pTxn->aLen[uPktIndex];
+
+                    
+                    if ((uIncrementLen > uRemainder) && (((uIncrementLen-uRemainder) & BLOCK_MASK) < 16))
+                    {
+                        ADD_DBG_TRACE(22, uIncrementLen, uRemainder);
+                        pRxXfer->uRxFifoWa++;
+                        bIssueTxn = TI_TRUE;
+                        break;
+                    }
+                }
+            }
+
+            if (bIssueTxn == TI_TRUE)
+            {
+                TRACE0(pRxXfer->hReport, REPORT_SEVERITY_INFORMATION , "rxXfer_Handle: bIssueTxn is TRUE\n");
+            }
+#endif
             /* No length limit so try to aggregate new packet */
             else
             {
@@ -575,7 +686,8 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
                 pTxn->aLen[uAggregPktsNum] = 0;
             }
 
-            eTxnStatus = rxXfer_IssueTxn (pRxXfer, uFirstMemBlkAddr);
+            ADD_DBG_TRACE(25, uAggregPktsNum, uTotalAggregLen);
+            eTxnStatus = rxXfer_IssueTxn (pRxXfer, uRxDesc, uFirstMemBlkAddr);
 
             if (eTxnStatus == TXN_STATUS_COMPLETE)
             {
@@ -612,7 +724,7 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
             uFirstMemBlkAddr = SLV_MEM_CP_VALUE(uRxDesc, pRxXfer->uPacketMemoryPoolStart);
             pTxn = (TTxnStruct*)&pRxXfer->aTxnStruct[pRxXfer->uCurrTxnIndex];
             BUILD_TTxnStruct(pTxn, SLV_MEM_DATA, pRxXfer->aTempBuffer, uBuffSize, (TTxnDoneCb)rxXfer_PktDropTxnDoneCb, hRxXfer)
-            eTxnStatus = rxXfer_IssueTxn (pRxXfer, uFirstMemBlkAddr);
+            eTxnStatus = rxXfer_IssueTxn (pRxXfer, uRxDesc, uFirstMemBlkAddr);
             if (eTxnStatus == TXN_STATUS_PENDING) 
             {
                 pRxXfer->uAvailableTxn--;
@@ -647,24 +759,42 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
  * 
  * RETURNS:     
  ****************************************************************************/
-static ETxnStatus rxXfer_IssueTxn (TI_HANDLE hRxXfer, TI_UINT32 uFirstMemBlkAddr)
+static ETxnStatus rxXfer_IssueTxn (TI_HANDLE hRxXfer, TI_UINT32 uRxDesc,TI_UINT32 uFirstMemBlkAddr)
 {
     TRxXfer    *pRxXfer = (TRxXfer *)hRxXfer;
     TI_UINT32   uIndex  = pRxXfer->uCurrTxnIndex;
     TTxnStruct *pTxn;
     ETxnStatus  eStatus;
 
+#ifdef TNETW1283  
+    /* 
+     * Skip write transaction of memory block address - only if RX_FIFO_ENABLE is set 
+     */
+    if ((pRxXfer->uHostIfCfgBitmap & HOST_IF_CFG_BITMAP_RX_FIFO_ENABLE) == 0)
+    {
+#endif
     /* Write the next mem block that we want to read */
     pTxn = &pRxXfer->aSlaveRegTxn[uIndex].tTxnStruct;
     pTxn->uHwAddr = SLV_REG_DATA;
     pRxXfer->aSlaveRegTxn[uIndex].uRegData  = ENDIAN_HANDLE_LONG(uFirstMemBlkAddr);
     pRxXfer->aSlaveRegTxn[uIndex].uRegAdata = ENDIAN_HANDLE_LONG(uFirstMemBlkAddr + 4);
     twIf_Transact(pRxXfer->hTwIf, pTxn);
+#ifdef TNETW1283 
+    }
+#endif
 
     /* Issue the packet(s) read transaction (prepared in rxXfer_Handle) */ 
     pTxn = &pRxXfer->aTxnStruct[uIndex];
+#ifdef TNETW1283 
+    /* save uRxDesc for print on bad length error, use aWspiPad field only for debug  */
+    ((TI_UINT32 *)pTxn->aWspiPad)[0] = uRxDesc;
+#endif
+    ADD_DBG_TRACE(30, uFirstMemBlkAddr, uRxDesc);
     eStatus = twIf_Transact(pRxXfer->hTwIf, pTxn);
 
+#if defined(TNETW1283) //|| defined(TNETW1273_FPGA)
+    /* Skip EOT and Rx counter workarounds */
+#else
     /* Write driver packets counter to FW. This write automatically generates interrupt to FW */
     pTxn = &pRxXfer->aCounterTxn[uIndex].tTxnStruct;
     pTxn->uHwAddr = RX_DRIVER_COUNTER_ADDRESS;
@@ -672,6 +802,7 @@ static ETxnStatus rxXfer_IssueTxn (TI_HANDLE hRxXfer, TI_UINT32 uFirstMemBlkAddr
     twIf_Transact(pRxXfer->hTwIf, pTxn);
 
     TRACE5(pRxXfer->hReport, REPORT_SEVERITY_INFORMATION , "rxXfer_IssueTxn: Counter-Txn: HwAddr=0x%x, Len0=%d, Data0=%d, DrvCount=%d, TxnParams=0x%x\n", pTxn->uHwAddr, pTxn->aLen[0], *(TI_UINT32 *)(pTxn->aBuf[0]), pRxXfer->uDrvRxCntr, pTxn->uTxnParams);
+#endif
 
     /* Return the status of the packet(s) transaction - COMPLETE, PENDING or ERROR */
     return eStatus;
@@ -713,6 +844,7 @@ static void rxXfer_TxnDoneCb (TI_HANDLE hRxXfer, TTxnStruct *pTxn)
     TRxXfer *pRxXfer = (TRxXfer *)hRxXfer;
     CL_TRACE_START_L2();
     
+    ADD_DBG_TRACE(40, pRxXfer->uAvailableTxn, 0);
     /* Increase the number of available txn structures */
     pRxXfer->uAvailableTxn++;
 
@@ -722,6 +854,7 @@ static void rxXfer_TxnDoneCb (TI_HANDLE hRxXfer, TTxnStruct *pTxn)
     /* If we exited the handler upon pending-buffer, call it again to handle further packets if any */
     if (pRxXfer->bPendingBuffer)
     {
+        ADD_DBG_TRACE(60, pRxXfer->uAvailableTxn, 0);
         pRxXfer->bPendingBuffer = TI_FALSE;
         rxXfer_Handle (hRxXfer);
     }
@@ -819,10 +952,12 @@ void rxXfer_Restart(TI_HANDLE hRxXfer)
         pTxn->fTxnDoneCb = (TTxnDoneCb)rxXfer_TxnDoneCb;
         pTxn->hCbHandle  = hRxXfer;
 
+#ifndef TNETW1283
         /* The driver packets counter */
         pTxn = &(pRxXfer->aCounterTxn[i].tTxnStruct);
         TXN_PARAM_SET(pTxn, TXN_LOW_PRIORITY, TXN_FUNC_ID_WLAN, TXN_DIRECTION_WRITE, TXN_INC_ADDR)
         BUILD_TTxnStruct(pTxn, RX_DRIVER_COUNTER_ADDRESS, &pRxXfer->aCounterTxn[i].uCounter, REGISTER_SIZE, NULL, NULL)
+#endif
     }
 	
 }
@@ -904,6 +1039,20 @@ void rxXfer_PrintStats (TI_HANDLE hRxXfer)
     WLAN_OS_REPORT(("uCountPktAggreg-2  = %d\n", pRxXfer->tDbgStat.uCountPktAggreg[1]));
     WLAN_OS_REPORT(("uCountPktAggreg-3  = %d\n", pRxXfer->tDbgStat.uCountPktAggreg[2]));
     WLAN_OS_REPORT(("uCountPktAggreg-4  = %d\n", pRxXfer->tDbgStat.uCountPktAggreg[3]));
+    WLAN_OS_REPORT(("uRxFifoWa          = %d\n", pRxXfer->uRxFifoWa));
+#ifdef DBG_TRACE
+    {
+        TI_UINT32 i;
+        WLAN_OS_REPORT(("Indx: Event    Data1    Data2\n"));
+        for (i = 0; i < DBG_TBL_SIZE; i++) 
+        {
+            WLAN_OS_REPORT(("%04d: %05d %08x %08x\n", ((aDbgIndex + i) % DBG_TBL_SIZE), 
+                   aDbgTrace[(aDbgIndex + i) % DBG_TBL_SIZE].uEvent,
+                   aDbgTrace[(aDbgIndex + i) % DBG_TBL_SIZE].uData1,
+                   aDbgTrace[(aDbgIndex + i) % DBG_TBL_SIZE].uData2));
+        }
+    }
+#endif
 }
 #endif
 

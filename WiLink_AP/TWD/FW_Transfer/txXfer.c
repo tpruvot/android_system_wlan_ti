@@ -346,10 +346,15 @@ static ETxnStatus txXfer_SendAggregatedPkts (TTxXferObj *pTxXfer, TI_BOOL bLastP
         pTxXfer->uPktsCntrTxnIndex = 0;
     }
     pPktsCntrTxn = &(pTxXfer->aPktsCntrTxn[pTxXfer->uPktsCntrTxnIndex]);
-    pPktsCntrTxn->uPktsCntr = ENDIAN_HANDLE_LONG(pTxXfer->uPktsCntr);
-    pPktsCntrTxn->tTxnStruct.uHwAddr = HOST_WR_ACCESS_REG;
-    twIf_Transact(pTxXfer->hTwIf, &pPktsCntrTxn->tTxnStruct);
-
+#if defined(TNETW1283) //|| defined(TNETW1273_FPGA)
+        /* Skip EOT and Rx counter workarounds */
+#else
+    {
+        pPktsCntrTxn->uPktsCntr = ENDIAN_HANDLE_LONG(pTxXfer->uPktsCntr);
+        pPktsCntrTxn->tTxnStruct.uHwAddr = HOST_WR_ACCESS_REG;
+        twIf_Transact(pTxXfer->hTwIf, &pPktsCntrTxn->tTxnStruct);
+    }
+#endif
     /* If xfer completion CB is registered and last packet status is Complete, call the CB for all 
      *     packets except the input one (covered by the return code). 
      */

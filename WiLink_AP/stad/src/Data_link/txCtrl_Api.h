@@ -130,10 +130,12 @@ void txCtrlParams_updateMgmtRateAttributes(TI_HANDLE hTxCtrl, TI_UINT8 ratePolic
 void txCtrlParams_updateDataRateAttributes(TI_HANDLE hTxCtrl, TI_UINT8 ratePolicyId, TI_UINT8 ac);
 void txCtrlParams_updateBrcstRateAttributes(TI_HANDLE hTxCtrl, TI_UINT8 ratePolicyId);
 void txCtrlParams_updateTxSessionCount(TI_HANDLE hTxCtrl, TI_UINT16 txSessionCount);
+
+void txCtrlParams_resetDbgCounters(TI_HANDLE hTxCtrl);
+void txCtrlParams_resetLinkCounters(TI_HANDLE hTxCtrl, TI_UINT32 uHlid);
 #ifdef TI_DBG
 void txCtrlParams_printInfo(TI_HANDLE hTxCtrl);
 void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl);
-void txCtrlParams_resetDbgCounters(TI_HANDLE hTxCtrl);
 #endif /* TI_DBG */
 
 

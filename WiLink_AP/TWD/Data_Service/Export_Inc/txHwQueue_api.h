@@ -59,11 +59,11 @@ TI_STATUS	txHwQueue_Restart (TI_HANDLE hTxHwQueue);
 ETxHwQueStatus txHwQueue_AllocResources (TI_HANDLE hTxHwQueue, TTxCtrlBlk *pTxCtrlBlk);
 ETxnStatus         txHwQueue_UpdateFreeResources (TI_HANDLE hTxHwQueue, FwStatus_t *pFwStatus);
 void        txHwQueue_RegisterCb (TI_HANDLE hTxHwQueue, TI_UINT32 uCallBackId, void *fCbFunc, TI_HANDLE hCbHndl);
+void  txHwQueue_AddLink(TI_HANDLE hTxHwQueue);
+void  txHwQueue_RemoveLink(TI_HANDLE hTxHwQueue);
 #ifdef TI_DBG
 void		txHwQueue_PrintInfo (TI_HANDLE hTxHwQueue);
 #endif /* TI_DBG */
-
-
 #endif /* _TX_HW_QUEUE_API_H */
 
 

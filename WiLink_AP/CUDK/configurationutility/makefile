@@ -6,8 +6,6 @@ WPA_ENTERPRISE ?= y
 XCC ?= n
 TI_HOSTAPD_LIB ?= n
 
-CROSS_COMPILE=/home/e13513/scratch_NOBACKUP/arm-2008q3/bin/arm-none-linux-gnueabi-
-
 
 #enable/disable wireless simple config (WPS) support
 

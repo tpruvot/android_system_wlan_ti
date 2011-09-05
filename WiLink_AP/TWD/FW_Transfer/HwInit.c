@@ -57,6 +57,13 @@
 #include "CmdBld.h"
 #include "CmdMBox_api.h"
 
+#ifdef TNETW1283_FPGA
+#define FPGA_SKIP_DRPW
+#endif
+#ifdef TNETW1273_FPGA
+#define FPGA_SKIP_TOP_INIT
+#define FPGA_SKIP_DRPW
+#endif
 
 extern void TWD_FinalizeOnFailure   (TI_HANDLE hTWD);
 extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, FwStaticData_t *pFwInfo);
@@ -124,16 +131,39 @@ extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, Fw
 #define DRPw_MASK_CHECK  0xc0
 #define DRPw_MASK_SET    0x2000000
 
+#define STALL_TIMEOUT   7
+
+#ifdef DOWNLOAD_TIMER_REQUIERD
+#define FIN_LOOP 10
+#endif
+
+
+#ifdef _VLCT_
+    #define FIN_LOOP 10
+#else
+    #define FIN_LOOP 20000
+#endif
+
+/* #define FIN_LOOP 10 ???? */
 /************************************************************************
  * Macros
  ************************************************************************/
-
+#ifndef TNETW1283
 #define SET_DEF_NVS(aNVS)     aNVS[0]=0x01; aNVS[1]=0x6d; aNVS[2]=0x54; aNVS[3]=0x56; aNVS[4]=0x34; \
                               aNVS[5]=0x12; aNVS[6]=0x28; aNVS[7]=0x01; aNVS[8]=0x71; aNVS[9]=0x54; \
                               aNVS[10]=0x00; aNVS[11]=0x08; aNVS[12]=0x00; aNVS[13]=0x00; aNVS[14]=0x00; \
                               aNVS[15]=0x00; aNVS[16]=0x00; aNVS[17]=0x00; aNVS[18]=0x00; aNVS[19]=0x00; \
                               aNVS[20]=0x00; aNVS[21]=0x00; aNVS[22]=0x00; aNVS[23]=0x00; aNVS[24]=eNVS_NON_FILE;\
 							  aNVS[25]=0x00; aNVS[26]=0x00; aNVS[27]=0x00;
+
+#else
+#define SET_DEF_NVS(aNVS)     aNVS[0]=0x01; aNVS[1]=0x6d; aNVS[2]=0x54; aNVS[3]=0x58; aNVS[4]=0x03; \
+                              aNVS[5]=0x12; aNVS[6]=0x28; aNVS[7]=0x01; aNVS[8]=0x71; aNVS[9]=0x54; \
+                              aNVS[10]=0x00; aNVS[11]=0x08; aNVS[12]=0x00; aNVS[13]=0x00; aNVS[14]=0x00; \
+                              aNVS[15]=0x00; aNVS[16]=0x00; aNVS[17]=0x00; aNVS[18]=0x00; aNVS[19]=0x00; \
+                              aNVS[20]=0x00; aNVS[21]=0x00; aNVS[22]=0x00; aNVS[23]=0x00; aNVS[24]=eNVS_NON_FILE;\
+							  aNVS[25]=0x00; aNVS[26]=0x00; aNVS[27]=0x00;
+#endif
 
 
 #define SET_PARTITION(pPartition,uAddr1,uMemSize1,uAddr2,uMemSize2,uAddr3,uMemSize3,uAddr4) \
@@ -305,6 +335,7 @@ typedef struct
     TI_UINT32               uElpCmd;      
     /* Chip ID */
     TI_UINT32               uChipId;      
+    TI_BOOL                 bIsFREFClock;     
     /* Boot state machine temporary data */
     TI_UINT32               uBootData;    
     TI_UINT32               uSelfClearTime;
@@ -330,7 +361,8 @@ typedef struct
      TI_UINT32               uRegStage;
     TI_UINT32               uRegLoop;
     TI_UINT32               uRegSeqStage;
-    TI_UINT32               uRegData;  
+    TI_UINT32               uRegData;
+	TI_HANDLE               hStallTimer;
 
     /* Top register Read/Write SM temporary data*/
     TI_UINT32               uTopRegAddr;
@@ -352,6 +384,12 @@ typedef struct
     THwInitTxn              aHwInitTxn[MAX_HW_INIT_CONSECUTIVE_TXN];
     TFwStaticTxn            tFwStaticTxn;
 
+#ifdef TNETW1283
+    /* PLL config stage */
+    TI_UINT32               uPllStage; 
+    TI_UINT32               uPllPendingFlag; 
+    TI_UINT32               uClockConfig; 
+#endif
     TI_UINT32               uSavedDataForWspiHdr;  /* For saving the 4 bytes before the NVS data for WSPI case 
                                                         where they are overrun by the WSPI BusDrv */
     TPartition              aPartition[NUM_OF_PARTITION];
@@ -368,13 +406,18 @@ static TI_STATUS hwInit_ResetSm                     (TI_HANDLE hHwInit);
 static TI_STATUS hwInit_EepromlessStartBurstSm      (TI_HANDLE hHwInit);                                                   
 static TI_STATUS hwInit_LoadFwImageSm               (TI_HANDLE hHwInit);
 static TI_STATUS hwInit_FinalizeDownloadSm          (TI_HANDLE hHwInit);                                             
+#ifndef FPGA_SKIP_TOP_INIT
 static TI_STATUS hwInit_TopRegisterRead(TI_HANDLE hHwInit);
 static TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress);
 static TI_STATUS hwInit_TopRegisterWrite(TI_HANDLE hHwInit);
 static TI_STATUS hwInit_InitTopRegisterWrite(TI_HANDLE hHwInit, TI_UINT32 uAddress, TI_UINT32 uValue);
-
-
-
+#endif
+#ifdef TNETW1283
+static TI_STATUS hwInit_PllConfigSm (TI_HANDLE hHwInit);
+#endif
+#ifdef DOWNLOAD_TIMER_REQUIERD
+static void      hwInit_StallTimerCb                (TI_HANDLE hHwInit, TI_BOOL bTwdInitOccured);
+#endif
 
 /*******************************************************************************
 *                       PUBLIC  FUNCTIONS  IMPLEMENTATION                      *
@@ -427,6 +470,13 @@ TI_HANDLE hwInit_Create (TI_HANDLE hOs)
 TI_STATUS hwInit_Destroy (TI_HANDLE hHwInit)
 {
     THwInit *pHwInit = (THwInit *)hHwInit;
+    if (pHwInit->hStallTimer)
+    {
+#ifdef DOWNLOAD_TIMER_REQUIERD
+		tmr_DestroyTimer (pHwInit->hStallTimer);
+#endif
+
+    }        
 
     /* Free HwInit Module */
     os_memoryFree (pHwInit->hOs, pHwInit, sizeof(THwInit));
@@ -470,6 +520,13 @@ TI_STATUS hwInit_Init (TI_HANDLE      hHwInit,
         /* Setting write as default transaction */
         TXN_PARAM_SET(pTxn, TXN_LOW_PRIORITY, TXN_FUNC_ID_WLAN, TXN_DIRECTION_WRITE, TXN_INC_ADDR)
     }
+#ifdef DOWNLOAD_TIMER_REQUIERD
+	pHwInit->hStallTimer = tmr_CreateTimer (hTimer);
+	if (pHwInit->hStallTimer == NULL) 
+	{
+		return TI_NOK;
+	}
+#endif
 
     TRACE0(pHwInit->hReport, REPORT_SEVERITY_INIT, ".....HwInit configured successfully\n");
     
@@ -597,10 +654,15 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
     THwInit    *pHwInit = (THwInit *)hHwInit;
     TI_STATUS   status = 0;
     TTxnStruct  *pTxn;
-    TI_UINT32   uData;
     TTwd        *pTWD        = (TTwd *) pHwInit->hTWD;
     IniFileGeneralParam  *pGenParams = &DB_GEN(pTWD->hCmdBld);
+#ifdef TNETW1283
+    TWlanParams             *pWlanParams = &DB_WLAN(pTWD->hCmdBld);
+#endif
     TI_UINT32   clkVal = 0x3;
+#ifndef FPGA_SKIP_TOP_INIT
+    TI_UINT32               uData;
+#endif
 
     switch (pHwInit->uInitStage)
     {
@@ -620,6 +682,29 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
          pHwInit->uTxnIndex++;
 #endif
 
+#ifdef TNETW1283
+        WLAN_OS_REPORT(("hwInit_BootSm: NewPllAlgo = %d\n", pWlanParams->NewPllAlgo));
+        if (pWlanParams->NewPllAlgo)
+        {
+             /*
+              * New PLL configuration algorithm - see hwInit_PllConfigSm()
+              * Skip TRIO setting of register PLL_PARAMETERS(6040) and WU_COUNTER_PAUSE(6008)
+              * Continue from WELP_ARM_COMMAND(6100) setting - Continue the ELP wake up sequence
+              */
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm: Call hwInit_PllConfigSm\n"));
+             /* Call PLL configuration state machine */
+            pHwInit->uPllStage = 0;
+            pHwInit->uPllPendingFlag = 0;
+            pHwInit->uClockConfig = 0;
+            status = hwInit_PllConfigSm(pHwInit);
+        
+            WLAN_OS_REPORT(("hwInit_BootSm: hwInit_PllConfigSm return status = %d\n", status));
+
+            EXCEPT (pHwInit, status)
+        }
+        else
+#endif
+        {
         if (( 0 == (pGenParams->RefClk & FREF_CLK_FREQ_MASK)) || (2 == (pGenParams->RefClk & FREF_CLK_FREQ_MASK))
              || (4 == (pGenParams->RefClk & FREF_CLK_FREQ_MASK)))
         {/* ref clk: 19.2/38.4/38.4-XTAL */
@@ -631,7 +716,17 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         }
 
         WLAN_OS_REPORT(("CHIP VERSION... set 1273 chip top registers\n"));
-
+#ifdef FPGA_SKIP_TOP_INIT
+            WLAN_OS_REPORT(("hwInit_BootSm: SKIP TOP INIT\n"));
+            /* 
+             * Don't Access PLL registers 
+             * Replace with SCR_PAD2 just not to break the boot states
+             */
+            BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, SCR_PAD2, 0, 
+                                   REGISTER_SIZE, TXN_DIRECTION_READ,(TTxnDoneCb)hwInit_BootSm, hHwInit)
+            status = twIf_Transact(pHwInit->hTwIf, pTxn);
+            pHwInit->uTxnIndex++;
+#else
         /* set the reference clock freq' to be used (pll_selinpfref field) */        
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, PLL_PARAMETERS, clkVal,
                                REGISTER_SIZE, TXN_DIRECTION_WRITE, NULL, NULL)
@@ -643,10 +738,23 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, PLL_PARAMETERS, 0, 
                                REGISTER_SIZE, TXN_DIRECTION_READ, (TTxnDoneCb)hwInit_BootSm, hHwInit)
         status = twIf_Transact(pHwInit->hTwIf, pTxn);
-
+#endif
         EXCEPT (pHwInit, status)
+        }
 
     case 1:
+#ifdef FPGA_SKIP_TOP_INIT
+            WLAN_OS_REPORT(("hwInit_BootSm 1: SKIP TOP INIT - don't set PLL registers\n"));
+#else
+
+#ifdef TNETW1283
+        if (pWlanParams->NewPllAlgo)
+        {
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm: stage 1 entry\n"));
+        }
+        else
+#endif
+        {
         pHwInit->uInitStage ++;
         /* We don't zero pHwInit->uTxnIndex at the begining because we need it's value to the next transaction */
         uData = pHwInit->aHwInitTxn[pHwInit->uTxnIndex].uData;
@@ -662,16 +770,29 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         twIf_Transact(pHwInit->hTwIf, pTxn);
 
         pHwInit->uTxnIndex++;
+        }
 
         /* Continue the ELP wake up sequence */
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, WELP_ARM_COMMAND, WELP_ARM_COMMAND_VAL, 
                                REGISTER_SIZE, TXN_DIRECTION_WRITE, NULL, NULL)
         twIf_Transact(pHwInit->hTwIf, pTxn);
 
+#endif /* FPGA_SKIP_TOP_INIT */
         /* Wait 500uS */
         os_StalluSec (pHwInit->hOs, 500);
 
-        
+#ifdef FPGA_SKIP_DRPW
+        /* 
+         * Don't Access DRPW registers 
+         * Replace with SCR_PAD2 just not to break the boot states
+         */
+        WLAN_OS_REPORT(("hwInit_BootSm 1: skip set_partition and skip read DRPW reg 0x%x\n", DRPW_SCRATCH_START));
+        BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, SCR_PAD2, 0, 
+                               REGISTER_SIZE, TXN_DIRECTION_READ,(TTxnDoneCb)hwInit_BootSm, hHwInit)
+        status = twIf_Transact(pHwInit->hTwIf, pTxn);
+        pHwInit->uTxnIndex++;
+        /* Skip to next phase */
+#else
         /* Set the bus addresses partition to DRPw registers region */
         SET_DRP_PARTITION(pHwInit->aPartition)        
         hwInit_SetPartition (pHwInit,pHwInit->aPartition);
@@ -683,25 +804,44 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, DRPW_SCRATCH_START, 0, 
                                REGISTER_SIZE, TXN_DIRECTION_READ,(TTxnDoneCb)hwInit_BootSm, hHwInit)
         status = twIf_Transact(pHwInit->hTwIf, pTxn);
-
+#endif
         EXCEPT (pHwInit, status)
 
     case 2:
         pHwInit->uInitStage ++;
 
+#ifdef FPGA_SKIP_DRPW
+        WLAN_OS_REPORT(("hwInit_BootSm 2: skip set_partition and skip write DRPW reg 0x%x\n", DRPW_SCRATCH_START));
+#else
         /* multiply fref value by 2, so that {0,1,2,3} values will become {0,2,4,6} */
         /* Then, move it 4 places to the right, to alter Fref relevant bits in register 0x2c */
         clkVal = pHwInit->aHwInitTxn[pHwInit->uTxnIndex].uData;
         pHwInit->uTxnIndex = 0; /* Reset index only after getting the last read value! */
+#ifdef TNETW1283 
+WLAN_OS_REPORT(("\n **** in BootSM, setting clkVal,  pHwInit->bIsFREFClock=%d  *****\n", pHwInit->bIsFREFClock));
+        if (pHwInit->bIsFREFClock == TI_TRUE)
+        {
+            clkVal |= (pGenParams->RefClk << 1) << 4;
+        }
+        else
+        {
+            clkVal |= (pWlanParams->TcxoRefClk << 1) << 4;
+        }
+#else
         clkVal |= (pGenParams->RefClk << 1) << 4;
+#endif
+#ifdef TNETW1283
+        if ((pGenParams->GeneralSettings[0] & DRPw_MASK_CHECK) > 0)
+#else
         if ((pGenParams->GeneralSettings & DRPw_MASK_CHECK) > 0)
+#endif            
         {
             clkVal |= DRPw_MASK_SET;
         }
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, DRPW_SCRATCH_START, clkVal, 
                                REGISTER_SIZE, TXN_DIRECTION_WRITE, NULL, NULL)
         twIf_Transact(pHwInit->hTwIf, pTxn);
-
+#endif
         pHwInit->uTxnIndex++;
 
 
@@ -741,6 +881,10 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
 		else if (pHwInit->uChipId == CHIP_ID_1273_PG20)
         {
             WLAN_OS_REPORT(("Working on a 1273 PG 2.0 board.\n"));
+        }
+		else if (pHwInit->uChipId == CHIP_ID_1283_PG10)
+        {
+            WLAN_OS_REPORT(("Working on a 1283 PG 1.0 board.\n"));
         }
         else 
         {
@@ -881,9 +1025,16 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         pHwInit->uInitSeqStage = 0;
         pHwInit->uInitSeqStatus = TXN_STATUS_COMPLETE;
 
+#ifdef FPGA_SKIP_TOP_INIT
+        WLAN_OS_REPORT(("hwInit_BootSm: SKIP TOP INIT, skip to last stage 12\n"));
+        pHwInit->uInitStage = 12;
+#else
         EXCEPT (pHwInit, status)
 
     case 8:
+#ifdef FPGA_SKIP_TOP_INIT
+        WLAN_OS_REPORT(("hwInit_BootSm: SKIP TOP INIT, ERROR in stage 8\n"));
+#endif
         pHwInit->uInitStage++;
         if ((pGenParams->RefClk & FREF_CLK_TYPE_MASK) != 0x0)
         {            
@@ -904,14 +1055,17 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
 
     case 10:
         pHwInit->uInitStage++; 
+#ifndef TNETW1283
 		if ((pGenParams->RefClk & FREF_CLK_POLARITY_MASK) == 0x0)
         {            
             status = hwInit_InitTopRegisterRead(hHwInit, 0xCB2);            
             EXCEPT (pHwInit, status)
         }
+#endif
 
     case 11:
         pHwInit->uInitStage++;        
+#ifndef TNETW1283     
         if ((pGenParams->RefClk & FREF_CLK_POLARITY_MASK) == 0x0)
         {    
             pHwInit->uTopRegValue &= FREF_CLK_POLARITY_BITS;
@@ -919,8 +1073,13 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
             status =  hwInit_InitTopRegisterWrite( hHwInit, 0xCB2, pHwInit->uTopRegValue);
             EXCEPT (pHwInit, status)
         }
+#endif /* #ifdef FPGA_SKIP_TOP_INIT */
 
     case 12:
+#endif
+#ifdef FPGA_SKIP_TOP_INIT
+        WLAN_OS_REPORT(("hwInit_BootSm: SKIP TOP INIT, now in stage 12\n"));
+#endif
         pHwInit->uInitStage = 0;
         
         /* Set the Download Status to COMPLETE */
@@ -938,6 +1097,471 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
     return TI_OK;
 }
 
+#ifdef TNETW1283
+/* 
+ * New PLL Configuration Algorithm
+ * -------------------------------
+ */
+#define CLOCK_CONFIG_19_2_M      0
+#define CLOCK_CONFIG_26_M        1
+#define CLOCK_CONFIG_38_4_M      2
+#define CLOCK_CONFIG_52_M        3
+#define CLOCK_CONFIG_38_4_M_XTAL 4
+#define CLOCK_CONFIG_16_368_M    4
+#define CLOCK_CONFIG_26_M_XTAL   5
+#define CLOCK_CONFIG_32_736_M    5
+#define CLOCK_CONFIG_16_8_M      6
+#define CLOCK_CONFIG_33_6_M      7
+
+
+
+ /****************************************************************************
+ * DESCRIPTION: PLL configuration state machine
+ * 
+ * INPUTS:  
+ * 
+ * OUTPUT:  None
+ * 
+ * RETURNS: TI_OK 
+ ****************************************************************************/
+static TI_STATUS hwInit_PllConfigSm (TI_HANDLE hHwInit)
+{
+    THwInit                 *pHwInit = (THwInit *)hHwInit;
+    TI_STATUS               status = TI_OK;
+    TI_UINT32               uData;
+    TI_UINT32               uMcsPllConfig;
+    TTwd                    *pTWD        = (TTwd *) pHwInit->hTWD;
+    IniFileGeneralParam     *pGenParams = &DB_GEN(pTWD->hCmdBld);
+    TWlanParams             *pWlanParams = &DB_WLAN(pTWD->hCmdBld);
+    TTxnStruct              *pTxn;
+    pHwInit->uTxnIndex =    0;
+    
+
+    pHwInit->bIsFREFClock = TI_FALSE;
+    
+    WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_PllConfigSm: entry, uPllStage=%d\n", pHwInit->uPllStage));
+    /*
+     * Select FREF or TCXO clock 
+     */
+    while (TI_TRUE)
+    {
+        WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_PllConfigSm( uPllStage = %d ): while\n", pHwInit->uPllStage));
+        switch (pHwInit->uPllStage)
+        {
+
+        /*
+         * 0. Read the CHIP ID for the different configurations of PG1.0/PG2.0 later on
+         *
+         */
+        case 0:
+            pHwInit->uPllStage++;
+            
+            /* ead CHIP ID in pllConfig */
+            BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, CHIP_ID, 0, REGISTER_SIZE, TXN_DIRECTION_READ,(TTxnDoneCb)hwInit_PllConfigSm, hHwInit)
+            status = twIf_Transact(pHwInit->hTwIf, pTxn);
+            EXCEPT (pHwInit, status)
+            
+        /*
+         * 1. TCXO Frequency Detection
+         * ---------------------------
+         */
+        case 1:
+            pHwInit->uPllStage++;
+            pHwInit->uTxnIndex = 0;
+            pHwInit->uChipId = pHwInit->aHwInitTxn[pHwInit->uTxnIndex].uData;
+            os_StalluSec (pHwInit->hOs, 60000);
+
+            
+            
+            WLAN_OS_REPORT(("\n TCXO CLOCK=%d, FREF CLOCK=%d !!!!!! \n", pWlanParams->TcxoRefClk, pGenParams->RefClk));
+            WLAN_OS_REPORT(("\n CHIP ID Found --->>>  0x%x !!!!!! \n", pHwInit->uChipId));
+            
+
+            
+            if (CHIP_ID_1283_PG10 == pHwInit->uChipId) 
+            {
+                WLAN_OS_REPORT(("\n CHIP PG1.0 Detected !!!!!!!!!!!!! \n"));
+            }
+            else if (CHIP_ID_1283_PG20 == pHwInit->uChipId) 
+            {
+                WLAN_OS_REPORT(("\n CHIP PG2.0 Detected !!!!!!!!!!!!1! \n"));
+            }
+            else
+            {
+                WLAN_OS_REPORT(("\n ERROR!!!!!!!!: unrecognized chip ID found!!! \n"));
+            }   
+
+            
+			/*
+			 *	if working on XTAL-only mode goto directly to TCXO TO FREF SWITCH
+			 */
+            if(pGenParams->RefClk == CLOCK_CONFIG_38_4_M_XTAL || pGenParams->RefClk == CLOCK_CONFIG_26_M_XTAL)
+			{
+				pHwInit->uPllStage = 3; //TCXO TO FREF SWITCH
+				continue;
+			}
+            
+            
+            
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_PllConfigSm(1): read SYS_CLK_CFG_REG\n"));
+
+            /* 
+             * Read clock source FREF or TCXO 
+             */
+            status = hwInit_InitTopRegisterRead(hHwInit, SYS_CLK_CFG_REG);            
+            if (status == TXN_STATUS_PENDING) pHwInit->uPllPendingFlag = 1;
+
+            EXCEPT (pHwInit, status)
+
+        case 2:
+            pHwInit->uPllStage++;
+            pHwInit->uClockConfig = pHwInit->uTopRegValue;
+            pHwInit->uTxnIndex = 0;
+            
+            /* 
+             * Check the clock source in bit 4 from SYS_CLK_CFG_REG 
+             */
+            if (pHwInit->uClockConfig & PRCM_CM_EN_MUX_WLAN_FREF)
+            {
+                pHwInit->bIsFREFClock = TI_TRUE;
+                /* 
+                 * if bit 4 is set - working with FREF clock, skip to FREF wait 15 msec stage
+                 */
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(2): bit 4 is set(SYS_CLK_CFG_REG=0x%x), working with FREF clock!!!\n", pHwInit->uClockConfig));
+                if (CHIP_ID_1283_PG10 == pHwInit->uChipId) 
+                {
+                    WLAN_OS_REPORT(("\n CHIP PG1.0 Detected, Moving to stage 6 (FREF Detection)!!! \n"));
+                    pHwInit->uPllStage = 6; 
+                }
+                else if (CHIP_ID_1283_PG20 == pHwInit->uChipId) 
+                {
+                    WLAN_OS_REPORT(("\n CHIP PG2.0 Detected!!! \n"));
+                }
+                else
+                {
+                    WLAN_OS_REPORT(("\n ERROR!!!!!!!!: unrecognized chip ID found!!! \n"));
+                    continue;
+                }   
+                
+                pHwInit->uPllStage = 4;
+                continue;
+            }
+
+            /* 
+             * if bit 3 is clear - working with TCXO clock
+             */
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(2): bit 3 is clear(SYS_CLK_CFG_REG=0x%x), working with TCXO clock, read TCXO_CLK_DETECT_REG\n", pHwInit->uClockConfig));
+            continue;
+
+#ifndef TNETW1283
+            /* 
+             * Read the status of the TXCO detection mechanism 
+             */
+            status = hwInit_InitTopRegisterRead(hHwInit, TCXO_CLK_DETECT_REG);            
+            if (status == TXN_STATUS_PENDING) pHwInit->uPllPendingFlag = 1;
+
+            EXCEPT (pHwInit, status)
+#endif
+            
+        case 3:
+            pHwInit->uPllStage++;
+            /* register val is in high word */
+            uData = pHwInit->uTopRegValue;
+            pHwInit->uTxnIndex = 0;
+
+
+            WLAN_OS_REPORT(("\n In stage 3, pWlanParams->TcxoRefClk=%d \n", pWlanParams->TcxoRefClk));
+            
+#ifndef TNETW1283            
+            /* 
+             * check bit 4 from TCXO_CLK_DETECT_REG
+             */
+            if (uData & TCXO_DET_FAILED)
+            {
+                /* 
+                 * if bit 4 is set - TCXO detect failure
+                 */
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(3): ERROR !!!!!!!! bit 4 is set, TCXO Detect failed\n"));
+            }
+#endif
+
+            /* 
+             * check TXCO clock config from INI file
+             */
+            if ((pWlanParams->TcxoRefClk != CLOCK_CONFIG_16_368_M) && (pWlanParams->TcxoRefClk != CLOCK_CONFIG_32_736_M))
+            {
+                /* 
+                 * not 16.368Mhz and not 32.736Mhz - skip to configure ELP stage
+                 */
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(3): TcxoRefClk=%d - not 16.368Mhz and not 32.736Mhz - skip to configure ELP stage\n", pWlanParams->TcxoRefClk));
+                pHwInit->uPllStage = 6;
+                continue;
+            }
+        
+            /*
+             * 2. TCXO to FREF switch
+             * ----------------------
+             */
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(3): TcxoRefClk=%d - 16.368Mhz or 32.736Mhz - TCXO to FREF switch started: \n", pWlanParams->TcxoRefClk));
+
+            /* 
+             * Write enable FREF_CLK_REQ 
+             */
+            if (CHIP_ID_1283_PG10 == pHwInit->uChipId)
+            {     
+                pHwInit->uClockConfig |= WL_CLK_REQ_TYPE_FREF;
+                status = hwInit_InitTopRegisterWrite(hHwInit, SYS_CLK_CFG_REG, pHwInit->uClockConfig);            
+                pHwInit->uTxnIndex++; 
+            }
+            else if (CHIP_ID_1283_PG20 == pHwInit->uChipId) 
+            {
+                uData = 0x68; /* setting bits 3,5 & 6 */
+                status = hwInit_InitTopRegisterWrite(hHwInit, WL_SPARE_REG, uData);
+
+                status = hwInit_InitTopRegisterWrite(hHwInit, SYS_CLK_CFG_REG, 0x0D);            
+                pHwInit->uTxnIndex++;
+            }
+
+            pHwInit->bIsFREFClock = TI_TRUE;
+            continue;
+
+        case 4:
+            /*
+             * 2.1 Wait settling time
+             * ----------------------
+             */
+            pHwInit->uPllStage++;
+
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(3): Wait settling time, Read FREF_CLK_DETECT_REG\n"));
+#ifdef TNETW1283
+            os_StalluSec (pHwInit->hOs, 15000); /* Wait for 15 msec */
+            continue;
+#else
+            os_StalluSec (pHwInit->hOs, pGenParams->SettlingTime*1000);
+#endif
+
+#ifndef TNETW1283 
+            /* 
+             * Read the status of the FREF detection mechanism 
+             */
+            status = hwInit_InitTopRegisterRead(hHwInit, FREF_CLK_DETECT_REG);            
+            if (status == TXN_STATUS_PENDING) pHwInit->uPllPendingFlag = 1;
+            
+            EXCEPT (pHwInit, status)
+#endif
+            
+        case 5:
+            pHwInit->uPllStage++;
+            /* register val is in high word */
+            uData = pHwInit->uTopRegValue;
+            pHwInit->uTxnIndex = 0;
+
+#ifndef TNETW1283
+            /* 
+             * check bit 4 from FREF_CLK_DETECT_REG
+             */
+            if (uData & FREF_CLK_DETECT_FAIL)
+            {
+                /* 
+                 * if bit 4 is set - FREF detect failure
+                 */
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(5): FREF_CLK_DETECT_REG=0x%x, ERROR !!!!!!!! bit 4 is set, FREF Detect failed\n", uData));
+            }
+#endif
+
+            /* 
+             * Configure the MCS PLL's input to be FREF -  MCS_PLL_CLK_SEL_FREF
+             * Configure WLAN's clock supply and DRPw's to be FREF -  PRCM_CM_EN_MUX_WLAN_FREF
+             */
+            if (CHIP_ID_1283_PG10 == pHwInit->uChipId)
+            {
+                pHwInit->uClockConfig |= (MCS_PLL_CLK_SEL_FREF | PRCM_CM_EN_MUX_WLAN_FREF);
+                status = hwInit_InitTopRegisterWrite(hHwInit, SYS_CLK_CFG_REG, pHwInit->uClockConfig); 
+                WLAN_OS_REPORT(("\n NEW PLL ALGO - hwInit_BootSm(5): Configure MCS and WLAN to FREF. uClockConfig=0x%x \n", pHwInit->uClockConfig));           
+                
+            }
+            continue;
+            
+        case 6:
+            /* 
+             * 3. Configure MCS PLL settings to TCXO/FREF Freq 
+             * -----------------------------------------------
+             */
+            pHwInit->uPllStage++;
+            pHwInit->uTxnIndex = 0;
+
+            
+            /* 
+             * Set the values that determine the time elapse since the PLL's get their enable signal until the lock indication is set
+             */
+            if (CHIP_ID_1283_PG10 == pHwInit->uChipId) 
+            {
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(6): Configure PLL_LOCK_COUNTERS_REG for PG1.0 only \n"));
+                uData = PLL_LOCK_COUNTERS_COEX | PLL_LOCK_COUNTERS_MCS;
+                status = hwInit_InitTopRegisterWrite(hHwInit, PLL_LOCK_COUNTERS_REG, uData);            
+                pHwInit->uTxnIndex++;  
+            }
+
+            /* 
+             * Read MCS PLL in order to set only bits[6:4]
+             */
+            
+            WLAN_OS_REPORT(("\n NEW PLL ALGO - hwInit_BootSm(6): Read MCS PLL in order to set only bits[6:4]\n"));
+            status = hwInit_InitTopRegisterRead(hHwInit, MCS_PLL_CONFIG_REG);            
+            if (status == TXN_STATUS_PENDING) pHwInit->uPllPendingFlag = 1;
+    
+            EXCEPT (pHwInit, status)            
+    
+            
+
+        case 7:
+            pHwInit->uPllStage++;
+            /* the data ins in the high word */
+            uData = pHwInit->uTopRegValue; 
+            pHwInit->uTxnIndex = 0;
+
+            WLAN_OS_REPORT(("\n [stage 7]: MCS_PLL_CONFIG_REG=0x%x ****** \n", pHwInit->uTopRegValue));
+            
+
+
+            if (CHIP_ID_1283_PG20 == pHwInit->uChipId) 
+            {
+                WLAN_OS_REPORT(("\n Setting bit 2 in spare register to avoid illegal access \n"));
+                uData = WL_SPARE_VAL; 
+                status = hwInit_InitTopRegisterWrite(hHwInit, WL_SPARE_REG, uData);  
+
+                if (TI_FALSE == pHwInit->bIsFREFClock) 
+                {
+                    if ((CLOCK_CONFIG_16_8_M == pGenParams->TcxoRefClk) || (CLOCK_CONFIG_33_6_M == pGenParams->TcxoRefClk)) 
+                    {
+                        WLAN_OS_REPORT(("\n 16_8_M or 33_6_M TCXO detected so configure the MCS PLL settings manually!!!! \n")); 
+                        status = hwInit_InitTopRegisterWrite(hHwInit, MCS_PLL_M_REG, MCS_PLL_M_REG_VAL);
+                        status = hwInit_InitTopRegisterWrite(hHwInit, MCS_PLL_N_REG, MCS_PLL_N_REG_VAL);
+                        status = hwInit_InitTopRegisterWrite(hHwInit, MCS_PLL_CONFIG_REG, MCS_PLL_CONFIG_REG_VAL);
+                        continue;
+                    }
+                }
+            }
+
+            if (pHwInit->bIsFREFClock == TI_TRUE)
+            {
+            /* 
+             * Set the MCS PLL input frequency value according to the FREF/TCXO value detected/read
+             */
+                WLAN_OS_REPORT(("!!!!!!!!    FREF CLOCK     !!!!!!!!!!\n"));
+                uMcsPllConfig = HW_CONFIG_19_2_M; /* default */
+                if (pGenParams->RefClk == CLOCK_CONFIG_19_2_M)
+                {               
+                    uMcsPllConfig = HW_CONFIG_19_2_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_19_2_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->RefClk == CLOCK_CONFIG_26_M)
+                {                
+                   uMcsPllConfig = HW_CONFIG_26_M; 
+                   WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_26_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->RefClk == CLOCK_CONFIG_38_4_M) 
+                {                
+                    uMcsPllConfig = HW_CONFIG_38_4_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_38_4_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->RefClk == CLOCK_CONFIG_52_M)
+                {                   
+                    uMcsPllConfig = HW_CONFIG_52_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_52_M)\n",uMcsPllConfig));
+                }
+#ifdef TNETW1283
+                if (pGenParams->RefClk == CLOCK_CONFIG_38_4_M)
+                {                
+                    uMcsPllConfig = HW_CONFIG_19_2_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_19_2_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->RefClk == CLOCK_CONFIG_52_M)  
+                {
+                    uMcsPllConfig = HW_CONFIG_26_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_26_M)\n",uMcsPllConfig));
+                }
+#endif
+           }
+           else
+           {
+
+                WLAN_OS_REPORT(("!!!!!!!!    TCXO CLOCK     !!!!!!!!!!\n"));
+                uMcsPllConfig = HW_CONFIG_19_2_M;
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_19_2_M)
+                {  
+                    uMcsPllConfig = HW_CONFIG_19_2_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_19_2_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_26_M)  
+                {  
+                    uMcsPllConfig = HW_CONFIG_26_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_26_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_38_4_M)
+                {  
+                    uMcsPllConfig = HW_CONFIG_38_4_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_38_4_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_52_M)   
+                { 
+                    uMcsPllConfig = HW_CONFIG_52_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_52_M)\n",uMcsPllConfig));
+                }
+#ifdef TNETW1283
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_38_4_M) 
+                { 
+                    uMcsPllConfig = HW_CONFIG_19_2_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_19_2_M)\n",uMcsPllConfig));
+                }
+                if (pGenParams->TcxoRefClk == CLOCK_CONFIG_52_M)    
+                {
+                    uMcsPllConfig = HW_CONFIG_26_M;
+                    WLAN_OS_REPORT(("uMcsPllConfig = %d (HW_CONFIG_26_M)\n",uMcsPllConfig));
+                }
+#endif          
+            }
+           
+
+            uData &= ~MCS_SEL_IN_FREQ_MASK; /* Zero any read bits */
+            uData |= (uMcsPllConfig << (MCS_SEL_IN_FREQ_SHIFT)) & (MCS_SEL_IN_FREQ_MASK); /* Bits[6:4]  */
+            if (CHIP_ID_1283_PG10 == pHwInit->uChipId) 
+            {
+                WLAN_OS_REPORT(("\n Configuring MCS_PLL for CHIP_ID_1283_PG10!!!!! \n"));
+                uData |= 0x02;
+            }
+            else
+            {
+                WLAN_OS_REPORT(("\n Configuring MCS_PLL for CHIP_ID_1283_PG20!!!!! \n"));
+                uData |= 0x03;
+            }
+           
+            
+            WLAN_OS_REPORT(("\n NEW PLL ALGO - hwInit_BootSm(6): Write to MCS_PLL_CONFIG_REG value of (Data=0x%x), McsPllConfig=%d\n", uData, uMcsPllConfig));
+            status = hwInit_InitTopRegisterWrite(hHwInit, MCS_PLL_CONFIG_REG, uData);            
+            continue;
+
+        case 8: /* was case 7 */
+            pHwInit->uPllStage = 0;
+
+            
+            if (pHwInit->uPllPendingFlag == 1)
+            {
+                WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(7): back to bootSm\n"));
+                hwInit_BootSm (hHwInit);
+            }
+
+            WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(7): return TXN_STATUS_COMPLETE\n"));
+            return TXN_STATUS_COMPLETE;
+        } /* switch */
+    } /* while */
+
+
+    WLAN_OS_REPORT(("NEW PLL ALGO - hwInit_BootSm(%d): Exit\n", pHwInit->uPllStage));
+    return TI_OK;
+}
+
+#endif
 
 TI_STATUS hwInit_LoadFw (TI_HANDLE hHwInit)
 {
@@ -1008,11 +1632,6 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
     TI_STATUS status = TI_OK;
     TTxnStruct* pTxn;
 
-#ifdef _VLCT_
-    #define FIN_LOOP 10
-#else
-    #define FIN_LOOP 20000
-#endif
 
     while (TI_TRUE)
     {
@@ -1079,7 +1698,9 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
             {           
                 pHwInit->uFinStage = 4;
 
-                os_StalluSec (pHwInit->hOs, 50);
+#ifndef DOWNLOAD_TIMER_REQUIERD
+				os_StalluSec (pHwInit->hOs, 50);
+#endif
 
                 /* Read interrupt status register */
                 BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, ACX_REG_INTERRUPT_NO_CLEAR, 0, 
@@ -1123,8 +1744,15 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
             {
                 pHwInit->uFinStage = 3;
                 pHwInit->uFinLoop ++;
+
+#ifdef DOWNLOAD_TIMER_REQUIERD
+                tmr_StartTimer (pHwInit->hStallTimer, hwInit_StallTimerCb, hHwInit, STALL_TIMEOUT, TI_FALSE);
+                return TXN_STATUS_PENDING;
+#endif
             }
+#ifndef DOWNLOAD_TIMER_REQUIERD
             continue;
+#endif
 
         case 5:  
             pHwInit->uFinStage++;
@@ -1218,7 +1846,7 @@ static TI_STATUS hwInit_ResetSm (TI_HANDLE hHwInit)
         /* Disable Rx/Tx */
     BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, REG_ENABLE_TX_RX, 0x0, 
                                REGISTER_SIZE, TXN_DIRECTION_WRITE, NULL, NULL)
-    twIf_Transact(pHwInit->hTwIf, pTxn);
+    status = twIf_Transact(pHwInit->hTwIf, pTxn);
 
     pHwInit->uTxnIndex++;
 
@@ -1576,6 +2204,11 @@ static TI_STATUS hwInit_LoadFwImageSm (TI_HANDLE hHwInit)
 } /* hwInit_LoadFwImageSm() */
 
 #define READ_TOP_REG_LOOP  32
+#ifdef TNETW1283
+#define TOP_REG_ADDR_MASK    0x1FFF
+#else
+#define TOP_REG_ADDR_MASK    0x7FF
+#endif
 
 /****************************************************************************
  *                      hwInit_ReadRadioParamsSm ()
@@ -1598,6 +2231,11 @@ TI_STATUS hwInit_ReadRadioParamsSm (TI_HANDLE hHwInit)
     TTxnStruct  *pTxn;
     TI_STATUS   status = 0;
     
+#ifdef FPGA_SKIP_TOP_INIT
+    WLAN_OS_REPORT(("hwInit_ReadRadioParamsSm: Skip also Radio params\n"));
+    TWD_FinalizeFEMRead(pHwInit->hTWD);
+    return TI_OK;
+#endif
              
     while (TI_TRUE)
     {
@@ -1645,7 +2283,7 @@ TI_STATUS hwInit_ReadRadioParamsSm (TI_HANDLE hHwInit)
      
             /* Select GPIO over Debug for BT_FUNC7*/
             retAddress = (TI_UINT32)(add / 2);
-	        val = (retAddress & 0x7FF);
+	        val = (retAddress & TOP_REG_ADDR_MASK);
         	val |= BIT_16 | BIT_17;
 
             BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, OCP_POR_CTR, val, 
@@ -1719,7 +2357,7 @@ TI_STATUS hwInit_ReadRadioParamsSm (TI_HANDLE hHwInit)
                pHwInit->uRegStage ++;
                add = pHwInit->uRegData;
                retAddress = (TI_UINT32)(add / 2);
-	           value = (retAddress & 0x7FF);
+	           value = (retAddress & TOP_REG_ADDR_MASK);
                value |= BIT_16 | BIT_17;
 
                BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, OCP_POR_CTR, value, 
@@ -1940,7 +2578,7 @@ TI_STATUS hwInit_InitPolarity(TI_HANDLE hHwInit)
 
              /* first read the IRQ Polarity register*/
              Address = (TI_UINT32)(FN0_CCCR_REG_32 / 2);
-             val = (Address & 0x7FF);
+             val = (Address & TOP_REG_ADDR_MASK);
              val |= BIT_16 | BIT_17;
 
              /* Write IRQ Polarity address register to OCP_POR_CTR*/
@@ -2019,7 +2657,7 @@ TI_STATUS hwInit_InitPolarity(TI_HANDLE hHwInit)
                /* second, write new value of IRQ polarity due to complation flag 1 - active low, 0 - active high*/
                 pHwInit->uRegStage ++;
                 Address = (TI_UINT32)(FN0_CCCR_REG_32 / 2);
-                value = (Address & 0x7FF);
+                value = (Address & TOP_REG_ADDR_MASK);
                 value |= BIT_16 | BIT_17;
 
                 /* Write IRQ Polarity address register to OCP_POR_CTR*/
@@ -2070,6 +2708,7 @@ TI_STATUS hwInit_InitPolarity(TI_HANDLE hHwInit)
 
  }
 
+#ifndef FPGA_SKIP_TOP_INIT
 
 /****************************************************************************
  *                      hwInit_InitTopRegisterWrite()
@@ -2082,9 +2721,10 @@ TI_STATUS hwInit_InitTopRegisterWrite(TI_HANDLE hHwInit, TI_UINT32 uAddress, TI_
 {
   THwInit      *pHwInit = (THwInit *)hHwInit;
 
+  WLAN_OS_REPORT(("hwInit_InitTopRegisterWrite: address = 0x%x, value = 0x%x\n", uAddress, uValue));
   pHwInit->uTopStage = 0;
   uAddress = (TI_UINT32)(uAddress / 2);
-  uAddress = (uAddress & 0x7FF);  
+  uAddress = (uAddress & TOP_REG_ADDR_MASK);  
   uAddress|= BIT_16 | BIT_17;
   pHwInit->uTopRegAddr = uAddress;
   pHwInit->uTopRegValue = uValue & 0xffff;  
@@ -2172,9 +2812,10 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
 {
   THwInit      *pHwInit = (THwInit *)hHwInit;
 
+  WLAN_OS_REPORT(("hwInit_InitTopRegisterRead: address = 0x%x\n", uAddress));
   pHwInit->uTopStage = 0;
   uAddress = (TI_UINT32)(uAddress / 2);
-  uAddress = (uAddress & 0x7FF);  
+  uAddress = (uAddress & TOP_REG_ADDR_MASK);  
   uAddress|= BIT_16 | BIT_17;
   pHwInit->uTopRegAddr = uAddress;
 
@@ -2298,6 +2939,24 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
      } /* End while */
 
  }
+#endif
 
+/****************************************************************************
+*                      hwInit_StallTimerCb ()
+****************************************************************************
+* DESCRIPTION: CB timer function in fTimerFunction format that calls hwInit_StallTimerCb
+* INPUTS:  TI_HANDLE hHwInit    
+* 
+* OUTPUT:  None
+* 
+* RETURNS: None
+****************************************************************************/
+#ifdef DOWNLOAD_TIMER_REQUIERD
+ static void hwInit_StallTimerCb (TI_HANDLE hHwInit, TI_BOOL bTwdInitOccured)
+{
+	hwInit_FinalizeDownloadSm (hHwInit);
+}
+
+#endif
 
 

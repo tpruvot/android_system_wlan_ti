@@ -187,9 +187,17 @@ point) classifier parameters
 
 /* def values of code points in the DSCP classification table*/
 #define DSCP_CLASSIFIER_CODE_POINT_DEF  0x0
+#define DSCP_CLASSIFIER_CODE_POINT_00  0
+#define DSCP_CLASSIFIER_CODE_POINT_01  8
+#define DSCP_CLASSIFIER_CODE_POINT_02  40
+#define DSCP_CLASSIFIER_CODE_POINT_03  56
 
 /* def values of D-tags in the DSCP classification table*/
 #define DSCP_CLASSIFIER_DTAG_DEF            0
+#define DSCP_CLASSIFIER_DTAG_00            0
+#define DSCP_CLASSIFIER_DTAG_01            1
+#define DSCP_CLASSIFIER_DTAG_02            5
+#define DSCP_CLASSIFIER_DTAG_03            6
 
 /* Port Classifier parameters 
 --------------------------------*/
@@ -342,7 +350,7 @@ IP&Port classification table  */
 #define  QOS_TX_BLKS_THRESHOLD_VO_DEF_WIFI_MODE           30
 
 /* HW Rx mem-blocks Number */
-#define  RX_MEM_BLKS_NUM_DEF                    70
+#define  RX_MEM_BLKS_NUM_DEF                    40
 #define  RX_MEM_BLKS_NUM_MIN                    20
 #define  RX_MEM_BLKS_NUM_MAX                    120
 #define  RX_MEM_BLKS_NUM_DEF_WIFI_MODE          40
@@ -363,6 +371,9 @@ IP&Port classification table  */
 #define  TX_DATA_MIN_GUARANTEE_LINK_DEF         4
 #define  TX_DATA_MIN_GUARANTEE_LINK_MIN         0
 #define  TX_DATA_MIN_GUARANTEE_LINK_MAX         10
+
+/* Maximum AMPDU Size */
+#define MAX_MPDU_DEF                            MAX_MPDU_8191_OCTETS
 
 /* STOP NETWORK STACK TX mode defines */
 #define  STOP_NET_STACK_TX_DEF                  0
@@ -1002,9 +1013,19 @@ IP&Port classification table  */
 
 #define SOFT_GEMINI_RATE_ADAPT_SNR_MIN       0 
 #define SOFT_GEMINI_RATE_ADAPT_SNR_MAX       255
-#define SOFT_GEMINI_RATE_ADAPT_SNR_DEF       0
+#define SOFT_GEMINI_RATE_ADAPT_SNR_DEF       1
 
+#define SOFT_GEMINI_AP_BEACON_MISS_TX_MIN       0 
+#define SOFT_GEMINI_AP_BEACON_MISS_TX_MAX       255
+#define SOFT_GEMINI_AP_BEACON_MISS_TX_DEF       3
 
+#define SOFT_GEMINI_RX_WINDOW_LENGTH_MIN       0 
+#define SOFT_GEMINI_RX_WINDOW_LENGTH_MAX       50
+#define SOFT_GEMINI_RX_WINDOW_LENGTH_DEF       6
+
+#define SOFT_GEMINI_AP_CONNECTION_PROTECTION_TIME_MIN       0 
+#define SOFT_GEMINI_AP_CONNECTION_PROTECTION_TIME_MAX       5000
+#define SOFT_GEMINI_AP_CONNECTION_PROTECTION_TIME_DEF       50
 
 #define SOFT_GEMINI_WLAN_PS_BT_ACL_MASTER_MIN_BR_MIN 		 0
 #define SOFT_GEMINI_WLAN_PS_BT_ACL_MASTER_MIN_BR_MAX 		 1000
@@ -1160,6 +1181,12 @@ IP&Port classification table  */
 #define SOFT_GEMINI_TEMP_PARAM_5_MIN    0
 #define SOFT_GEMINI_TEMP_PARAM_5_MAX 	100000
 #define SOFT_GEMINI_TEMP_PARAM_5_DEF 	0
+
+#define SOFT_GEMINI_TEMP_PARAM_MIN    	0
+#define SOFT_GEMINI_TEMP_PARAM_MAX 		0xFFFFFFFF
+#define SOFT_GEMINI_TEMP_PARAM_DEF 		0
+
+#define SOFT_GEMINI_TEMP6_PARAM_DEF 	1
 
 
 #define WIFI_WMM_PS_MIN                         0  
@@ -1327,6 +1354,11 @@ IP&Port classification table  */
 #define RATE_MNG_MAX_STR_LEN  255
 
 
+#define ROLE_AP_BEACON_TX_TIMEOUT_DEF		20		
+#define ROLE_AP_BEACON_TX_TIMEOUT_MIN		0
+#define ROLE_AP_BEACON_TX_TIMEOUT_MAX		255
+
+
 
 /* Configurable Scan Rate */
 #define SCAN_RATE_MODE_B_MIN                    DRV_RATE_1M
@@ -1358,6 +1390,9 @@ IP&Port classification table  */
 #define RADIO_TX_PER_POWER_LIMITS_2_4_DEGRADED_DEF_TABLE    "19,1f,22,23,27,28"
 #define RADIO_TX_PER_POWER_LIMITS_2_4_EXTREME_DEF_TABLE     "19,1c,1e,20,24,25"
 
+#ifdef TNETW1283
+#define RADIO_GENERAL_SETTING_DEF_TABLE     "01,00,00,00"
+#endif
 
 #define RADIO_TX_PER_POWER_LIMITS_2_4_11B_DEF_TABLE         "50,50,50,50,50,50,50,50,50,50,50,50,50,50"
 #define RADIO_TX_PER_POWER_LIMITS_2_4_OFDM_DEF_TABLE        "50,50,50,50,50,50,50,50,50,50,50,50,50,50"
@@ -1365,6 +1400,7 @@ IP&Port classification table  */
 #define RADIO_TX_PD_VS_RATE_OFFSET_2_4_DEF_TABLE            "00,00,00,00,00,00 "
 #define RADIO_TX_BIAS_2_4_DEF_TABLE                         "11,11,15,11,15,15"
 #define RADIO_TX_BIP_REF_VOLTAGE_DEF_TABLE_5G               "173,188,187,18b,18a,186,18c"
+#define GEN_FW_CMD_DEF_TABLE        "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 #define RADIO_TX_BIP_REF_POWER_DEF_TABLE_5G                 "80,80,80,80,80,80,80"
 #define RADIO_TX_BIP_OFF_BD_5G                              "00,00,00,00,00,00"
 
@@ -1410,6 +1446,10 @@ IP&Port classification table  */
 #define RADIO_RX_RSSI_PROCESS_2_4_DEF_TABLE                 "7a,7b,7c,7d,7e,7f,80,81,82,83,84,85,86,87,88"
 #define RADIO_RX_RSSI_PROCESS_5_DEF_TABLE                   "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
+#ifndef TNETW1283
+#define RADIO_TX_PER_CH_POWER_COMPENSATION_2_4_DEF	       "00,00,00,00,00,00,00"
+#define RADIO_TX_PER_CH_POWER_COMPENSATION_5_DEF	       "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
+#endif
 #define RADIO_FREF_CLOCK_SETTING_TIME_MIN    				0
 #define RADIO_FREF_CLOCK_SETTING_TIME_DEF    				5
 #define RADIO_FREF_CLOCK_SETTING_TIME_MAX    				15
@@ -1422,6 +1462,17 @@ IP&Port classification table  */
 #define RADIO_FREF_CLOCK_DEF                        		2
 #define RADIO_FREF_CLOCK_MAX                        		31   
 
+#ifdef TNETW1283
+#define RADIO_TCXO_CLOCK_MIN                        		0	/* 19.2, 26, 38.4, 52 MHz, 38.4 XTAL, 16.368, 32.736 */
+#define RADIO_TCXO_CLOCK_DEF                        		1
+#define RADIO_TCXO_CLOCK_MAX                        		6   
+#define RADIO_TCXO_CLOCK_SETTING_TIME_MIN    				0
+#define RADIO_TCXO_CLOCK_SETTING_TIME_DEF    				5
+#define RADIO_TCXO_CLOCK_SETTING_TIME_MAX    				15
+#define RADIO_TCXO_CLOCK_LDO_VOLTAGE_MIN    			    0   /* (0)2.5v, (1)2.55v, (2)2.6v */
+#define RADIO_TCXO_CLOCK_LDO_VOLTAGE_DEF    			    0
+#define RADIO_TCXO_CLOCK_LDO_VOLTAGE_MAX    			    2
+#endif
 
 /* 
  * Driver-Main parameters values
