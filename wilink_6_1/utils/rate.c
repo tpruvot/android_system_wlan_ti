@@ -704,7 +704,7 @@ TI_STATUS rate_DrvBitmapToNetStr (TI_UINT32   uSuppRatesBitMap,
     }
 
     *len = i;
-
+    
     return TI_OK;
 }
 
@@ -713,8 +713,7 @@ TI_STATUS rate_DrvBitmapToNetStr (TI_UINT32   uSuppRatesBitMap,
  *                        bitMapToNetworkStringRates                    *
  ************************************************************************
 DESCRIPTION: Converts bit map to the rates string
-
-
+                                                                                                   
 INPUT:      suppRatesBitMap     -   bit map of supported rates
             basicRatesBitMap    -   bit map of basic rates
 
@@ -832,6 +831,7 @@ TI_STATUS rate_DrvBitmapToNetStrIncluding11n (TI_UINT32   uSuppRatesBitMap,
         }
     }
 
+    
     return TI_OK;
 }
 

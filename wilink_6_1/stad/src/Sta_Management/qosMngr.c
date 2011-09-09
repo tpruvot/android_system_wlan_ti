@@ -232,7 +232,7 @@ void qosMngr_init (TStadHandlesList *pStadHandles)
 	pQosMngr->hTimer           = pStadHandles->hTimer;
     pQosMngr->hStaCap          = pStadHandles->hStaCap;
     pQosMngr->hRoamMng         = pStadHandles->hRoamingMngr;
-    
+
     pQosMngr->isConnected = TI_FALSE;
 }
 
@@ -255,7 +255,6 @@ TI_STATUS qosMngr_SetDefaults (TI_HANDLE hQosMngr, QosMngrInitParams_t *pQosMngr
     pQosMngr->uDesireCwMax = pQosMngrInitParams->uDesireCwMax;
 	pQosMngr->bEnableBurstMode = pQosMngrInitParams->bEnableBurstMode;
 	pQosMngr->AutoRxStreaming.uStreamPeriod = pQosMngrInitParams->uPsTrafficPeriod;
-	pQosMngr->AutoRxStreaming.uStreamPeriod = 20;
 
 
     pQosMngr->activeProtocol    = QOS_NONE;
@@ -405,10 +404,6 @@ TI_STATUS qosMngr_SetDefaults (TI_HANDLE hQosMngr, QosMngrInitParams_t *pQosMngr
         pQosMngr->aTidPsRxStreaming[uTid].bEnabled = TI_FALSE;
     }
     pQosMngr->uNumEnabledPsRxStreams = 0;
-
-	pQosMngr->AutoRxStreaming.bEnabled = TI_TRUE;
-	pQosMngr->AutoRxStreaming.uTid = 0;
-	pQosMngr->AutoRxStreaming.uTxTimeout = 0;
 
 	/*Reset Auto Rx streaming configuration*/
 
@@ -567,8 +562,8 @@ TI_STATUS qosMngr_disconnect (TI_HANDLE hQosMngr, TI_BOOL bDisconnect)
 	status = verifyAndConfigTrafficParams(hQosMngr,&(pQosMngr->acParams[QOS_AC_BE].QtrafficParams));
 	if (status != TI_OK)
 	{
-TRACE0(pQosMngr->hReport, REPORT_SEVERITY_ERROR, "qosMngr_setSite:failed to init NON_QOS Queue Traffic parameters!!!\n\n");
-			return status;
+        TRACE0(pQosMngr->hReport, REPORT_SEVERITY_ERROR, "qosMngr_setSite:failed to init NON_QOS Queue Traffic parameters!!!\n\n");
+		return status;
 	}
 
 	/*
@@ -1729,7 +1724,6 @@ TRACE2(pQosMngr->hReport, REPORT_SEVERITY_INFORMATION, "qosMngr_checkTspecRenegR
 
 	qosMngr_setAdmissionInfo(pQosMngr, tspecInfo.AC, &tspecInfo, STATUS_TRAFFIC_ADM_REQUEST_ACCEPT);
 	}
-
 	if (assocRsp->tspecSignalParameters != NULL)
 	{
 		pQosMngr->videoTspecConfigured = TI_TRUE;
@@ -2235,11 +2229,11 @@ TRACE1(pQosMngr->hReport, REPORT_SEVERITY_ERROR, "qosMngr_SetPsRxStreaming: Can'
  *                        qosMngr_UpdatePsTraffic                      *
  ************************************************************************
 DESCRIPTION: Update the FW with the Auto Rx steaming configuration if needed
-
+                                                                                                   
 INPUT:      pQosMngr	- Qos Manager handle.
             bPsTrafficOn - enable or disable the rx streaming in the FW
 
-OUTPUT:
+OUTPUT:		
 
 RETURN:     TI_OK on success, relevant failures otherwise
 
@@ -2263,11 +2257,11 @@ void qosMngr_UpdatePsTraffic   (TI_HANDLE hQosMngr,TI_BOOL bPsTrafficOn )
  *                        qosMngr_SetAutoRxStreaming                      *
  ************************************************************************
 DESCRIPTION: Verify and configure Auto -Rx-Streaming setting
-
+                                                                                                   
 INPUT:      pQosMngr	- Qos Manager handle.
             pNewParams  - The new auto ps streaming parameters to configure
 
-OUTPUT:
+OUTPUT:		
 
 RETURN:     TI_OK on success, relevant failures otherwise
 
@@ -2302,9 +2296,10 @@ static TI_STATUS qosMngr_SetAutoRxStreaming (qosMngr_t *pQosMngr, TPsRxStreaming
 				DisableAutoRxStreaming.bEnabled = TI_FALSE;
 				return TWD_CfgPsRxStreaming (pQosMngr->hTWD, &DisableAutoRxStreaming, NULL, NULL);
 			}
+				
 		}
 	}
-	return TI_OK;
+	return TI_OK;	
 }
 
 
@@ -2919,7 +2914,7 @@ TI_STATUS QosMngr_receiveActionFrames(TI_HANDLE hQosMngr, TI_UINT8* pData, TI_UI
 		/*  Get TS-Info from TSpec IE in DELTS, and get from it the user-priority. */
 		tsInfo.tsInfoArr[0] = *pData;
 		pData++;
-		tsInfo.tsInfoArr[1] = *pData;
+        tsInfo.tsInfoArr[1] = *pData;
 		pData++;
 		tsInfo.tsInfoArr[2] = *pData;
 		
@@ -3100,14 +3095,4 @@ static void qosMngr_storeTspecCandidateParams (tspecInfo_t *pCandidateParams, OS
 	pCandidateParams->minimumPHYRate = pTSPECParams->uMinimumPHYRate;
 	pCandidateParams->streamDirection = BI_DIRECTIONAL;
 	pCandidateParams->mediumTime = 0;
-}
-
-void qosMngr_SetMotrxStreaming(TI_HANDLE hQosMngr, TI_BOOL bEnable)
-{
-    qosMngr_t *pQosMngr = (qosMngr_t *)hQosMngr;
-
-	if (bEnable)
-		TWD_CfgPsRxStreaming(pQosMngr->hTWD,&pQosMngr->AutoRxStreaming,NULL,NULL);
-	else
-		TWD_CfgPsRxStreaming(pQosMngr->hTWD,&pQosMngr->aTidPsRxStreaming[0],NULL,NULL);
 }

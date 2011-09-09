@@ -71,7 +71,7 @@ static int ParsEvent_GetEventParam( unsigned short  uEventCmd,
  * \return value > 0 meens valide event 
  * \sa     
  */ 
-int ParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEvent)
+intParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEvent)
 
 {
     unsigned int uStatus = 0;
@@ -100,7 +100,7 @@ int ParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEven
     }
 
     /* get event parameters */
-    uStatus = ParsEvent_GetEventParam(pEvent->cmd, &uEventLen, &uEventFlag, &uMaxPayload, &uPayloadNum, &bIsPoint);
+    uStatus = ParsEvent_GetEventParam(pEvent->cmd, &uEventLen, &uEventFlag, &uMaxPayload, &uPayloadNum, &bIsPoint);
 
     if(uEventLen <= IW_EV_LCP_LEN)
     {
@@ -131,7 +131,7 @@ int ParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEven
 
     if(bIsPoint == TRUE)
     {
-        os_memcpy((char *) pEvent + IW_EV_LCP_LEN + IW_EV_POINT_OFF, pPtr, uDataLen);
+        os_memcpy((char *) pEvent + IW_EV_LCP_LEN + IW_EV_POINT_OFF,pPtr, uDataLen);
     }
     else
     {

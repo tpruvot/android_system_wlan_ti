@@ -1602,7 +1602,7 @@ typedef enum
     SOFT_GEMINI_WLAN_PS_BT_ACL_SLAVE_MIN_EDR,
 	SOFT_GEMINI_WLAN_PS_BT_ACL_SLAVE_MAX_EDR,
 	SOFT_GEMINI_WLAN_PS_MAX_BT_ACL_SLAVE_EDR,
-    SOFT_GEMINI_RXT,
+	SOFT_GEMINI_RXT,
 	SOFT_GEMINI_TXT,
 	SOFT_GEMINI_ADAPTIVE_RXT_TXT,
 	SOFT_GEMINI_PS_POLL_TIMEOUT,
@@ -2376,7 +2376,6 @@ typedef struct
     int32  goodAttemptTH;
     int32  curveCorrectionStep;
 }AcxRateMangeReadParams;
-
 
 
 /******************************************************************************

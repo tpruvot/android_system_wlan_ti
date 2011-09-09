@@ -76,7 +76,6 @@
  * \sa	txnQ_Destroy
  */ 
 TI_HANDLE   txnQ_Create (TI_HANDLE hOs);
-
 /** \brief	Destroy the module
  * 
  * \param  The module's object
@@ -88,7 +87,6 @@ TI_HANDLE   txnQ_Create (TI_HANDLE hOs);
  * \sa	txnQ_Create
  */ 
 TI_STATUS   txnQ_Destroy (TI_HANDLE hTxnQ);
-
 /** \brief	Init module
  * 
  * \param  hTxnQ     - The module's object
@@ -102,10 +100,9 @@ TI_STATUS   txnQ_Destroy (TI_HANDLE hTxnQ);
  * \sa
  */ 
 void        txnQ_Init (TI_HANDLE hTxnQ, 
-                       TI_HANDLE hOs, 
-                       TI_HANDLE hReport, 
-                       TI_HANDLE hContext);
-
+					   TI_HANDLE hOs, 
+					   TI_HANDLE hReport, 
+					   TI_HANDLE hContext);
 /** \brief	Configure bus driver
  * 
  * \param  hTxnQ      - The module's object
@@ -121,10 +118,10 @@ void        txnQ_Init (TI_HANDLE hTxnQ,
  * 
  * \sa
  */ 
-TI_STATUS   txnQ_ConnectBus (TI_HANDLE  hTxnQ,
+TI_STATUS   txnQ_ConnectBus (TI_HANDLE hTxnQ, 
 							 TBusDrvCfg *pBusDrvCfg,
 							 TTxnDoneCb fConnectCb,
-							 TI_HANDLE  hConnectCb,
+							 TI_HANDLE  hConnectCb, 
                              TI_UINT32  *pRxDmaBufLen,
                              TI_UINT32  *pTxDmaBufLen);
 
@@ -140,7 +137,6 @@ TI_STATUS   txnQ_ConnectBus (TI_HANDLE  hTxnQ,
  * \sa
  */ 
 TI_STATUS   txnQ_DisconnectBus (TI_HANDLE hTxnQ);
-
 /** \brief	Register functional driver to TxnQ
  * 
  * \param  hTxnQ           - The module's object
@@ -162,7 +158,6 @@ TI_STATUS   txnQ_Open (TI_HANDLE       hTxnQ,
                        TI_UINT32       uNumPrios, 
                        TTxnQueueDoneCb fTxnQueueDoneCb,
                        TI_HANDLE       hCbHandle);
-
 /** \brief	Unregister functional driver from TxnQ
  * 
  * \param  hTxnQ      - The module's object
@@ -178,7 +173,6 @@ TI_STATUS   txnQ_Open (TI_HANDLE       hTxnQ,
  * \sa	txnQ_Open
  */ 
 void        txnQ_Close (TI_HANDLE  hTxnQ, TI_UINT32 uFuncId);
-
 /** \brief	Restart caller's queues
  * 
  * \param  hTxnQ      - The module's object
@@ -197,7 +191,6 @@ void        txnQ_Close (TI_HANDLE  hTxnQ, TI_UINT32 uFuncId);
  * \sa	txnQ_ClearQueues
  */ 
 ETxnStatus  txnQ_Restart (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
-
 /** \brief	Run caller's queues
  * 
  * \param  hTxnQ   - The module's object
@@ -212,7 +205,6 @@ ETxnStatus  txnQ_Restart (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
  * \sa	txnQ_ClearQueues
  */ 
 void        txnQ_Run (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
-
 /** \brief	Stop caller's queues
  * 
  * \param  hTxnQ   - The module's object
@@ -225,7 +217,6 @@ void        txnQ_Run (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
  * \sa
  */ 
 void        txnQ_Stop (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
-
 /** \brief	Issue a new transaction
  * 
  * \param  hTxnQ - The module's object
@@ -240,18 +231,18 @@ void        txnQ_Stop (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
  */ 
 ETxnStatus  txnQ_Transact (TI_HANDLE hTxnQ, TTxnStruct *pTxn);
 
-/**
+/** 
  * \fn     txnQ_ClearQueues
  * \brief  Clear the function queues
- *
+ * 
  * Clear the specified function queues and call its CB for each Txn with status=RECOVERY.
- *
+ * 
  * \note   Called in critical section.
  * \param  hTxnQ            - The module's object
  * \param  uFuncId          - The calling functional driver
  * \return void
- * \sa
- */
+ * \sa     
+ */ 
 void        txnQ_ClearQueues (TI_HANDLE hTxnQ, TI_UINT32 uFuncId);
 
 

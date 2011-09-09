@@ -1871,28 +1871,27 @@ TI_STATUS cmdBld_CfgIeRadioParams (TI_HANDLE hCmdBld, IniFileRadioParam *pIniFil
 
     os_memoryCopy(pCmdBld->hOs, &pTestCmd->testCmd_u.IniFileRadioParams, pIniFileRadioParams, sizeof(IniFileRadioParam));
 
-    status = cmdQueue_SendCommand (pCmdBld->hCmdQueue,
+    status = cmdQueue_SendCommand (pCmdBld->hCmdQueue, 
                              CMD_TEST, 
                              (void *)pTestCmd, 
                              sizeof(IniFileRadioParam) + 4,
                              fCb, 
                              hCb, 
                              NULL);
-
     os_memoryFree(pCmdBld->hOs, pTestCmd, sizeof(TTestCmd));
     return status;
 }
 
 
-/**
- * \fn     cmdBld_CfgIeExtendedRadioParams
+/** 
+ * \fn     cmdBld_CfgIeExtendedRadioParams 
  * \brief  configure extended radio parameters setting in the
  * FW.
  *
- * \note
- * \return TI_OK on success or TI_NOK on failure
- * \sa
- */
+ * \note    
+ * \return TI_OK on success or TI_NOK on failure 
+ * \sa 
+ */ 
 TI_STATUS cmdBld_CfgIeExtendedRadioParams (TI_HANDLE hCmdBld,
 										   IniFileExtendedRadioParam *pIniFileExtRadioParams,
 										   void *fCb,
@@ -1909,16 +1908,16 @@ TI_STATUS cmdBld_CfgIeExtendedRadioParams (TI_HANDLE hCmdBld,
     }
 
     pTestCmd->testCmdId = TEST_CMD_INI_FILE_RF_EXTENDED_PARAM;
-
+    
     os_memoryCopy(pCmdBld->hOs, &pTestCmd->testCmd_u.IniFileExtendedRadioParams,
 				  pIniFileExtRadioParams, sizeof(IniFileExtendedRadioParam));
 
-    status = cmdQueue_SendCommand (pCmdBld->hCmdQueue,
-                             CMD_TEST,
-                             (void *)pTestCmd,
+    status = cmdQueue_SendCommand (pCmdBld->hCmdQueue, 
+                             CMD_TEST, 
+                             (void *)pTestCmd, 
                              sizeof(IniFileExtendedRadioParam) + 4,
-                             fCb,
-                             hCb,
+                             fCb, 
+                             hCb, 
                              NULL);
     os_memoryFree(pCmdBld->hOs, pTestCmd, sizeof(TTestCmd));
     return status;
@@ -1947,7 +1946,7 @@ TI_STATUS cmdBld_CfgPlatformGenParams (TI_HANDLE hCmdBld, IniFileGeneralParam *p
                               sizeof(IniFileGeneralParam),
                               fCb, 
                               hCb, 
-                              NULL);
+                              NULL);    
     os_memoryFree(pCmdBld->hOs, pTestCmd, sizeof(TTestCmd));
     return status;
 }
@@ -1974,7 +1973,7 @@ TI_STATUS cmdBld_CfgIeBurstMode (TI_HANDLE hCmdBld, TI_BOOL bEnabled, void *fCb,
 	AcxBurstMode *pCfg = &tAcxBurstMode;
 
 	/* set IE header */
-    pCfg->EleHdr.id = ACX_BURST_MODE;
+	pCfg->EleHdr.id = ACX_BURST_MODE;
 	pCfg->EleHdr.len = sizeof(*pCfg) - sizeof(EleHdrStruct);
 
 	/* set burst mode value */
@@ -2001,7 +2000,7 @@ TI_STATUS cmdBld_CfgIeDcoItrimParams (TI_HANDLE hCmdBld, TI_BOOL enable, TI_UINT
     TCmdBld *pCmdBld = (TCmdBld *)hCmdBld;
     ACXDCOItrimParams_t ACXBeaconFilterOptions;
     ACXDCOItrimParams_t *pCfg = &ACXBeaconFilterOptions;
-
+    
     pCfg->enable = enable;
     pCfg->moderation_timeout_usec = moderationTimeoutUsec;
 

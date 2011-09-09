@@ -52,10 +52,10 @@
 #define RX_QUEUE_WIN_SIZE		                            RX_QUEUE_ARRAY_SIZE
 #define BA_SESSION_TIME_TO_SLEEP		                    (50)
 
-#define BA_SESSION_IS_A_BIGGER_THAN_B(A,B)                  (((((A)-(B)) & 0xFFF) < 0x7FF) && ((A)!=(B)))
-#define BA_SESSION_IS_A_BIGGER_EQUAL_THAN_B(A,B)            (((((A)-(B)) & 0xFFF) < 0x7FF))
-#define SEQ_NUM_WRAP                                        0x1000
-#define SEQ_NUM_MASK                                        0xFFF
+#define BA_SESSION_IS_A_BIGGER_THAN_B(A,B)       (((((A)-(B)) & 0xFFF) < 0x7FF) && ((A)!=(B)))
+#define BA_SESSION_IS_A_BIGGER_EQUAL_THAN_B(A,B) (((((A)-(B)) & 0xFFF) < 0x7FF))
+#define SEQ_NUM_WRAP 0x1000
+#define SEQ_NUM_MASK 0xFFF
 
 
 /************************ static structures declaration *****************************/
@@ -158,10 +158,12 @@ TI_STATUS RxQueue_Destroy (TI_HANDLE hRxQueue)
 {
     TRxQueue *pRxQueue;
     
-    if (hRxQueue) {
+    if (hRxQueue)
+    {
         pRxQueue = (TRxQueue *)hRxQueue;
         
-        if (pRxQueue->hTimer) {
+        if (pRxQueue->hTimer) 
+        {
             tmr_DestroyTimer (pRxQueue->hTimer);
             pRxQueue->hTimer = NULL;
         }
@@ -192,8 +194,8 @@ TI_STATUS RxQueue_Init (TI_HANDLE hRxQueue, TI_HANDLE hReport, TI_HANDLE hTimerM
 {
 	TRxQueue *pRxQueue = (TRxQueue *)hRxQueue;
     
-    pRxQueue->hReport   = hReport;
 
+    pRxQueue->hReport   = hReport;
 	pRxQueue->hTimer = tmr_CreateTimer (hTimerModule);
 
 	return TI_OK;
@@ -309,6 +311,7 @@ static TI_STATUS RxQueue_PassPacket (TI_HANDLE hRxQueue, TI_STATUS tStatus, cons
 {
     TRxQueue *pRxQueue = (TRxQueue *)hRxQueue;
 
+
     if (tStatus == TI_OK)
     {
         /* Get the mac header location in the packet Buffer */
@@ -423,6 +426,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
     /* 
      * packet doesn't need reorder ? 
      */
+
     if ((pRxParams->packet_class_tag != TAG_CLASS_QOS_DATA) && (pRxParams->packet_class_tag != TAG_CLASS_BA_EVENT) && (pRxParams->packet_class_tag != TAG_CLASS_AMSDU))
     {
         TRACE0(pRxQueue->hReport, REPORT_SEVERITY_INFORMATION , "RxQueue_ReceivePacket: pass packet without reorder.\n");
@@ -431,6 +435,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
 
         return;
     }
+
 
 
     /* 
@@ -475,6 +480,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
 
 
         /* If we got here - Packet TID BA established */
+
         /* Get Sequence Number from frame */
         COPY_WLAN_WORD(&uSequenceControl, &pHdr->seqCtrl); /* copy with endianess handling. */
         uFrameSn = (uSequenceControl & DOT11_SC_SEQ_NUM_MASK) >> 4;
@@ -520,6 +526,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
             /* aWinStartArrayInex % RX_QUEUE_ARRAY_SIZE */
             pTidDataBase->aWinStartArrayInex &= RX_QUEUE_ARRAY_SIZE_BIT_MASK;
 
+
             /* Pass all saved queue consecutive packets with SN higher than the expected one */
             while (pTidDataBase->aPaketsQueue[pTidDataBase->aWinStartArrayInex].pPacket != NULL)
             {
@@ -555,7 +562,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                 tmr_StartTimer (pRxQueue->hTimer, RxQueue_PacketTimeOut, pRxQueue, BA_SESSION_TIME_TO_SLEEP, TI_FALSE);
 
                 pRxQueue->tPacketTimeout.bPacketMiss = TI_TRUE;
-                pRxQueue->tPacketTimeout.aFrameTid = uFrameTid;
+                pRxQueue->tPacketTimeout.aFrameTid   = uFrameTid;
             }
 
             return;
@@ -704,14 +711,13 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                                          pTidDataBase->aPaketsQueue[pTidDataBase->aWinStartArrayInex].tStatus,
                                          pTidDataBase->aPaketsQueue[pTidDataBase->aWinStartArrayInex].pPacket
                                        );
-    
                     pTidDataBase->aPaketsQueue[pTidDataBase->aWinStartArrayInex].pPacket = NULL;
-    
+
                     pTidDataBase->aWinStartArrayInex++;
-    
+
                     /* aWinStartArrayInex % RX_QUEUE_ARRAY_SIZE */
                     pTidDataBase->aWinStartArrayInex &= RX_QUEUE_ARRAY_SIZE_BIT_MASK;
-    
+
                     pTidDataBase->aTidExpectedSn++;
                     pTidDataBase->aTidExpectedSn &= 0xFFF;
 
@@ -726,7 +732,6 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                 TRACE0(pRxQueue->hReport, REPORT_SEVERITY_INFORMATION, "RxQueue_ReceivePacket: Send current packet to uper layer");
                 /* pass the packet */
                 RxQueue_PassPacket (pRxQueue, tStatus, pBuffer);
-
                 pTidDataBase->aTidExpectedSn++;
 				pTidDataBase->aTidExpectedSn &= 0xfff;
             }
@@ -766,6 +771,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
     }
 
 
+
     /* 
      * BA event ? 
      */
@@ -793,7 +799,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
         case DOT11_FC_SUB_BAR:
 
             TRACE0(pRxQueue->hReport, REPORT_SEVERITY_INFORMATION , "RxQueue_ReceivePacket: BA event - BAR frame.\n");
-            
+
             /* get pointer to the frame body */
             pDataFrameBody = pFrame + sizeof(dot11_BarFrameHeader_t);
 
@@ -820,7 +826,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
             {
                 TRACE1(pRxQueue->hReport, REPORT_SEVERITY_ERROR , "RxQueue_ReceivePacket: BA event - BAR frame for TID not established, TID = %d.\n",uFrameTid);
 
-				RxQueue_PassPacket (pRxQueue, TI_NOK, pBuffer);
+                RxQueue_PassPacket (pRxQueue, TI_NOK, pBuffer);
 
                 return;
             }
@@ -871,7 +877,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                 {
                     tmr_StartTimer (pRxQueue->hTimer, RxQueue_PacketTimeOut, pRxQueue, BA_SESSION_TIME_TO_SLEEP, TI_FALSE);
                     pRxQueue->tPacketTimeout.bPacketMiss = TI_TRUE;
-                    pRxQueue->tPacketTimeout.aFrameTid   = uFrameTid;
+                    pRxQueue->tPacketTimeout.aFrameTid = uFrameTid;
                 }
 
 
@@ -890,7 +896,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
             {
             case DOT11_BA_ACTION_ADDBA:
 
-                
+
                 /* get TID field and winSize from ADDBA action frame */
                 pDataFrameBody = pDataFrameBody + 2;
                 COPY_WLAN_WORD(&uBAParameterField, (TI_UINT16 *)pDataFrameBody); /* copy with endianess handling. */
@@ -909,7 +915,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                 /*set the SA Tid pointer */
                 pTidDataBase = &(pRxQueue->tRxQueueArraysMng.tSa1ArrayMng[uFrameTid]);
 
-				/* TID legal value */
+                /* TID legal value */
                 /* packet TID BA established ? */ 
                 if (pTidDataBase->aTidBaEstablished == TI_TRUE)
                 {
@@ -944,7 +950,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
 
             case DOT11_BA_ACTION_DELBA:
 
-                
+
                 /* get TID field and winSize from ADDBA action frame */
                 pDataFrameBody = pDataFrameBody + 1;
                 COPY_WLAN_WORD(&uBAParameterField, (TI_UINT16 *)pDataFrameBody); /* copy with endianess handling. */
@@ -969,7 +975,7 @@ void RxQueue_ReceivePacket (TI_HANDLE hRxQueue, const void * pBuffer)
                 {
                     TRACE1(pRxQueue->hReport, REPORT_SEVERITY_ERROR , "RxQueue_ReceivePacket: BA event - DELBA frame for TID not established, TID = %d.\n",uFrameTid);
 
-					RxQueue_PassPacket (pRxQueue, TI_NOK, pBuffer);
+                    RxQueue_PassPacket (pRxQueue, TI_NOK, pBuffer);
 
                     return;
                 }

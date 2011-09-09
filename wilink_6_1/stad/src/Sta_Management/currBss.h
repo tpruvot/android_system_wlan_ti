@@ -134,7 +134,7 @@ typedef struct _currBSS_t
     TI_HANDLE   hReport;
     TI_HANDLE   hRegulatoryDomain;
     TI_HANDLE   hSiteMgr;
-    TI_HANDLE   hConn;
+	TI_HANDLE   hConn;
     TI_HANDLE   hScanMngr;
     TI_HANDLE   hEvHandler;
     TI_HANDLE   hTxCtrl;

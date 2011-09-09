@@ -52,7 +52,7 @@ typedef struct iwscan_state
 
 /* functions */
 /*************/
-int ParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEvent);
+intParsEvent_GetEvent(struct stream_descr* pEventStream, struct iw_event* pEvent);
 
 #endif  /* _WIRELESS_TOOLS_H_ */
         

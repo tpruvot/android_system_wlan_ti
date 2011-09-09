@@ -92,7 +92,7 @@ typedef struct
     TI_HANDLE                   hRetryPsTimer;                  /**< Handle to the retry timer */
     TI_HANDLE                   hPsPollFailureTimer;            /**< Handle to ps-poll failure timer */
     TI_HANDLE                   hPowerMgrKeepAlive;             /**< Handle to the keep-alive sub module */
-    TI_HANDLE			        hQosMngr;			            /**< Handle to the qos manager moudle*/
+	TI_HANDLE					hQosMngr;						/**< Handle to the qos manager moudle*/
     PowerMgr_PowerMode_e        desiredPowerModeProfile;        /**< 
                                                                  * The configure power mode to the system in the
                                                                  * initialization function. This parameters is Saved

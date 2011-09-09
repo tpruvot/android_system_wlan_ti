@@ -615,8 +615,8 @@ IP&Port classification table  */
 
 /* 1 seconds */                                                                
 #define CONN_SELF_TIMEOUT_MIN                   (1 * 1000)
-/* 1 day */
-#define CONN_SELF_TIMEOUT_MAX                   (60 * 60 * 24 * 1000)
+/* 1 minute */
+#define CONN_SELF_TIMEOUT_MAX                   (60*60*24*1000)
 /* 10 seconds */
 #define CONN_SELF_TIMEOUT_DEF                   (10 * 1000)
 
@@ -1114,15 +1114,15 @@ IP&Port classification table  */
 #define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_EDR_MAX 	1000
 #define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_EDR_DEF 	15
 
-#define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MIN_BR_MIN    0    
+#define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MIN_BR_MIN    0
 #define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MIN_BR_MAX    1000
 #define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MIN_BR_DEF    20
 
-#define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MAX_BR_MIN    0    
+#define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MAX_BR_MIN    0
 #define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MAX_BR_MAX    1000
 #define SOFT_GEMINI_WLAN_ACTIVE_BT_ACL_SLAVE_MAX_BR_DEF    50
 
-#define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_BR_MIN    0    
+#define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_BR_MIN    0
 #define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_BR_MAX    1000
 #define SOFT_GEMINI_WLAN_ACTIVE_MAX_BT_ACL_SLAVE_BR_DEF    10
 
@@ -1419,8 +1419,8 @@ IP&Port classification table  */
 #define RADIO_RX_RSSI_PROCESS_2_4_DEF_TABLE                 "7a,7b,7c,7d,7e,7f,80,81,82,83,84,85,86,87,88"
 #define RADIO_RX_RSSI_PROCESS_5_DEF_TABLE                   "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
-#define RADIO_TX_PER_CH_POWER_COMPENSATION_2_4_DEF             "00,00,00,00,00,00,00"
-#define RADIO_TX_PER_CH_POWER_COMPENSATION_5_DEF               "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
+#define RADIO_TX_PER_CH_POWER_COMPENSATION_2_4_DEF	       "00,00,00,00,00,00,00"
+#define RADIO_TX_PER_CH_POWER_COMPENSATION_5_DEF	       "00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
 #define RADIO_FREF_CLOCK_SETTING_TIME_MIN    				0
 #define RADIO_FREF_CLOCK_SETTING_TIME_DEF    				5
@@ -1432,7 +1432,7 @@ IP&Port classification table  */
 
 #define RADIO_FREF_CLOCK_MIN                        		0	/* 19.2, 26, 38.4, 52 MHz */
 #define RADIO_FREF_CLOCK_DEF                        		2
-#define RADIO_FREF_CLOCK_MAX                        		31   
+#define RADIO_FREF_CLOCK_MAX                        		31
 
 
 /* 
@@ -1495,10 +1495,9 @@ typedef enum
 typedef enum 
 {
     POWER_MANAGER_USER_PRIORITY,           /**< indicates the default user priority. */
-    POWER_MANAGER_VOIP_PRIORITY,           /**< indicates the default VoIP priority. */
     POWER_MANAGER_SG_PRIORITY,             /**< Indicate the Soft Gemini priority */
     POWER_MANAGER_REAUTH_PRIORITY,         /**< Indicate 802.1x reauthentication priority */
-	POWER_MANAGER_WPS_PRIORITY=3,         /**< Indicate WPS priority */
+	POWER_MANAGER_WPS_PRIORITY=2,         /**< Indicate WPS priority */
     POWER_MANAGER_PS_POLL_FAILURE_PRIORITY,/**< After receiving the PsPoll failure event */
     POWER_MANAGER_MAX_PRIORITY                                                      
 }PowerMgr_Priority_e;
@@ -1594,8 +1593,8 @@ enum PowerMgr_registryDefinitions
 	POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_DEF_VALUE = 0,
     POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_MIN_VALUE = 0,
     POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_MAX_VALUE = 1,
-    
-	/*BET*/
+
+    /*BET*/
     POWER_MGMNT_BET_ENABLE_MIN = 0,
     POWER_MGMNT_BET_ENABLE_MAX = 1,
     POWER_MGMNT_BET_ENABLE_DEF = 1,
@@ -1638,4 +1637,3 @@ typedef enum
 
 
 #endif /* _CORE_DEFAULT_PARAMS_H */
-

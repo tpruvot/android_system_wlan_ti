@@ -350,102 +350,102 @@ TI_STATUS apConn_unload(TI_HANDLE hAPConnection)
 static TGenSM_actionCell apConnSM_matrix[AP_CONNECT_NUM_STATES][AP_CONNECT_NUM_EVENTS] =
 {
     /* next state and actions for IDLE state */
-        {   {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* FINISHED_OK          */
             {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_WAIT_ROAM,apConn_smStartWaitingForTriggers},  /* START                */
-            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* START_ROAM           */
-            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_IDLE, apConn_smNop},                          /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_IDLE, apConn_smNop},                          /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_WAIT_ROAM,apConn_smStartWaitingForTriggers},  /* START                */ 
+            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* START_ROAM           */ 
+            {AP_CONNECT_STATE_IDLE, apConn_smUnexpected},                   /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_IDLE, apConn_smNop},                          /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_IDLE, apConn_smNop},                          /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_IDLE, apConn_smUnexpected}                    /* STOP                 */
-        },
+        },                                                                              
         /* next state and actions for WAIT_ROAM state */
-        {   {AP_CONNECT_STATE_WAIT_CONNECT_CMD,apConn_smConfigureDriverBeforeRoaming},/* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_WAIT_CONNECT_CMD,apConn_smConfigureDriverBeforeRoaming},/* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_OK          */
             {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* START                */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* START_ROAM           */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smNop},         /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* START                */ 
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* START_ROAM           */ 
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smNop},         /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smUnexpected},          /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}   /* STOP                 */
-        },
+        },                                                                              
         /* next state and actions for SWITCHING_CHANNEL state */
-        {   {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* FINISHED_OK          */
             {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* START                */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* START_ROAM           */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smSwChFinished},/* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smNop},                 /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* START                */ 
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* START_ROAM           */ 
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smSwChFinished},/* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smNop},                 /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_SWITCHING_CHANNEL, apConn_smUnexpected},  /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}   /* STOP                 */
-        },
+        },                                                                              
         /* next state and actions for WAIT_CONNECT_CMD state */
-        {   {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_OK          */
             {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smRetainAP},            /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* START                */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smRequestCCKM},  /* START_ROAM           */
-            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_WAIT_ROAM, apConn_smRetainAP},            /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* START                */ 
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smRequestCCKM},  /* START_ROAM           */ 
+            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smUnexpected},   /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}   /* STOP                 */
-        },
+        },                                                                              
         /* next state and actions for PREPARE_HAND_OFF state */
-        {   {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* FINISHED_OK          */
             {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START                */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START_ROAM           */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smInvokeConnectionToNewAp},/* FINISHED_HAND_OVER */
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START                */ 
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START_ROAM           */ 
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_PREPARE_HAND_OFF, apConn_smUnexpected},   /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smInvokeConnectionToNewAp},/* FINISHED_HAND_OVER */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}       /* STOP               */
-        },
+        },                                                                              
         /* next state and actions for CONNECTING state */
-        {   {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_REESTABLISH_VOICE,apConn_smHandleTspecReneg}, /* FINISHED_OK             */
             {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smReportConnFail},   /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START                */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START_ROAM           */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START                */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START_ROAM           */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_CONNECTING, apConn_smUnexpected},             /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}       /* STOP                 */
-        },
+        },                                                                              
         /* next state and actions for DISCONNECTING state */
-        {   {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_IDLE, apConn_smReportDisconnected},       /* FINISHED_OK          */
             {AP_CONNECT_STATE_IDLE, apConn_smReportDisconnected},       /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smUnexpected},      /* START                */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* START_ROAM           */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smUnexpected},      /* START                */ 
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* START_ROAM           */ 
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smNop},             /* STOP                 */
-        },
+        },                                                                             
         /* next state and actions for REESTABLISH_VOICE state */
-        {   {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* PREPARE_FOR_ROAMING  */
+        {   {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* PREPARE_FOR_ROAMING  */ 
             {AP_CONNECT_STATE_WAIT_ROAM,apConn_smConnectedToNewAP},         /* FINISHED_OK          */
             {AP_CONNECT_STATE_WAIT_CONNECT_CMD, apConn_smReportConnFail},   /* FINISHED_NOT_OK      */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* RETAIN_CURRENT_AP    */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START                */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START_ROAM           */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START_SWITCH_CHANNEL */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* FINISHED_SWITCH_CH   */
-            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* FINISHED_HAND_OVER   */
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* RETAIN_CURRENT_AP    */ 
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START                */ 
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START_ROAM           */ 
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* START_SWITCH_CHANNEL */ 
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* FINISHED_SWITCH_CH   */ 
+            {AP_CONNECT_STATE_REESTABLISH_VOICE, apConn_smUnexpected},      /* FINISHED_HAND_OVER   */ 
             {AP_CONNECT_STATE_DISCONNECTING, apConn_smStopConnection}       /* STOP                 */
-        }
-};
+        }                                                                             
+}; 
 
 
 /**
@@ -1210,7 +1210,7 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
 
     pAPConnection->assocRoamingTrigger = roamingEventType;
 
-	/* 1. Check if this is Rogue AP test case */
+    /* 1. Check if this is Rogue AP test case */
     if (roamingEventType == ROAMING_TRIGGER_AP_DISCONNECT)
     {   
 		if (pRoamingEventData != NULL)
@@ -1297,15 +1297,18 @@ TI_STATUS apConn_reportRoamingEvent(TI_HANDLE hAPConnection,
             {
                 pAPConnection->removeKeys = TI_FALSE;
             }
+
             UPDATE_SEND_DEAUTH_PACKET_FLAG(roamingEventType);
-			if (roamingEventType == ROAMING_TRIGGER_SECURITY_ATTACK)
+
+            if (roamingEventType == ROAMING_TRIGGER_SECURITY_ATTACK)
             {
-				pAPConnection->deauthPacketReasonCode = STATUS_MIC_FAILURE;
+                pAPConnection->deauthPacketReasonCode = STATUS_MIC_FAILURE;
             }
 			else
             {
-				pAPConnection->deauthPacketReasonCode = STATUS_UNSPECIFIED;
+                pAPConnection->deauthPacketReasonCode = STATUS_UNSPECIFIED;
             }
+			   
             apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_STOP, pAPConnection);
         }
         return TI_OK;
@@ -1589,11 +1592,11 @@ static TI_STATUS apConn_smEvent(TI_UINT8 *currState, TI_UINT8 event, void* data)
     apConn_t  *pAPConnection = (apConn_t *)data;
     TGenSM    *pGenSM = (TGenSM*)pAPConnection->hAPConnSM;
 
-    TRACE2(pAPConnection->hReport, REPORT_SEVERITY_INFORMATION, "apConn_smEvent: currState = %d, event = %d\n", pGenSM->uCurrentState, event);
+	TRACE2(pAPConnection->hReport, REPORT_SEVERITY_INFORMATION, "apConn_smEvent: currState = %d, event = %d\n", pGenSM->uCurrentState, event);
     genSM_Event (pAPConnection->hAPConnSM, (TI_UINT32)event, data);
     pAPConnection->currentState = pGenSM->uCurrentState;
 
-    TRACE1(pAPConnection->hReport, REPORT_SEVERITY_INFORMATION, "apConn_smEvent: newState = %d\n", pAPConnection->currentState);
+	TRACE1(pAPConnection->hReport, REPORT_SEVERITY_INFORMATION, "apConn_smEvent: newState = %d\n", pAPConnection->currentState);
 
     return TI_OK;
 }
@@ -1948,7 +1951,7 @@ static void apConn_smRequestCCKM(void *data)
     apConn_calcNewTsf(pAPConnection, (TI_UINT8 *)&(pAPConnection->newAP->lastRxTSF), pAPConnection->newAP->lastRxHostTimestamp, pAPConnection->newAP->beaconInterval);
     XCCMngr_startCckm(pAPConnection->hXCCMngr, &(pAPConnection->newAP->BSSID), (TI_UINT8 *)&(pAPConnection->newAP->lastRxTSF));
 #else
-        apConn_RoamHandoffFinished(pAPConnection);
+    apConn_RoamHandoffFinished(pAPConnection);
 #endif
 }
 
@@ -2072,7 +2075,7 @@ static void apConn_smInvokeConnectionToNewAp(void *data)
 #else 
     if (staPrivacySupported != apPrivacySupported)
 #endif
-	{
+    {
         param.paramType = RSN_MIXED_MODE;
         rsn_getParam(pAPConnection->hPrivacy, &param);
 
@@ -2121,7 +2124,7 @@ static void apConn_smInvokeConnectionToNewAp(void *data)
     TRACE2(pAPConnection->hReport, REPORT_SEVERITY_INFORMATION, ": calls conn_start, removeKeys=%d, renegotiateTSPEC=%d\n", pAPConnection->removeKeys, renegotiateTspec);
 
     /* Start Connection state machine */
-    conn_start(pAPConnection->hConnSm,
+    conn_start(pAPConnection->hConnSm, 
                       connType,
                       apConn_ConnCompleteInd,
                       pAPConnection,
@@ -2317,6 +2320,7 @@ static void apConn_smHandleTspecReneg (void *pData)
         /* No need to re-negotiate TSPEC, move to CONNECTED */
         apConn_smEvent(&(pAPConnection->currentState), AP_CONNECT_EVENT_FINISHED_OK, pAPConnection);
     }
+	return;
 }
 
 

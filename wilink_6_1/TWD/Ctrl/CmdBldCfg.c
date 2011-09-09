@@ -186,11 +186,11 @@ TI_STATUS cmdBld_CfgRtsThreshold (TI_HANDLE hCmdBld, TI_UINT16 threshold, void *
 /****************************************************************************
  *                      cmdBld_CfgDcoItrimParams()
  ****************************************************************************
- * DESCRIPTION: Sets the DCO Itrim parameters.
- *
+ * DESCRIPTION: Sets the DCO Itrim parameters. 
+ * 
  * OUTPUT:  None
- *
- * RETURNS: TI_OK or TI_NOK
+ * 
+ * RETURNS: TI_OK or TI_NOK 
  ****************************************************************************/
 TI_STATUS cmdBld_CfgDcoItrimParams (TI_HANDLE hCmdBld, TI_BOOL enable, TI_UINT32 moderationTimeoutUsec, void *fCb, TI_HANDLE hCb)
 {
@@ -496,7 +496,7 @@ TI_STATUS cmdBld_CfgPsRxStreaming (TI_HANDLE hCmdBld, TPsRxStreaming *pPsRxStrea
 {
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CFG_PS_RX_STREAMING);
 
-    DB_PS_STREAM(hCmdBld).tid[pPsRxStreaming->uTid] = *pPsRxStreaming;
+	DB_PS_STREAM(hCmdBld).tid[pPsRxStreaming->uTid] = *pPsRxStreaming;
 
     return cmdBld_CfgIePsRxStreaming (hCmdBld, pPsRxStreaming, fCb, hCb);  
 }
@@ -1177,7 +1177,7 @@ TI_STATUS cmdBld_CfgBet (TI_HANDLE hCmdBld, TI_UINT8 Enable, TI_UINT8 MaximumCon
 
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CFG_BET)
 
-    DB_WLAN(hCmdBld).BetEnable              = Enable;
+	DB_WLAN(hCmdBld).BetEnable              = Enable;
     DB_WLAN(hCmdBld).MaximumConsecutiveET   = MaximumConsecutiveET;
 
     return cmdBld_CfgIeBet (hCmdBld, Enable, MaximumConsecutiveET, fCb, hCb);

@@ -59,7 +59,6 @@
 #else
 #define SUPPL_IF_FILE "/var/run/" TIWLAN_DRV_NAME
 #endif
-
 extern int consoleRunScript( char *script_file, THandle hConsole);
     
 /* local types */
@@ -248,6 +247,7 @@ static S32 TiCon_Init_Console_Menu(TiCon_t* pTiCon)
         };
         Console_AddToken(pTiCon->hConsole, h2, (PS8)"Remove", (PS8)"Remove a keep-alive template", (FuncToken_t)CuCmd_RemoveKeepAliveMessage, aaa );
     }
+
 
     Console_AddToken(pTiCon->hConsole, h2, (PS8)"Show", (PS8)"Show all configured keep-alive templates", (FuncToken_t)CuCmd_ShowKeepAlive, NULL );
 

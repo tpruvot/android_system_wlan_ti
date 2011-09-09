@@ -237,6 +237,7 @@ TI_STATUS txDataQ_Destroy (TI_HANDLE hTxDataQ)
     TI_STATUS  status = TI_OK;
     TI_UINT32  uQueId;
 
+    
     /* Free Data queues */
     for (uQueId = 0 ; uQueId < pTxDataQ->uNumQueues ; uQueId++)
     {
@@ -282,7 +283,7 @@ void txDataQ_ClearQueues (TI_HANDLE hTxDataQ)
     {
         do {
             context_EnterCriticalSection (pTxDataQ->hContext);
-            pPktCtrlBlk = (TTxCtrlBlk *) que_Dequeue (pTxDataQ->aQueues[uQueId]);
+            pPktCtrlBlk = (TTxCtrlBlk *) que_Dequeue(pTxDataQ->aQueues[uQueId]);
             context_LeaveCriticalSection (pTxDataQ->hContext);
             if (pPktCtrlBlk != NULL) {
                 txCtrl_FreePacket (pTxDataQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
@@ -340,7 +341,7 @@ TI_STATUS txDataQ_InsertPacket (TI_HANDLE hTxDataQ, TTxCtrlBlk *pPktCtrlBlk, TI_
 	{
 #ifdef TI_DBG
 		pTxDataQ->uClsfrMismatchCount++;
-        TRACE0(pTxDataQ->hReport, REPORT_SEVERITY_WARNING, "txDataQueue_xmit: No matching classifier found \n");
+TRACE0(pTxDataQ->hReport, REPORT_SEVERITY_WARNING, "txDataQueue_xmit: No matching classifier found \n");
 #endif /* TI_DBG */
 	}
 
@@ -361,17 +362,17 @@ TI_STATUS txDataQ_InsertPacket (TI_HANDLE hTxDataQ, TTxCtrlBlk *pPktCtrlBlk, TI_
             bRequestSchedule = TI_TRUE;
         }
         /* If below Tx-Send pacing threshold, start timer to trigger packets handling if expired */
-        else if (uQueSize < pTxDataQ->aTxSendPaceThresh[uQueId])
+        else if (uQueSize < pTxDataQ->aTxSendPaceThresh[uQueId]) 
         {
-            tmr_StartTimer (pTxDataQ->hTxSendPaceTimer,
-                            txDataQ_TxSendPaceTimeout,
-                            hTxDataQ,
-                            TX_SEND_PACE_TIMEOUT_MSEC,
+            tmr_StartTimer (pTxDataQ->hTxSendPaceTimer, 
+                            txDataQ_TxSendPaceTimeout, 
+                            hTxDataQ, 
+                            TX_SEND_PACE_TIMEOUT_MSEC, 
                             TI_FALSE);
         }
     }
 
-    /* If allowed to stop network stack and the queue is full, indicate to stop network and
+    /* If allowed to stop network stack and the queue is full, indicate to stop network and 
           to schedule Tx handling (both are executed below, outside the critical section!) */
 	if ((pTxDataQ->bStopNetStackTx) && (uQueSize == pTxDataQ->aQueueMaxSize[uQueId]))
 	{
@@ -385,7 +386,7 @@ TI_STATUS txDataQ_InsertPacket (TI_HANDLE hTxDataQ, TTxCtrlBlk *pPktCtrlBlk, TI_
 
     /* If needed, schedule Tx handling */
 	if (bRequestSchedule)
-	{
+    {
         context_RequestSchedule (pTxDataQ->hContext, pTxDataQ->uContextId);
     }
 
@@ -393,7 +394,7 @@ TI_STATUS txDataQ_InsertPacket (TI_HANDLE hTxDataQ, TTxCtrlBlk *pPktCtrlBlk, TI_
 	if (bStopNetStack)
 	{
 		/* Stop the network stack from sending Tx packets as we have at least one date queue full.
-		Note that in some of the OS's (e.g Win Mobile) it is implemented by blocking the thread! */
+		Note that in some of the OS's (e.g Win Mobile) it is implemented by blocking the thread*/
 		wlanDrvIf_StopTx (pTxDataQ->hOs);
     }
 
@@ -584,35 +585,35 @@ void txDataQ_PrintModuleParams (TI_HANDLE hTxDataQ)
 void txDataQ_PrintQueueStatistics (TI_HANDLE hTxDataQ)
 {
 #ifdef REPORT_LOG
-	TTxDataQ *pTxDataQ = (TTxDataQ *)hTxDataQ;
-	TI_UINT32      qIndex;
+    TTxDataQ *pTxDataQ = (TTxDataQ *)hTxDataQ;
+    TI_UINT32      qIndex;
 
-	WLAN_OS_REPORT(("-------------- txDataQueue_printStatistics -------\n\n"));
+    WLAN_OS_REPORT(("-------------- txDataQueue_printStatistics -------\n\n"));
 
 	WLAN_OS_REPORT(("uClsfrMismatchCount      = %d\n",pTxDataQ->uClsfrMismatchCount));
     WLAN_OS_REPORT(("uTxSendPaceTimeoutsCount = %d\n",pTxDataQ->uTxSendPaceTimeoutsCount));
 	
-	WLAN_OS_REPORT(("-------------- Enqueue to queues -----------------\n"));
+    WLAN_OS_REPORT(("-------------- Enqueue to queues -----------------\n"));
     for(qIndex = 0; qIndex < MAX_NUM_OF_AC; qIndex++)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uEnqueuePacket));
 	
-	WLAN_OS_REPORT(("-------------- Dequeue from queues ---------------\n"));
+    WLAN_OS_REPORT(("-------------- Dequeue from queues ---------------\n"));
     for(qIndex = 0; qIndex < MAX_NUM_OF_AC; qIndex++)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uDequeuePacket));
 
-	WLAN_OS_REPORT(("-------------- Requeue to queues -----------------\n"));
+    WLAN_OS_REPORT(("-------------- Requeue to queues -----------------\n"));
     for(qIndex = 0; qIndex < MAX_NUM_OF_AC; qIndex++)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uRequeuePacket));
 
-	WLAN_OS_REPORT(("-------------- Sent to TxCtrl --------------------\n"));
+    WLAN_OS_REPORT(("-------------- Sent to TxCtrl --------------------\n"));
     for(qIndex = 0; qIndex < MAX_NUM_OF_AC; qIndex++)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uXmittedPacket));
 
-	WLAN_OS_REPORT(("-------------- Dropped - Queue Full --------------\n"));
+    WLAN_OS_REPORT(("-------------- Dropped - Queue Full --------------\n"));
     for(qIndex = 0; qIndex < MAX_NUM_OF_AC; qIndex++)
         WLAN_OS_REPORT(("Que[%d]: = %d\n",qIndex, pTxDataQ->aQueueCounters[qIndex].uDroppedPacket));
 
-	WLAN_OS_REPORT(("--------------------------------------------------\n\n"));
+    WLAN_OS_REPORT(("--------------------------------------------------\n\n"));
 #endif
 }
 
@@ -800,15 +801,15 @@ static void txDataQ_UpdateQueuesBusyState (TTxDataQ *pTxDataQ, TI_UINT32 uTidBit
 
 /*
  * \brief   Handle Tx-Send-Pacing timeout.
- *
+ * 
  * \param  hTxDataQ        - Module handle
  * \param  bTwdInitOccured - Indicate if TWD restart (recovery) occured
  * \return void
- *
+ * 
  * \par Description
  * Call the Tx scheduler to handle the queued packets.
- *
- * \sa
+ * 
+ * \sa 
  */
 static void txDataQ_TxSendPaceTimeout (TI_HANDLE hTxDataQ, TI_BOOL bTwdInitOccured)
 {

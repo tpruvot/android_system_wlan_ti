@@ -1,4 +1,4 @@
-/* 
+/*
  * driver_ti.h
  *
  * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
@@ -51,65 +51,11 @@
 
 #define MAX_NUMBER_SEQUENTIAL_ERRORS	4
 
-#define MULTI_SSID_SCAN_MAX 8
-
 typedef enum {
 	BLUETOOTH_COEXISTENCE_MODE_ENABLED = 0,
 	BLUETOOTH_COEXISTENCE_MODE_DISABLED,
 	BLUETOOTH_COEXISTENCE_MODE_SENSE
 } EUIBTCoexMode;
-
-/**
- * struct wpa_scan_ssid - Scan SSID
- * @ssid: SSID
- * @ssid_len: length of the ssid
- */
-struct wpa_scan_ssid {
-        u8 ssid[32];
-        size_t ssid_len;
-
-        /**
-         * scan_ssid - Scan this SSID with Probe Requests
-         *
-         * scan_ssid can be used to scan for APs using hidden SSIDs.
-         * Note: Many drivers do not support this. ap_mode=2 can be used with
-         * such drivers to use hidden SSIDs.
-         */
-        u8 scan_ssid;
-};
-
-/**
- * struct wpa_driver_multi_ssid_scan_params - multi ssid scan parameters
- * Data for struct for wpa_driver_tista_multi_ssid_scan().
- */
-struct wpa_driver_multi_ssid_scan_params {
-        /**
-         * ssid_num - ssid number, set in wpa_scan_ssid. Its maximum value is
-         * MULTI_SSID_SCAN_MAX
-         */
-        u8 ssid_num;
-
-        /**
-         * broadcast_scan - whether perform broadcast scan
-         */
-        u8 broadcast_scan;
-
-        /**
-         * num_cycle - number of scan cycles to run
-         */ 
-        u8 num_cycle;
-
-        /**
-         * interval - interval (in ms) between two sequential scan cycle
-         */ 
-        u8 interval;
-
-        /**
-         * wpa_scan_ssid - specific scan ssids setting, and supports up to
-         * MULTI_SSID_SCAN_MAX networks
-         */
-        struct wpa_scan_ssid scan_ssids[MULTI_SSID_SCAN_MAX];
-};
 
 struct wpa_driver_ti_data {
 	void *wext; /* private data for driver_wext */

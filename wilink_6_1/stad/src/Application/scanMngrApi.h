@@ -242,6 +242,7 @@ void scanMngr_stopContScan( TI_HANDLE hScanMngr );
  * \sa
  */
 bssList_t *scanMngr_getBSSList( TI_HANDLE hScanMngr );
+
 /** 
  * \brief  Sets the neighbor APs
  * 
@@ -256,6 +257,7 @@ bssList_t *scanMngr_getBSSList( TI_HANDLE hScanMngr );
  * \sa
  */
 void scanMngr_setNeighborAPs( TI_HANDLE hScanMngr, neighborAPList_t* neighborAPList );
+
 /** 
  * \brief  Change quality level (normal / deteriorating)
  * 

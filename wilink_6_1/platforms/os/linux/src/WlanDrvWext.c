@@ -263,18 +263,14 @@ int wlanDrvWext_Handler (struct net_device *dev,
      }
 	 break;
    }
-   /* If the driver is not running, return NOK */
+   /* If the friver is not running, return NOK */
    if (drv->tCommon.eDriverState != DRV_STATE_RUNNING)
    {
-        if (my_command.in_buffer)
-            os_memoryFree(drv, my_command.in_buffer, my_command.in_buffer_len);
-        if (my_command.out_buffer)
-            os_memoryFree(drv,my_command.out_buffer,my_command.out_buffer_len);
        return TI_NOK;
    }
 
    /* Call the Cmd module with the given user paramters */
-    rc = cmdHndlr_InsertCommand(drv->tCommon.hCmdHndlr,
+   rc = (cmdHndlr_InsertCommand (drv->tCommon.hCmdHndlr, 
                                    info->cmd, 
                                    info->flags, 
                                    iw_req, 
@@ -282,7 +278,7 @@ int wlanDrvWext_Handler (struct net_device *dev,
                                    extra, 
                                    0, 
                                    param3, 
-                                   NULL);
+                                   NULL));
    /* Here we are after the command was completed */
    if (my_command.in_buffer)
    {

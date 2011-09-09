@@ -69,7 +69,7 @@ typedef enum
     TRIGGER_EVENT_BG_SCAN    = 4,
     TRIGGER_EVENT_USER_0     = 5,
     TRIGGER_EVENT_USER_1     = 6,
-    TRIGGER_EVENT_HIGH_BG_SCAN = 7,
+	TRIGGER_EVENT_HIGH_BG_SCAN = 7,
     TRIGGER_EVENT_MAX        = 8
 
 }ETriggerEventIndex;

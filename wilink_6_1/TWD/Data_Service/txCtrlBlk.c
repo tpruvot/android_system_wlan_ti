@@ -232,14 +232,14 @@ void txCtrlBlk_Free (TI_HANDLE hTxCtrlBlk, TTxCtrlBlk *pCurrentEntry)
 	pTxCtrlBlk->uNumUsedEntries--;
 #endif
 
-    /* Protect block freeing from preemption (may be called from external context) */
-    context_EnterCriticalSection (pTxCtrlBlk->hContext);
+	/* Protect block freeing from preemption (may be called from external context) */
+	context_EnterCriticalSection (pTxCtrlBlk->hContext);
 
 	/* Link the freed entry between entry 0 and the next free entry. */
 	pCurrentEntry->pNextFreeEntry   = pFirstFreeEntry->pNextFreeEntry;
 	pFirstFreeEntry->pNextFreeEntry = pCurrentEntry;
 
-    context_LeaveCriticalSection (pTxCtrlBlk->hContext);
+	context_LeaveCriticalSection (pTxCtrlBlk->hContext);
 }
 
 

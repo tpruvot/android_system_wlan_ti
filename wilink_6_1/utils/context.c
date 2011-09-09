@@ -66,8 +66,8 @@ typedef struct
 /* context module structure */
 typedef struct
 {
-	TI_HANDLE        hOs;
-	TI_HANDLE        hReport; 
+    TI_HANDLE        hOs;
+    TI_HANDLE        hReport;
 
     TI_BOOL          bContextSwitchRequired;       /* Indicate if the driver should switch to its  */
                                                    /*   own context or not before handling events  */
@@ -100,20 +100,20 @@ typedef struct
  */ 
 TI_HANDLE context_Create (TI_HANDLE hOs)
 {
-	TI_HANDLE hContext;
+    TI_HANDLE hContext;
 
-	/* allocate module object */
-	hContext = os_memoryAlloc (hOs, sizeof(TContext));
-	
-	if (!hContext)
-	{
-		WLAN_OS_REPORT (("context_Create():  Allocation failed!!\n"));
-		return NULL;
-	}
-	
+    /* allocate module object */
+    hContext = os_memoryAlloc (hOs, sizeof(TContext));
+
+    if (!hContext)
+    {
+        WLAN_OS_REPORT (("context_Create():  Allocation failed!!\n"));
+        return NULL;
+    }
+
     os_memoryZero (hOs, hContext, (sizeof(TContext)));
 
-	return (hContext);
+    return (hContext);
 }
 
 
@@ -136,8 +136,8 @@ TI_STATUS context_Destroy (TI_HANDLE hContext)
     os_protectDestroy (pContext->hOs, pContext->hProtectionLock);
 
     /* free module object */
-	os_memoryFree (pContext->hOs, pContext, sizeof(TContext));
-	
+    os_memoryFree (pContext->hOs, pContext, sizeof(TContext));
+
     return TI_OK;
 }
 
@@ -157,11 +157,11 @@ TI_STATUS context_Destroy (TI_HANDLE hContext)
  */ 
 void context_Init (TI_HANDLE hContext, TI_HANDLE hOs, TI_HANDLE hReport)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
     pContext->hOs     = hOs;
     pContext->hReport = hReport;
-	
+
     /* Create the module's protection lock and save its handle */
     pContext->hProtectionLock = os_protectCreate (pContext->hOs);
 }
@@ -182,11 +182,11 @@ void context_Init (TI_HANDLE hContext, TI_HANDLE hOs, TI_HANDLE hReport)
  */ 
 TI_STATUS context_SetDefaults (TI_HANDLE hContext, TContextInitParams *pContextInitParams)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
     /* Set parameters */
     pContext->bContextSwitchRequired = pContextInitParams->bContextSwitchRequired;
-	
+
     return TI_OK;
 }
 
@@ -215,7 +215,7 @@ TI_UINT32 context_RegisterClient (TI_HANDLE       hContext,
                                   char           *sName,
                                   TI_UINT32       uNameSize)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
     TI_UINT32 uClientId = pContext->uNumClients;
 
     /* If max number of clients is exceeded, report error and exit. */
@@ -271,7 +271,7 @@ TI_UINT32 context_RegisterClient (TI_HANDLE       hContext,
  */ 
 void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
 #ifdef TI_DBG
     pContext->aRequestCount[uClientId]++; 
@@ -295,7 +295,7 @@ void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
     }
     else
     {
-        context_DriverTask (hContext);
+        context_DriverTask(hContext);
         os_wake_unlock(pContext->hOs);
     }
 }
@@ -316,7 +316,7 @@ void context_RequestSchedule (TI_HANDLE hContext, TI_UINT32 uClientId)
  */ 
 void context_DriverTask (TI_HANDLE hContext)
 {
-	TContext       *pContext = (TContext *)hContext;
+    TContext       *pContext = (TContext *)hContext;
     TContextCbFunc  fCbFunc;
     TI_HANDLE       hCbHndl;
     TI_UINT32       i;
@@ -325,7 +325,7 @@ void context_DriverTask (TI_HANDLE hContext)
     TRACE0(pContext->hReport, REPORT_SEVERITY_INFORMATION , "context_DriverTask():\n");
 
     /* For all registered clients do: */
-	for (i = 0; i < pContext->uNumClients; i++)
+    for (i = 0; i < pContext->uNumClients; i++)
     {
         /* If client is pending and enabled */
         if (pContext->aClientPending[i]  &&  pContext->aClientEnabled[i])
@@ -364,7 +364,7 @@ void context_DriverTask (TI_HANDLE hContext)
  */ 
 void context_EnableClient (TI_HANDLE hContext, TI_UINT32 uClientId)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
 #ifdef TI_DBG
     if (pContext->aClientEnabled[uClientId])
@@ -403,7 +403,7 @@ void context_EnableClient (TI_HANDLE hContext, TI_UINT32 uClientId)
 
 void context_DisableClient (TI_HANDLE hContext, TI_UINT32 uClientId)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
 #ifdef TI_DBG
     if (!pContext->aClientEnabled[uClientId])
@@ -433,7 +433,7 @@ void context_DisableClient (TI_HANDLE hContext, TI_UINT32 uClientId)
  */ 
 void context_EnterCriticalSection (TI_HANDLE hContext)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
     TRACE0(pContext->hReport, REPORT_SEVERITY_INFORMATION , "context_EnterCriticalSection():\n");
 
@@ -443,7 +443,7 @@ void context_EnterCriticalSection (TI_HANDLE hContext)
 
 void context_LeaveCriticalSection (TI_HANDLE hContext)
 {
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
 
     TRACE0(pContext->hReport, REPORT_SEVERITY_INFORMATION , "context_LeaveCriticalSection():\n");
 
@@ -469,16 +469,16 @@ void context_LeaveCriticalSection (TI_HANDLE hContext)
 void context_Print(TI_HANDLE hContext)
 {
 #ifdef REPORT_LOG
-	TContext *pContext = (TContext *)hContext;
+    TContext *pContext = (TContext *)hContext;
     TI_UINT32 i;
 
     WLAN_OS_REPORT(("context_Print():  %d Clients Registered:\n", pContext->uNumClients));
     WLAN_OS_REPORT(("=======================================\n"));
     WLAN_OS_REPORT(("bContextSwitchRequired = %d\n", pContext->bContextSwitchRequired));
 
-	for (i = 0; i < pContext->uNumClients; i++)
-	{
-		WLAN_OS_REPORT(("Client %d - %s: CbFunc=0x%x, CbHndl=0x%x, Enabled=%d, Pending=%d, Requests=%d, Invoked=%d\n",
+    for (i = 0; i < pContext->uNumClients; i++)
+    {
+        WLAN_OS_REPORT(("Client %d - %s: CbFunc=0x%x, CbHndl=0x%x, Enabled=%d, Pending=%d, Requests=%d, Invoked=%d\n",
                         i,
                         pContext->aClientName[i].sName,
                         pContext->aClientCbFunc[i],
@@ -487,7 +487,7 @@ void context_Print(TI_HANDLE hContext)
                         pContext->aClientPending[i],
                         pContext->aRequestCount[i],
                         pContext->aInvokeCount[i] ));
-	}
+    }
 #endif
 }
 

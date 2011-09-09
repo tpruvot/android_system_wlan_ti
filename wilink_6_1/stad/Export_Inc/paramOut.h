@@ -255,7 +255,7 @@ typedef struct
 
 typedef struct rxDataFilterFieldPattern_t
 {
-    TI_UINT16       offset; /*  Offset of the field to compare from the start of the packet*/
+    TI_UINT16      offset; /*  Offset of the field to compare from the start of the packet*/
     TI_UINT8       length; /* Size of the field pattern */
     TI_UINT8       flag; /* Bit Mask flag */
     TI_UINT8       pattern[RX_DATA_FILTER_MAX_PATTERN_SIZE]; /* expected pattern */
@@ -752,9 +752,9 @@ typedef struct{
         TScanParams                 		*pScanParams;
         TPeriodicScanParams         		*pPeriodicScanParams;
         TI_UINT32                   		uBssidListSize;
-        TI_UINT32                               uNumBssidInList;
+		TI_UINT32                   		uNumBssidInList;
         OS_802_11_BSSID_LIST_EX     		*pBssidList;
-        OS_802_11_N_RATES                       *pRateList;
+		OS_802_11_N_RATES					*pRateList;
         TSsid                   			tScanDesiredSSID;
 
         TI_UINT32                           uSraThreshold;
@@ -818,9 +818,7 @@ typedef struct{
 		/* debug */
 		TDebugRegisterReq					HwRegister;
         RateMangeParams_t                   RateMng;
-        RateMangeReadParams_t               RateMngParams; 
-
-        TI_UINT8 dtimListenInterval;
+        RateMangeReadParams_t               RateMngParams;
 
         TIpAddr    StationIP;
         
@@ -1116,7 +1114,7 @@ typedef struct
     TI_UINT8   						MaximumConsecutiveET;
     TI_UINT32						PsPollDeliveryFailureRecoveryPeriod;
 
-	TI_BOOL							reAuthActivePriority;	
+	TI_BOOL							reAuthActivePriority;
 }PowerMgrInitParams_t;
 
 typedef struct

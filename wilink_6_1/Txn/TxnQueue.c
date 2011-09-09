@@ -117,7 +117,7 @@ typedef struct _TTxnQObj
     TI_UINT32       uMaxFuncId;         /* The maximal function ID actually registered (through txnQ_Open) */
     TI_BOOL         bSchedulerBusy;     /* If set, the scheduler is currently running so it shouldn't be reentered */
     TI_BOOL         bSchedulerPend;     /* If set, a call to the scheduler was postponed because it was busy */
-
+    
     /* Environment dependent: TRUE if needed and allowed to protect TxnDone in critical section */
     TTxnDoneCb      fConnectCb;
     TI_HANDLE       hConnectCb;
@@ -229,9 +229,9 @@ void txnQ_Init (TI_HANDLE hTxnQ, TI_HANDLE hOs, TI_HANDLE hReport, TI_HANDLE hCo
 }
 
 TI_STATUS txnQ_ConnectBus (TI_HANDLE  hTxnQ,
-                           TBusDrvCfg *pBusDrvCfg, 
-                           TTxnDoneCb fConnectCb, 
-                           TI_HANDLE  hConnectCb, 
+                           TBusDrvCfg *pBusDrvCfg,
+                           TTxnDoneCb fConnectCb,
+                           TI_HANDLE  hConnectCb,
                            TI_UINT32  *pRxDmaBufLen,
                            TI_UINT32  *pTxDmaBufLen)
 {
@@ -746,7 +746,7 @@ static TTxnStruct *txnQ_SelectTxn (TTxnQObj *pTxnQ)
         if (pSelectedTxn != NULL)
         {
             /* If aggregation ended, reset the aggregation-queue pointer */
-            if (TXN_PARAM_GET_AGGREGATE(pSelectedTxn) == TXN_AGGREGATE_OFF)
+            if (TXN_PARAM_GET_AGGREGATE(pSelectedTxn) == TXN_AGGREGATE_OFF) 
             {
                 if ((TXN_PARAM_GET_FIXED_ADDR(pSelectedTxn) != TXN_FIXED_ADDR) ||
                     (TXN_PARAM_GET_DIRECTION(pSelectedTxn)  != TXN_DIRECTION_WRITE))

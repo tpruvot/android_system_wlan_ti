@@ -221,7 +221,7 @@ void genSM_Event (TI_HANDLE hGenSM, TI_UINT32 uEvent, void *pData)
  */
 TI_UINT32 genSM_GetCurrentState (TI_HANDLE hGenSM)
 {
-    TGenSM *pGenSM = (TGenSM*)hGenSM;
+    TGenSM              *pGenSM =       (TGenSM*)hGenSM;
 
 	if (pGenSM == NULL)
 	{

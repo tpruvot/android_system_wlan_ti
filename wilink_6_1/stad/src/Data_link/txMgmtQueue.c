@@ -92,12 +92,14 @@ typedef enum
 /* State-Machine States */
 typedef enum
 {
-	SM_STATE_CLOSE,			/* All Tx path is closed. */
-	SM_STATE_MGMT,			/* Only mgmt Tx is permitted. */
-	SM_STATE_EAPOL,			/* Only mgmt and EAPOL Tx is permitted. */
-	SM_STATE_OPEN_MGMT,		/* All Tx permitted and Mgmt aQueues are currently active (date disabled). */
-	SM_STATE_OPEN_DATA		/* All Tx permitted and Data aQueues are currently active (mgmt disabled). */
+    SM_STATE_CLOSE,			/* All Tx path is closed. */
+    SM_STATE_MGMT,			/* Only mgmt Tx is permitted. */
+    SM_STATE_EAPOL,			/* Only mgmt and EAPOL Tx is permitted. */
+    SM_STATE_OPEN_MGMT,		/* All Tx permitted and Mgmt aQueues are currently active (date disabled). */
+    SM_STATE_OPEN_DATA		/* All Tx permitted and Data aQueues are currently active (mgmt disabled). */
 } ESmState;
+
+
 
 /* State-Machine Actions */
 typedef enum
@@ -290,6 +292,7 @@ TI_STATUS txMgmtQ_Destroy (TI_HANDLE hTxMgmtQ)
     TI_STATUS  eStatus = TI_OK;
     int        uQueId;
 
+
     /* free Mgmt queues */
     for (uQueId = 0 ; uQueId < NUM_OF_MGMT_QUEUES ; uQueId++)
     {
@@ -329,7 +332,7 @@ void txMgmtQ_ClearQueues (TI_HANDLE hTxMgmtQ)
     {
         do {
             context_EnterCriticalSection (pTxMgmtQ->hContext);
-            pPktCtrlBlk = (TTxCtrlBlk *) que_Dequeue (pTxMgmtQ->aQueues[uQueId]);
+            pPktCtrlBlk = (TTxCtrlBlk *)que_Dequeue(pTxMgmtQ->aQueues[uQueId]);
             context_LeaveCriticalSection (pTxMgmtQ->hContext);
             if (pPktCtrlBlk != NULL) {
                 txCtrl_FreePacket (pTxMgmtQ->hTxCtrl, pPktCtrlBlk, TI_NOK);
@@ -967,33 +970,33 @@ void txMgmtQ_PrintModuleParams (TI_HANDLE hTxMgmtQ)
 void txMgmtQ_PrintQueueStatistics (TI_HANDLE hTxMgmtQ)
 {
 #ifdef REPORT_LOG
-	TTxMgmtQ *pTxMgmtQ = (TTxMgmtQ *)hTxMgmtQ;
-	TI_UINT32 uQueId;
+    TTxMgmtQ *pTxMgmtQ = (TTxMgmtQ *)hTxMgmtQ;
+    TI_UINT32 uQueId;
 
-	WLAN_OS_REPORT(("-------------- Mgmt Queues Statistics  -------------------\n"));
-	WLAN_OS_REPORT(("==========================================================\n"));
+    WLAN_OS_REPORT(("-------------- Mgmt Queues Statistics  -------------------\n"));
+    WLAN_OS_REPORT(("==========================================================\n"));
 
-	WLAN_OS_REPORT(("-------------- Enqueue Packets ---------------------------\n"));
+    WLAN_OS_REPORT(("-------------- Enqueue Packets ---------------------------\n"));
     for(uQueId = 0; uQueId < NUM_OF_MGMT_QUEUES; uQueId++)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aEnqueuePackets[uQueId]));
 	
-	WLAN_OS_REPORT(("-------------- Dequeue Packets ---------------------------\n"));
+    WLAN_OS_REPORT(("-------------- Dequeue Packets ---------------------------\n"));
     for(uQueId = 0; uQueId < NUM_OF_MGMT_QUEUES; uQueId++)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aDequeuePackets[uQueId]));
 
-	WLAN_OS_REPORT(("-------------- Requeue Packets ---------------------------\n"));
+    WLAN_OS_REPORT(("-------------- Requeue Packets ---------------------------\n"));
     for(uQueId = 0; uQueId < NUM_OF_MGMT_QUEUES; uQueId++)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aRequeuePackets[uQueId]));
 
-	WLAN_OS_REPORT(("-------------- Xmitted Packets ---------------------------\n"));
+    WLAN_OS_REPORT(("-------------- Xmitted Packets ---------------------------\n"));
     for(uQueId = 0; uQueId < NUM_OF_MGMT_QUEUES; uQueId++)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aXmittedPackets[uQueId]));
 
-	WLAN_OS_REPORT(("-------------- Dropped Packets (queue full) --------------\n"));
+    WLAN_OS_REPORT(("-------------- Dropped Packets (queue full) --------------\n"));
     for(uQueId = 0; uQueId < NUM_OF_MGMT_QUEUES; uQueId++)
         WLAN_OS_REPORT(("Que[%d]:  %d\n", uQueId, pTxMgmtQ->tDbgCounters.aDroppedPackets[uQueId]));
 
-	WLAN_OS_REPORT(("==========================================================\n\n"));
+    WLAN_OS_REPORT(("==========================================================\n\n"));
 #endif    
 }
 

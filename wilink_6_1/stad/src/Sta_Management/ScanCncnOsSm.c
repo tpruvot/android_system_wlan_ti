@@ -400,7 +400,7 @@ void scanCncnOsSm_ActionCompleteScan (TI_HANDLE hScanCncn)
     pScanCncn->bOSScanRunning = TI_FALSE;
     /* also mark that no app scan client is running */
     pScanCncn->eCurrentRunningAppScanClient = SCAN_SCC_NO_CLIENT;
-
+ 
 
     /* no need to send scan complete event - WZC (or equivalent other OS apps) will query for the results */
 }

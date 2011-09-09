@@ -108,13 +108,7 @@ typedef struct
  */
 static inline WBUF *WbufAlloc (TI_HANDLE hOs, TI_UINT32 len)
 {
-	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	WBUF *pWbuf = alloc_skb(len + WSPI_PAD_BYTES, flags);
-
-	if (!pWbuf)
-	{
-		return NULL;
-	}
+     WBUF *pWbuf = alloc_skb (len + WSPI_PAD_BYTES, GFP_ATOMIC);
      WBUF_DATA (pWbuf) += WSPI_PAD_BYTES;
      return pWbuf;
 }

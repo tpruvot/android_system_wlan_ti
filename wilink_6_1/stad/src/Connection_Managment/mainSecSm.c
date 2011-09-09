@@ -190,7 +190,7 @@ TI_STATUS mainSec_config (mainSec_t *pMainSec,
     pMainSec->hReport = hReport;
     pMainSec->hOs = hOs;
 
-    TRACE4(pMainSec->hReport, REPORT_SEVERITY_SM, "MainSec SM: config, authProtocol = %d, keyExchangeProtocol=%d, unicastSuite=%d, broadcastSuite=%d\n", pInitData->pPaeConfig->authProtocol, pInitData->pPaeConfig->keyExchangeProtocol, pInitData->pPaeConfig->unicastSuite, pInitData->pPaeConfig->broadcastSuite); 
+    TRACE4(pMainSec->hReport, REPORT_SEVERITY_SM, "MainSec SM: config, authProtocol = %d, keyExchangeProtocol=%d, unicastSuite=%d, broadcastSuite=%d\n", pInitData->pPaeConfig->authProtocol, pInitData->pPaeConfig->keyExchangeProtocol, pInitData->pPaeConfig->unicastSuite, pInitData->pPaeConfig->broadcastSuite);
 
     if (TI_TRUE == pMainSec->pParent->bRsnExternalMode)
     {

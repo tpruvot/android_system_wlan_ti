@@ -846,7 +846,7 @@ TI_STATUS admCtrlWpa_setSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TI_UINT8 *
 
 #ifdef XCC_MODULE_INCLUDED
 	pParam->paramType = XCC_CCKM_EXISTS;
-	pParam->content.XCCCckmExists  = (wpaData.KeyMngSuite[0]==WPA_IE_KEY_MNG_CCKM) ? TI_TRUE : TI_FALSE;
+	pParam->content.XCCCckmExists = (wpaData.KeyMngSuite[0]==WPA_IE_KEY_MNG_CCKM) ? TI_TRUE : TI_FALSE;
 	XCCMngr_setParam(pAdmCtrl->hXCCMngr, pParam);
 #endif
     /* set replay counter */
@@ -894,7 +894,7 @@ TI_STATUS admCtrlWpa_setSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TI_UINT8 *
 	status = TWD_SetParam(pAdmCtrl->pRsn->hTWD, &tTwdParam);
 	if (status != TI_OK)
 	{
-        goto adm_ctrl_wpa_end;
+        goto adm_ctrl_wpa_end;		
 	}
 
 #ifdef XCC_MODULE_INCLUDED
@@ -913,7 +913,7 @@ TI_STATUS admCtrlWpa_setSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TI_UINT8 *
     
     if (status != TI_OK)
     {
-        goto adm_ctrl_wpa_end;
+        goto adm_ctrl_wpa_end;        
     }
 #endif /*XCC_MODULE_INCLUDED*/
 
@@ -923,7 +923,6 @@ TI_STATUS admCtrlWpa_setSite(admCtrl_t *pAdmCtrl, TRsnData *pRsnData, TI_UINT8 *
     {
         goto adm_ctrl_wpa_end;
     }
-
 adm_ctrl_wpa_end:
     os_memoryFree(pAdmCtrl->hOs, pParam, sizeof(paramInfo_t));
     return status;
@@ -1235,7 +1234,6 @@ TI_STATUS admCtrlWpa_parseIe(admCtrl_t *pAdmCtrl, TI_UINT8 *pWpaIe, wpaIeData_t 
             TRACE2(pAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "Wpa_IE: authKeyMng %x , keyMng %x \n", curWpaIe[3], curKeyMngSuite);
 
             if ((curKeyMngSuite>maxKeyMngSuite) && (curKeyMngSuite!=WPA_IE_KEY_MNG_NA)
-				&& (curKeyMngSuite != TWD_CIPHER_UNKNOWN)
 				&& (curKeyMngSuite!=WPA_IE_KEY_MNG_CCKM))
             {
                 maxKeyMngSuite =  curKeyMngSuite;
@@ -1248,7 +1246,7 @@ TI_STATUS admCtrlWpa_parseIe(admCtrl_t *pAdmCtrl, TI_UINT8 *pWpaIe, wpaIeData_t 
             curWpaIe +=4; 
 
             /* Include all AP key management supported suites in the wpaData structure */
-    	    if ((index+1) < MAX_WPA_KEY_MNG_SUITES)
+	    if ((index+1) < MAX_WPA_KEY_MNG_SUITES)
                 pWpaData->KeyMngSuite[index+1] = curKeyMngSuite;
 
         }

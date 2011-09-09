@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 STATIC_LIB ?= y
 DEBUG ?= y
-BUILD_SUPPL ?= y
+BUILD_SUPPL = y
 WPA_ENTERPRISE ?= y
 
 ifeq ($(DEBUG),y)
@@ -32,6 +32,7 @@ WPA_SUPPL_DIR_INCLUDE += $(WPA_SUPPL_DIR)/src \
 	$(WPA_SUPPL_DIR)/src/utils \
 	$(WPA_SUPPL_DIR)/src/wps
 endif
+
 DK_DEFINES = 
 ifeq ($(WPA_ENTERPRISE), y)
 DK_DEFINES += -D WPA_ENTERPRISE
@@ -40,9 +41,9 @@ endif
 ifeq ($(BUILD_SUPPL), y)
 DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
 -include $(WPA_SUPPL_DIR)/.config
-  ifeq ($(CONFIG_WPS), y)
-    DK_DEFINES += -DCONFIG_WPS
-  endif
+ifdef CONFIG_WPS
+DK_DEFINES += -DCONFIG_WPS
+endif
 endif
 
 LOCAL_CFLAGS += \
@@ -58,23 +59,24 @@ LOCAL_SRC_FILES:= \
 	osapi.c
 
 LOCAL_C_INCLUDES := \
-        $(LOCAL_PATH)/../inc \
-        $(LOCAL_PATH)/../../common/inc \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/stad/Export_Inc \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/stad/src/Sta_Management \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/stad/src/Application \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/utils \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/Txn \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/TWD/TWDriver \
+	$(LOCAL_PATH)/../inc \
+	$(LOCAL_PATH)/../../common/inc \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/stad/Export_Inc \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/stad/src/Sta_Management \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/stad/src/Application \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/utils \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/Txn \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/TWD/TWDriver \
 	$(LOCAL_PATH)/$(WILINK_ROOT)/TWD/FirmwareApi \
 	$(LOCAL_PATH)/$(WILINK_ROOT)/TWD/FW_Transfer/Export_Inc \
 	$(LOCAL_PATH)/$(WILINK_ROOT)/TWD/TwIf \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/platforms/os/linux/inc \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/platforms/os/common/inc \
-        $(LOCAL_PATH)/$(WILINK_ROOT)/TWD/FirmwareApi \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/platforms/os/linux/inc \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/platforms/os/common/inc \
+	$(LOCAL_PATH)/$(WILINK_ROOT)/TWD/FirmwareApi \
 	$(LOCAL_PATH)/$(CUDK_ROOT)/configurationutility/inc \
 	$(WPA_SUPPL_DIR_INCLUDE)
 
+LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE := libtiOsLib
 
 include $(BUILD_STATIC_LIBRARY)

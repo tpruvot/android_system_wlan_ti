@@ -52,6 +52,7 @@
 #include "EvHandler.h"
 #include "apConnApi.h"
 
+
 /*
  ***********************************************************************
  *  Internal functions
@@ -682,7 +683,7 @@ void scanMngr_GetUpdatedTsfDtimMibForScan (TI_HANDLE hScanMngr, TI_BOOL bTwdInit
     TI_STATUS reqStatus = TI_OK;
     
     TRACE0( pScanMngr->hReport , REPORT_SEVERITY_INFORMATION, "\nscanMngr_GetUpdatedTsfDtimMibForScan called\n");
-    
+
 	if (pScanMngr->bQualityChangeNeeded == TI_TRUE)
 	{
 		scanMngr_qualityChangeTrigger(hScanMngr);
@@ -891,7 +892,7 @@ void scanMngrPerformAging( TI_HANDLE hScanMngr )
         return;
     }
     /* loop on all entries in the BSS list */
-    for (BSSEntryIndex = 0; BSSEntryIndex < pScanMngr->BSSList.numOfEntries; )
+    for ( BSSEntryIndex = 0; BSSEntryIndex < pScanMngr->BSSList.numOfEntries; )
     {
         /* if an entry failed enough consecutive track attempts - remove it */
         if ( pScanMngr->BSSList.scanBSSList[ BSSEntryIndex ].trackFailCount > 
@@ -4047,24 +4048,25 @@ void scanMngr_SetDefaults (TI_HANDLE hScanMngr, TRoamScanMngrInitParams *pInitPa
         {
             defaultScanPolicy.bandScanPolicy[0].channelList[ i ] = i + 1;
         }
-        // CSR OMAPS00226950
-        defaultScanPolicy.bandScanPolicy[0].trackingMethod.scanType = SCAN_TYPE_NORMAL_ACTIVE;
+
+        defaultScanPolicy.bandScanPolicy[0].trackingMethod.scanType = SCAN_TYPE_NO_SCAN;
         defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.earlyTerminationEvent = SCAN_ET_COND_DISABLE;
         defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.ETMaxNumberOfApFrames = 0;
-        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.maxChannelDwellTime = 30000;
-        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.minChannelDwellTime = 15000;
-        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.bitrate = (ERateMask)RATE_MASK_UNSPECIFIED; /* Let the FW select */
-        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 3;
-        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.txPowerDbm = DEF_TX_POWER;
+        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.maxChannelDwellTime = 0;
+        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.minChannelDwellTime = 0;
 
-        defaultScanPolicy.bandScanPolicy[0].discoveryMethod.scanType = SCAN_TYPE_NORMAL_ACTIVE;
+        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.bitrate = (ERateMask)RATE_MASK_UNSPECIFIED; /* Let the FW select */
+        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 0;
+        defaultScanPolicy.bandScanPolicy[ 0 ].trackingMethod.method.basicMethodParams.probReqParams.txPowerDbm = 0;
+
+        defaultScanPolicy.bandScanPolicy[0].discoveryMethod.scanType = SCAN_TYPE_NO_SCAN;
         defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.earlyTerminationEvent = SCAN_ET_COND_DISABLE;
         defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.ETMaxNumberOfApFrames = 0;
-        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.maxChannelDwellTime = 30000;
-        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.minChannelDwellTime = 15000;
+        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.maxChannelDwellTime = 0;
+        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.minChannelDwellTime = 0;
         defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.probReqParams.bitrate = (ERateMask)RATE_MASK_UNSPECIFIED; /* Let the FW select */
-        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 3;
-        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.probReqParams.txPowerDbm = DEF_TX_POWER;
+        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 0;
+        defaultScanPolicy.bandScanPolicy[ 0 ].discoveryMethod.method.basicMethodParams.probReqParams.txPowerDbm = 0;
 
         defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.scanType = SCAN_TYPE_NORMAL_ACTIVE;
         defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.maxChannelDwellTime = 30000;
@@ -4073,7 +4075,7 @@ void scanMngr_SetDefaults (TI_HANDLE hScanMngr, TRoamScanMngrInitParams *pInitPa
         defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.ETMaxNumberOfApFrames = 0;
         defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 3;
         defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.probReqParams.bitrate = (ERateMask)4;//RATE_MASK_UNSPECIFIED; /* Let the FW select */
-        defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.probReqParams.txPowerDbm = DEF_TX_POWER;
+        defaultScanPolicy.bandScanPolicy[0].immediateScanMethod.method.basicMethodParams.probReqParams.txPowerDbm = MAX_TX_POWER;
 
         pParam->paramType = SCAN_MNGR_SET_CONFIGURATION;
 

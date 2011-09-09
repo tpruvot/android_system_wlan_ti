@@ -32,16 +32,16 @@
  */
 
 
-/** \file   txXfer.c
- *  \brief  Handle Tx packets transfer to the firmware.
+/** \file   txXfer.c 
+ *  \brief  Handle Tx packets transfer to the firmware. 
  *
  *  This module gets the upper driver's Tx packets after FW resources were
- *    allocated for them, aggregates them if possible, and handles their transfer
+ *    allocated for them, aggregates them if possible, and handles their transfer 
  *    to the FW via the host slave (indirect) interface, using the TwIf Transaction API.
  *  The aggregation processing is completed by the BusDrv where the packets are combined
  *    and sent to the FW in one transaction.
- *
- *  \see
+ * 
+ *  \see    
  */
 
 
@@ -90,7 +90,7 @@ typedef struct
 } TTxXferObj;
 
 static ETxnStatus txXfer_SendAggregatedPkts (TTxXferObj *pTxXfer, TI_BOOL bLastPktSentNow);
-static void txXfer_TransferDoneCb (TI_HANDLE hTxXfer, TTxnStruct *pTxn);
+static void       txXfer_TransferDoneCb     (TI_HANDLE hTxXfer, TTxnStruct *pTxn);
 
 
 /********************************************************************************
@@ -157,7 +157,7 @@ TI_STATUS txXfer_Restart (TI_HANDLE hTxXfer)
 {
     TTxXferObj *pTxXfer = (TTxXferObj *)hTxXfer;
 
-    pTxXfer->uPktsCntr = 0;
+    pTxXfer->uPktsCntr         = 0;
     pTxXfer->uPktsCntrTxnIndex = 0;
     pTxXfer->uAggregPktsNum    = 0;
 
@@ -442,5 +442,3 @@ void txXfer_PrintStats (TI_HANDLE hTxXfer)
 }
 
 #endif /* TI_DBG */
-
-

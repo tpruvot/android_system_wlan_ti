@@ -437,8 +437,8 @@ typedef enum RADIO_CHANNEL_INDEX_ENMT
 
 #define NUMBER_OF_2_4_G_CHANNELS    	(NUMBER_OF_2_4_G_CHANNEL_INDICES_E + 1)
 #define NUMBER_OF_5G_CHANNELS       	(NUMBER_OF_RADIO_CHANNEL_INDEXS_E - NUMBER_OF_2_4_G_CHANNELS)
-#define HALF_NUMBER_OF_2_4_G_CHANNELS   (NUMBER_OF_2_4_G_CHANNELS / 2)
-#define HALF_NUMBER_OF_5G_CHANNELS      ((NUMBER_OF_5G_CHANNELS + 1) / 2)
+#define HALF_NUMBER_OF_2_4_G_CHANNELS 	(NUMBER_OF_2_4_G_CHANNELS / 2)
+#define HALF_NUMBER_OF_5G_CHANNELS  	((NUMBER_OF_5G_CHANNELS + 1) / 2)
 
 typedef enum RADIO_RATE_GROUPS_ENMT
 {		
@@ -982,7 +982,7 @@ typedef struct
 
 } TTestCmdRunCalibration;
 
-typedef struct
+typedef struct 
 {
     uint8   DCOItrimONOff;
 	uint8	padding[3];
@@ -1070,7 +1070,7 @@ typedef enum TXPWR_CFG0__VGA_STEP_ENMT
 
 /* NVS definition start here */
 
-#define	NVS_TX_TYPE_INDEX		0
+#define	NVS_TX_TYPE_INDEX		0 
 #define        NVS_TX_LENGTH_INDEX                             ((NVS_TX_TYPE_INDEX) + 1) /* 1 (26) */
 #define        NVS_TX_PARAM_INDEX                              ((NVS_TX_LENGTH_INDEX) + 2) /* 3  (28) */
 
@@ -1162,7 +1162,7 @@ typedef enum TXPWR_CFG0__VGA_STEP_ENMT
  
 #define	 MAX_NVS_VERSION_LENGTH			12
 
-/* type to set in the NVS for each mode of work */
+/* type to set in the NVS for each mode of work */ 
 typedef enum
 {
 	eNVS_VERSION = 0xaa,
@@ -1196,7 +1196,7 @@ typedef enum
 typedef enum
 {
 	eCURRENT_SUB_BAND,
-	eALL_SUB_BANDS
+	eALL_SUB_BANDS	
 }TxBipCurrentAllSubBand;
 
 typedef struct 
@@ -1415,13 +1415,13 @@ typedef struct
 	uint8	DC2DCMode;                               
 	uint8	Single_Dual_Band_Solution;  
 	uint8	TXBiPFEMAutoDetect;
-	uint8	TXBiPFEMManufacturer;
+	uint8	TXBiPFEMManufacturer;  
 /*	GeneralSettingsByte	Settings; */
     uint8   GeneralSettings;
 
 
     /* smart reflex state*/
-    uint8 SRState;
+    uint8 SRState; 
     /* FUB parameters */
     int8	SRF1[MAX_SMART_REFLEX_PARAM];
     int8	SRF2[MAX_SMART_REFLEX_PARAM];
@@ -1517,32 +1517,32 @@ typedef struct
 typedef struct 
 {  
 	/* SECTION 1: 2.4G parameters */
-	uint16  TXBiPReferencePDvoltage_2_4G;
-	uint8   TxBiPReferencePower_2_4G;
-	int8  TxBiPOffsetdB_2_4G;																							
-	int8  TxPerRatePowerLimits_2_4G_Normal[NUMBER_OF_RATE_GROUPS_E];							
-	int8  TxPerRatePowerLimits_2_4G_Degraded[NUMBER_OF_RATE_GROUPS_E];							
+	uint16  TXBiPReferencePDvoltage_2_4G;								
+	uint8   TxBiPReferencePower_2_4G;		
+	int8  	TxBiPOffsetdB_2_4G;
+	int8  	TxPerRatePowerLimits_2_4G_Normal[NUMBER_OF_RATE_GROUPS_E];							
+	int8  	TxPerRatePowerLimits_2_4G_Degraded[NUMBER_OF_RATE_GROUPS_E];							
 	int8    TxPerRatePowerLimits_2_4G_Extreme[NUMBER_OF_RATE_GROUPS_E];
 	int8  	TxPerChannelPowerLimits_2_4G_11b[NUMBER_OF_2_4_G_CHANNELS];	
-	int8  TxPerChannelPowerLimits_2_4G_OFDM[NUMBER_OF_2_4_G_CHANNELS];	
-	int8  TxPDVsRateOffsets_2_4G[NUMBER_OF_RATE_GROUPS_E];												
-	uint8 TxIbiasTable_2_4G[NUMBER_OF_RATE_GROUPS_E];														
-	uint8 RxFemInsertionLoss_2_4G;
-    uint8 	DegradedLowToNormalThr_2_4G;
-    uint8 	NormalToDegradedHighThr_2_4G;
+	int8    TxPerChannelPowerLimits_2_4G_OFDM[NUMBER_OF_2_4_G_CHANNELS];	
+	int8    TxPDVsRateOffsets_2_4G[NUMBER_OF_RATE_GROUPS_E];												
+	uint8   TxIbiasTable_2_4G[NUMBER_OF_RATE_GROUPS_E];														
+	uint8   RxFemInsertionLoss_2_4G;
+        uint8 	DegradedLowToNormalThr_2_4G;
+        uint8 	NormalToDegradedHighThr_2_4G;
 
 	/* SECTION 2: 5G parameters */
 	uint16 	TXBiPReferencePDvoltage_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];
-	uint8  	TxBiPReferencePower_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];
-	int8  TxBiPOffsetdB_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];
-	int8  TxPerRatePowerLimits_5G_Normal[NUMBER_OF_RATE_GROUPS_E];
-	int8  TxPerRatePowerLimits_5G_Degraded[NUMBER_OF_RATE_GROUPS_E];
+	uint8  	TxBiPReferencePower_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];			
+	int8   	TxBiPOffsetdB_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];								
+	int8   	TxPerRatePowerLimits_5G_Normal[NUMBER_OF_RATE_GROUPS_E];							
+	int8   	TxPerRatePowerLimits_5G_Degraded[NUMBER_OF_RATE_GROUPS_E];
     int8   	TxPerRatePowerLimits_5G_Extreme[NUMBER_OF_RATE_GROUPS_E];
-	int8  TxPerChannelPowerLimits_5G_OFDM[NUMBER_OF_5G_CHANNELS];
-	int8  TxPDVsRateOffsets_5G[NUMBER_OF_RATE_GROUPS_E];
-	int8  TxIbiasTable_5G[NUMBER_OF_RATE_GROUPS_E];
-	uint8  	RxFemInsertionLoss_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];
-    uint8  	DegradedLowToNormalThr_5G;
+	int8   	TxPerChannelPowerLimits_5G_OFDM[NUMBER_OF_5G_CHANNELS];                         
+	int8   	TxPDVsRateOffsets_5G[NUMBER_OF_RATE_GROUPS_E];										
+	int8   	TxIbiasTable_5G[NUMBER_OF_RATE_GROUPS_E];											
+	uint8  	RxFemInsertionLoss_5G[NUMBER_OF_SUB_BANDS_IN_5G_BAND_E];	
+    uint8  	DegradedLowToNormalThr_5G;			
     uint8   NormalToDegradedHighThr_5G;
  
 }TDynRadioParams;  
@@ -1555,14 +1555,14 @@ typedef struct
 
 }IniFileRadioParam;  
 
-typedef struct
+typedef struct 
 {
 	int8  TxPerChannelPowerCompensation_2_4G[HALF_NUMBER_OF_2_4_G_CHANNELS]; /* 7 */	
 	int8  TxPerChannelPowerCompensation_5G_OFDM[HALF_NUMBER_OF_5G_CHANNELS]; /* 18 */
 	uint8 Padding[3];
 
-}IniFileExtendedRadioParam;
-
+}IniFileExtendedRadioParam;  
+	
 /*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 /* Describes a reference design supported by the HDK Module */
@@ -1629,7 +1629,7 @@ typedef struct
 		TTestCmdRunCalibration			RunCalibration;
         IniFileRadioParam				IniFileRadioParams;
 		IniFileExtendedRadioParam		IniFileExtendedRadioParams;
-        IniFileGeneralParam				IniFileGeneralParams;
+		IniFileGeneralParam				IniFileGeneralParams;
 		EfuseParameters_t				EfuseParams;
 		TestToneParams_t				TestToneParams;
 		TTestCmdPowerMode				powerMode;

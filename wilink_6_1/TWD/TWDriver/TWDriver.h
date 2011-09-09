@@ -286,12 +286,12 @@
 
 /* Rx aggregation packets number limit (max packets in one aggregation) */
 #define TWD_RX_AGGREG_PKTS_LIMIT_DEF    4
-#define TWD_RX_AGGREG_PKTS_LIMIT_MIN    0
+#define TWD_RX_AGGREG_PKTS_LIMIT_MIN    0 
 #define TWD_RX_AGGREG_PKTS_LIMIT_MAX    4
 
 /* Tx aggregation packets number limit (max packets in one aggregation) */
 #define TWD_TX_AGGREG_PKTS_LIMIT_DEF    0
-#define TWD_TX_AGGREG_PKTS_LIMIT_MIN    0
+#define TWD_TX_AGGREG_PKTS_LIMIT_MIN    0 
 #define TWD_TX_AGGREG_PKTS_LIMIT_MAX    32
 
 /*
@@ -1219,17 +1219,19 @@ typedef enum
 /*
  ==============
 
- IMPORTANT NOTE - Changes to this enumeration must check weather MIN and MAX values
+ IMPORTANT NOTE - Changes to this enumeration must check weather MIN and MAX values 
                   should be updated
  ==============
 */
 typedef enum
 {   
             MAX_MPDU_MIN_VALUE = 0,
+
 /*	0	*/	MAX_MPDU_8191_OCTETS = MAX_MPDU_MIN_VALUE,	/**< Maximum MPDU Octets Number: 8191	*/
 /*	1	*/  MAX_MPDU_16383_OCTETS,		                /**< Maximum MPDU Octets Number: 16383	*/
 /*	2	*/  MAX_MPDU_32767_OCTETS,		                /**< Maximum MPDU Octets Number: 32767	*/
 /*	3	*/  MAX_MPDU_65535_OCTETS,		                /**< Maximum MPDU Octets Number: 65535	*/
+
             MAX_MPDU_MAX_VALUE = MAX_MPDU_65535_OCTETS
 
 } ETwdMaxAMPDU;
@@ -2364,11 +2366,11 @@ typedef struct
 
 /** \struct DcoItrimParams_t
  * \brief DCO Itrim params structure
- *
+ * 
  * \par Description
- *
+ * 
  * \sa
- */
+ */ 
 typedef struct
 {
     Bool_e enable;
@@ -2761,9 +2763,9 @@ typedef struct
     TMacAddrFilterInitParams            tMacAddrFilter;		 /**< MAC Address Initialization Parameters		*/
     IniFileRadioParam                   tIniFileRadioParams; /**< Radio Initialization Parameters   		*/
 	IniFileExtendedRadioParam			tIniFileExtRadioParams; /**< Radio Initialization Parameters   		*/
-    IniFileGeneralParam                 tPlatformGenParams; /**< Radio Initialization Parameters   	        */
-	RateMangeParams_t					tRateMngParams;
-    DcoItrimParams_t                    tDcoItrimParams;          /**< Dco Itrim Parameters   	            */
+    IniFileGeneralParam                 tPlatformGenParams;  /**< Radio Initialization Parameters           */
+	RateMangeParams_t					tRateMngParams;			  
+    DcoItrimParams_t                    tDcoItrimParams;     /**< Dco Itrim Parameters                      */
    
 } TTwdInitParams;
 
@@ -3070,9 +3072,9 @@ void TWD_Init (TI_HANDLE    hTWD,
  * 
  * \sa
  */ 
-TI_STATUS TWD_InitHw (TI_HANDLE hTWD,
-                      TI_UINT8 *pbuf,
-                      TI_UINT32 length,
+TI_STATUS TWD_InitHw (TI_HANDLE hTWD, 
+                      TI_UINT8 *pbuf, 
+                      TI_UINT32 length, 
                       TI_UINT32 uRxDmaBufLen,
                       TI_UINT32 uTxDmaBufLen);
 /** @ingroup Control
@@ -4045,10 +4047,10 @@ TI_STATUS TWD_CmdSetStaState (TI_HANDLE hTWD, TI_UINT8 staState, void *fCb, TI_H
  */ 
 TI_STATUS TWD_CfgArpIpAddrTable (TI_HANDLE hTWD, 
 								 TIpAddr tIpAddr, 
-								 EArpFilterType filterType,
+								 EArpFilterType filterType, 
 								 EIpVer eIpVer);
 
-TI_STATUS TWD_CfgArpIpFilter    (TI_HANDLE hTWD,
+TI_STATUS TWD_CfgArpIpFilter    (TI_HANDLE hTWD, 
                                  TIpAddr tIpAddr);
 
 /** @ingroup BSS
@@ -4649,15 +4651,15 @@ ETxnStatus TWD_txXfer_SendPacket (TI_HANDLE hTWD, TTxCtrlBlk *pPktCtrlBlk);
 
 /** @ingroup Data_Path
  * \brief  Indicates that current packets burst stopped
- *
+ * 
  * \param  hTWD   			- TWD module object handle
  * \return void
- *
+ * 
  * \par Description
- * Indicates that current packets burst stopped, so the TxXfer will send its aggregated packets to FW.
- *
+ * Indicates that current packets burst stopped, so the TxXfer will send its aggregated packets to FW. 
+ * 
  * \sa
- */
+ */ 
 void TWD_txXfer_EndOfBurst (TI_HANDLE hTWD);
 
 /** @ingroup Control

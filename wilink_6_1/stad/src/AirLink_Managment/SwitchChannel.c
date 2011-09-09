@@ -410,6 +410,7 @@ TI_STATUS switchChannel_start(TI_HANDLE hSwitchChannel)
     pSwitchChannel->switchChannelStarted = TI_TRUE;
 
     return (switchChannel_smEvent((TI_UINT8*)&pSwitchChannel->currentState, SC_EVENT_START, pSwitchChannel));
+
 }
 
 
@@ -477,7 +478,6 @@ void switchChannel_recvCmd(TI_HANDLE hSwitchChannel, dot11_CHANNEL_SWITCH_t *cha
     switchChannel_t             *pSwitchChannel = (switchChannel_t *)hSwitchChannel;
     paramInfo_t                 param;
 
-
     if (pSwitchChannel==NULL)
     {
         return;
@@ -520,7 +520,6 @@ void switchChannel_recvCmd(TI_HANDLE hSwitchChannel, dot11_CHANNEL_SWITCH_t *cha
             (channelSwitch->channelSwitchMode == SC_SWITCH_CHANNEL_MODE_TX_SUS))
         {   /* Trigger Roaming, if TX mode is disabled, the new channel number is invalid, 
                 or the TBTT count is 0 */
-
             TRACE0(pSwitchChannel->hReport, REPORT_SEVERITY_INFORMATION, "report Roaming trigger\n");
             if (channelSwitch->channelSwitchMode == SC_SWITCH_CHANNEL_MODE_TX_SUS) 
             {

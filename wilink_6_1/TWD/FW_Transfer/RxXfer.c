@@ -125,7 +125,7 @@ typedef struct
     TI_UINT32           uAvailableTxn;                          /* Number of Txn structures currently available */
     TRegTxn             aSlaveRegTxn[MAX_CONSECUTIVE_READ_TXN]; /* Txn structures for writing mem-block address reg */
     TTxnStruct          aTxnStruct[MAX_CONSECUTIVE_READ_TXN];   /* Txn structures for reading the Rx packets */
-    TCounterTxn         aCounterTxn[MAX_CONSECUTIVE_READ_TXN];  /* Txn structures for writing the driver counter */
+    TCounterTxn         aCounterTxn[MAX_CONSECUTIVE_READ_TXN];  /* Txn structures for writing the driver counter workaround */
 
     TI_UINT8            aTempBuffer[MAX_PACKET_SIZE];           /* Dummy buffer to use if we couldn't get a buffer for the packet (so drop the packet) */
     TFailureEventCb     fErrCb;                                 /* The upper layer CB function for error handling */
@@ -251,12 +251,12 @@ void rxXfer_SetDefaults (TI_HANDLE hRxXfer, TTwdInitParams *pInitParams)
  *                      rxXfer_SetBusParams()
  ****************************************************************************
  * DESCRIPTION: Configure bus driver DMA-able buffer length to be used as a limit to the aggragation length.
- *
+ * 
  * INPUTS:      hRxXfer    - module handle
  *              uDmaBufLen - The bus driver DMA-able buffer length
- *
+ * 
  * OUTPUT:  None
- *
+ * 
  * RETURNS: None
  ****************************************************************************/
 void rxXfer_SetBusParams (TI_HANDLE hRxXfer, TI_UINT32 uDmaBufLen)
@@ -346,7 +346,7 @@ static void rxXfer_ForwardPacket (TRxXfer *pRxXfer, TTxnStruct *pTxn)
                 pRxXfer->fErrCb (pRxXfer->hErrCb, RX_XFER_FAILURE);
             }
         }
-        else
+        else 
         {
             TRACE2(pRxXfer->hReport, REPORT_SEVERITY_INFORMATION , "rxXfer_ForwardPacket: RxInfoLength=%d, RxInfoStatus=0x%x\n", uLenFromRxInfo, pRxInfo->status);
         }
@@ -553,7 +553,6 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
         else
         {
             bExit = TI_TRUE;
-
             if (uAggregPktsNum > 0)
             {
                 bIssueTxn = TI_TRUE;
@@ -564,7 +563,6 @@ static TI_STATUS rxXfer_Handle(TI_HANDLE hRxXfer)
         /* If required to send Rx packet(s) transaction */
         if (bIssueTxn)
         {
-
             if (bExit)
             {
                 TXN_PARAM_SET_END_OF_BURST(pTxn, 1);
@@ -909,5 +907,3 @@ void rxXfer_PrintStats (TI_HANDLE hRxXfer)
 #endif
 }
 #endif
-
-

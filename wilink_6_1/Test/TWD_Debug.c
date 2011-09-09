@@ -622,9 +622,9 @@ static TI_STATUS TWD_StatisticsReadCB (TI_HANDLE hTWD, TI_UINT16 MboxStatus, ACX
 
 TI_STATUS TWD_Debug (TI_HANDLE hTWD, TI_UINT32 funcType, void *pParam)
 {
-    TTwd *pTWD 					= (TTwd *)hTWD;    
+    TTwd *pTWD			= (TTwd *)hTWD;    
     TI_UINT32 GenericVal;
-	TFwDebugParams* pMemDebug	= (TFwDebugParams*)pParam;
+    TFwDebugParams* pMemDebug	= (TFwDebugParams*)pParam;
 
     static TI_UINT32 GenericAddr;
 #ifdef REPORT_LOG

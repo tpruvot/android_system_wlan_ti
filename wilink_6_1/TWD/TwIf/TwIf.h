@@ -79,12 +79,12 @@ typedef void (*TRecoveryCb)(TI_HANDLE hCb);
  ************************************************************************/
 TI_HANDLE   twIf_Create (TI_HANDLE hOs);
 TI_STATUS   twIf_Destroy (TI_HANDLE hTwIf);
-void        twIf_Init (TI_HANDLE hTwIf,
-                       TI_HANDLE hReport,
-                       TI_HANDLE hContext,
-                       TI_HANDLE hTimer,
-                       TI_HANDLE hTxnQ,
-                       TRecoveryCb fRecoveryCb,
+void        twIf_Init (TI_HANDLE hTwIf, 
+                       TI_HANDLE hReport, 
+                       TI_HANDLE hContext, 
+                       TI_HANDLE hTimer, 
+                       TI_HANDLE hTxnQ, 
+                       TRecoveryCb fRecoveryCb, 
                        TI_HANDLE hRecoveryCb);
 void        twIf_RegisterErrCb (TI_HANDLE hTwIf, void *fErrCb, TI_HANDLE hErrCb);
 ETxnStatus  twIf_Restart (TI_HANDLE hTwIf);

@@ -49,10 +49,6 @@
 #include <linux/wakelock.h>
 #endif
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-#include <linux/earlysuspend.h>
-#endif /* CONFIG_HAS_EARLYSUSPEND */
-
 #include "tidef.h"
 #include "WlanDrvCommon.h"
 #include "paramOut.h"
@@ -126,14 +122,7 @@ typedef struct
     struct wake_lock         wl_wifi;   /* Wifi wakelock */
     struct wake_lock         wl_rxwake; /* Wifi rx wakelock */
 #endif
-#ifdef CONFIG_HAS_EARLYSUSPEND 
-    struct early_suspend early_suspend;
-    int in_suspend;
-    int allow_suspend;
-    int skipped_suspend;
-#endif /* CONFIG_HAS_EARLYSUSPEND */
-    struct semaphore sem;
-    int in_dtim_skipping;
+
     NDIS_HANDLE		         ConfigHandle;/* Temp - For Windows compatibility */
 
 } TWlanDrvIfObj, *TWlanDrvIfObjPtr;

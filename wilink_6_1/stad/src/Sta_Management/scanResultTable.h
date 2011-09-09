@@ -161,6 +161,5 @@ TI_STATUS scanResultTable_GetBssidSupportedRatesList (TI_HANDLE hScanResultTable
 
 void        scanResultTable_PerformAging(TI_HANDLE hScanResultTable);
 void        scanResultTable_SetSraThreshold(TI_HANDLE hScanResultTable, TI_UINT32 uSraThreshold);
-
 #endif /* __SCAN_RESULT_TABLE_H__ */
 

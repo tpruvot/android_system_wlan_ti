@@ -684,10 +684,11 @@ TI_STATUS trafficAdmCtrl_recv(TI_HANDLE hTrafficAdmCtrl, TI_UINT8* pData, TI_UIN
 
 	trafficAdmCtrl_t *pTrafficAdmCtrl = (trafficAdmCtrl_t*)hTrafficAdmCtrl;
 
-    
 	if (action == ADDTS_RESPONSE_ACTION) 
 	{
-TRACE0(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "action = 1 - ADDTS RESPONSE ACTION........!! \n");
+        /* Note: The IE length was already verified by the caller. */
+
+        TRACE0(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "action = 1 - ADDTS RESPONSE ACTION........!! \n");
 
 		/* parsing the dialog token */
 		dialogToken = *pData;
@@ -696,7 +697,6 @@ TRACE0(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "action = 1 - ADDT
 		/* in WME status code is 1 byte, in WSM is 2 bytes */
 		statusCode = *pData;
 		pData++;
-
 		tspecInfo.statusCode = statusCode;
 
         TRACE2(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "dialogToken = %d, statusCode = %d \n", dialogToken, statusCode);
@@ -738,13 +738,13 @@ TRACE0(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "action = 1 - ADDT
 #endif  /* XCC_MODULE_INCLUDED */
 
 			/* admission rejected */
-			/********************/
+			/**********************/
 
             TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "trafficAdmCtrl_recv: admission reject [ statusCode = 0x%x ]\n",statusCode);
             TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "trafficAdmCtrl_recv: ADDTS Response (reject) userPriority = %d , \n", tspecInfo.userPriority);
 			
 			trafficAdmCtrl_smEvent(pTrafficAdmCtrl, TRAFFIC_ADM_CTRL_SM_EVENT_REJECT, &fsmTSpecInfo);
-			
+
 #ifdef XCC_MODULE_INCLUDED
 
             if (ADDTS_STATUS_CODE_REFUSED == statusCode)
@@ -773,10 +773,10 @@ TRACE0(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "action = 1 - ADDT
 		else
 		{
 			/* admission accepted */
-			/********************/
-TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "***** admCtrlQos_recv: admission accept [ statusCode = %d ]\n",statusCode);
-TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "ADDTS Response (accepted) userPriority = %d ,  \n", tspecInfo.userPriority);
-TRACE2(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "mediumTime = %d ,  surplusBandwidthAllowance = %d \n", tspecInfo.mediumTime, tspecInfo.surplausBwAllowance);
+			/**********************/
+            TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "***** admCtrlQos_recv: admission accept [ statusCode = %d ]\n",statusCode);
+            TRACE1(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "ADDTS Response (accepted) userPriority = %d ,  \n", tspecInfo.userPriority);
+            TRACE2(pTrafficAdmCtrl->hReport, REPORT_SEVERITY_INFORMATION, "mediumTime = %d ,  surplusBandwidthAllowance = %d \n", tspecInfo.mediumTime, tspecInfo.surplausBwAllowance);
 			
 			trafficAdmCtrl_smEvent(pTrafficAdmCtrl, TRAFFIC_ADM_CTRL_SM_EVENT_ACCEPT, &fsmTSpecInfo);
 		}
@@ -1250,7 +1250,7 @@ void trafficAdmCtrl_buildTSPec(trafficAdmCtrl_t	*pTrafficAdmCtrl,
 		nominalMSDUSize |= FIX_MSDU_SIZE;
 
     maxMSDUSize = (nominalMSDUSize & (~FIX_MSDU_SIZE));
-
+    
 	COPY_WLAN_WORD(pDataBuf,      &nominalMSDUSize);			/* Nominal-MSDU-size. */
 	COPY_WLAN_WORD(pDataBuf +  2, &maxMSDUSize);			    /* Maximum-MSDU-size. */
 	COPY_WLAN_LONG(pDataBuf +  4, &pTSpecInfo->uMinimumServiceInterval); /* Minimum service interval */

@@ -43,7 +43,7 @@
  * \n\n
  */
  
-/* \
+/* \author Ronen Kalish
  * \date 01-Mar-2005
  */
 

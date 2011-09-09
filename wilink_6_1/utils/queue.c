@@ -372,7 +372,7 @@ TRACE0(pQue->hReport, REPORT_SEVERITY_INFORMATION , "que_Requeue(): Requeued suc
 	 */
 #ifdef TI_DBG
     pQue->uOverflow++;
-    TRACE0(pQue->hReport, REPORT_SEVERITY_ERROR , "que_Requeue(): Queue Overflow\n");
+TRACE0(pQue->hReport, REPORT_SEVERITY_ERROR , "que_Requeue(): Queue Overflow\n");
 #endif
     
     return TI_NOK;
@@ -415,7 +415,7 @@ TI_UINT32 que_Size (TI_HANDLE hQue)
 void que_Print(TI_HANDLE hQue)
 {
 #ifdef REPORT_LOG
-	TQueue *pQue = (TQueue *)hQue;
+    TQueue *pQue = (TQueue *)hQue;
 
     WLAN_OS_REPORT(("que_Print: Count=%u MaxCount=%u Limit=%u Overflow=%u NodeHeaderOffset=%u Next=0x%x Prev=0x%x\n",
                     pQue->uCount, pQue->uMaxCount, pQue->uLimit, pQue->uOverflow, 

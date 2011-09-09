@@ -79,6 +79,5 @@ void        sme_ReportApConnStatus (TI_HANDLE hSme, mgmtStatus_e eStatusType, TI
 void        sme_ConnectScanReport (TI_HANDLE hSme, TI_HANDLE *hScanResultTable);
 void        sme_MeasureScanReport (TI_HANDLE hSme, TI_HANDLE *hScanResultTable);
 
-
 #endif /* __SME_H__ */
 

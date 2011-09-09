@@ -39,28 +39,28 @@
 /***************************************************************************/
 #define __FILE_ID__  FILE_ID_54
 #include "tidef.h"
-#include "paramOut.h" 
+#include "paramOut.h"
 #include "rx.h"
 #include "osApi.h"
 #include "timer.h"
 #include "DataCtrl_Api.h"
 #include "Ctrl.h"
 #include "802_11Defs.h"
-#include "Ethernet.h" 
+#include "Ethernet.h"
 #include "report.h"
 #include "rate.h"
 #include "mlmeApi.h"
 #include "rsnApi.h"
 #include "smeApi.h"
 #include "siteMgrApi.h"
-#include "GeneralUtil.h"   
+#include "GeneralUtil.h"
 #include "EvHandler.h"
 #ifdef XCC_MODULE_INCLUDED
 #include "XCCMngr.h"
 #endif
 #include "TWDriver.h"
 #include "RxBuf.h"
-#include "DrvMainModules.h" 
+#include "DrvMainModules.h"
 #include "bmtrace_api.h"
 #include "PowerMgr_API.h"
 
@@ -187,7 +187,7 @@ void rxData_init (TStadHandlesList *pStadHandles)
     pRxData->hEvHandler = pStadHandles->hEvHandler;
     pRxData->hTimer     = pStadHandles->hTimer;
     pRxData->hPowerMgr  = pStadHandles->hPowerMgr;
-    
+
     pRxData->rxDataExcludeUnencrypted = DEF_EXCLUDE_UNENCYPTED; 
     pRxData->rxDataExludeBroadcastUnencrypted = DEF_EXCLUDE_UNENCYPTED;
     pRxData->rxDataEapolDestination = DEF_EAPOL_DESTINATION;
@@ -243,7 +243,7 @@ TI_STATUS rxData_SetDefaults (TI_HANDLE hRxData, rxDataInitParams_t * rxDataInit
 {
     rxData_t *pRxData = (rxData_t *)hRxData;
     int i;
-    
+
     /* init rx data filters */
     pRxData->filteringEnabled = rxDataInitParams->rxDataFiltersEnabled;
     pRxData->filteringDefaultAction = rxDataInitParams->rxDataFiltersDefaultAction;
@@ -271,7 +271,7 @@ TI_STATUS rxData_SetDefaults (TI_HANDLE hRxData, rxDataInitParams_t * rxDataInit
 
 	rxData_SetReAuthInProgress(pRxData, TI_FALSE);
 
-  #ifdef TI_DBG
+#ifdef TI_DBG
     /* reset counters */
     rxData_resetCounters(pRxData);
     rxData_resetDbgCounters(pRxData);
@@ -284,7 +284,7 @@ TI_STATUS rxData_SetDefaults (TI_HANDLE hRxData, rxDataInitParams_t * rxDataInit
         return TI_NOK;
     }
     pRxData->rxThroughputTimerEnable = TI_FALSE;
-  #endif
+#endif
 
 
     TRACE0(pRxData->hReport, REPORT_SEVERITY_INIT, ".....Rx Data configured successfully\n");
@@ -603,7 +603,8 @@ static int findFilterRequest(TI_HANDLE hRxData, TRxDataFilterRequest* request)
 ***************************************************************************/
 static void closeFieldPattern (rxData_t * pRxData, rxDataFilterFieldPattern_t * fieldPattern, TI_UINT8 * fieldPatterns, TI_UINT8 * lenFieldPatterns)
 {
-    os_memoryCopy(pRxData->hOs, fieldPatterns + *lenFieldPatterns, (TI_UINT8 *)&fieldPattern->offset, sizeof(fieldPattern->offset));
+    //fieldPatterns[*lenFieldPatterns] = fieldPattern->offset;
+	os_memoryCopy(pRxData->hOs, fieldPatterns + *lenFieldPatterns, (TI_UINT8 *)&fieldPattern->offset, sizeof(fieldPattern->offset));
     *lenFieldPatterns += sizeof(fieldPattern->offset);
 
     fieldPatterns[*lenFieldPatterns] = fieldPattern->length;
@@ -1387,6 +1388,7 @@ static TI_STATUS rxData_convertWlanToEthHeader (TI_HANDLE hRxData, void *pBuffer
     TI_UINT32            headerLength;
     TI_UINT8             createEtherIIHeader;
     rxData_t *pRxData = (rxData_t *)hRxData;
+
     dataBuf = (TI_UINT8 *)RX_BUF_DATA(pBuffer);
 
     /* Setting the mac header len according to the received FrameControl field in the Mac Header */
@@ -1752,9 +1754,8 @@ static void rxData_ReceivePacket (TI_HANDLE   hRxData,
         RxAttr.band       = ((pRxParams->flags & RX_DESC_BAND_MASK) == RX_DESC_BAND_A) ? 
                             RADIO_BAND_5_0_GHZ : RADIO_BAND_2_4_GHZ ;
         RxAttr.eScanTag   = (EScanResultTag)(pRxParams->proccess_id_tag);
-
         /* timestamp is 32 bit so do bytes copy to avoid exception in case the RxInfo is in 2 bytes offset */
-        os_memoryCopy (pRxData->hOs, 
+        os_memoryCopy (pRxData->hOs,
                        (void *)&(RxAttr.TimeStamp), 
                        (void *)&(pRxParams->timestamp), 
                        sizeof(pRxParams->timestamp) );

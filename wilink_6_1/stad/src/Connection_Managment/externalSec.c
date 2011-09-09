@@ -182,16 +182,14 @@ TI_STATUS externalSec_Destroy (struct externalSec_t *pExternalSec)
     {
         return TI_NOK;
     }
-
-    status = fsm_Unload (pExternalSec->hOs, pExternalSec->pExternalSecSm);
+    status = fsm_Unload(pExternalSec->hOs, pExternalSec->pExternalSecSm);
     if (status != TI_OK)
     {
         /* report failure but don't stop... */
         TRACE0(pExternalSec->hReport, REPORT_SEVERITY_ERROR, "EXTERNAL SECURITY: Error releasing FSM memory \n");
     }
 
-    os_memoryFree (pExternalSec->hOs, pExternalSec, sizeof(struct externalSec_t));
-
+    os_memoryFree(pExternalSec->hOs, pExternalSec, sizeof(struct externalSec_t));
     return TI_OK;
 }
 

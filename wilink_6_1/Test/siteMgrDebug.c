@@ -206,7 +206,7 @@ void siteMgrDebugFunction (TI_HANDLE         hSiteMgr,
                 handleRunProblem(PROBLEM_BUF_SIZE_VIOLATION);
                 param.content.siteMgrDesiredSupportedRateSet.len = DOT11_MAX_SUPPORTED_RATES;
             }
-            for (i = 0; i < param.content.siteMgrDesiredSupportedRateSet.len; i++)
+			for (i = 0; i < param.content.siteMgrDesiredSupportedRateSet.len; i++)
 				WLAN_OS_REPORT(("\nRate %d is 0x%X\n", i +1, param.content.siteMgrDesiredSupportedRateSet.ratesString[i]));
 		}
 		break;
@@ -249,9 +249,9 @@ void siteMgrDebugFunction (TI_HANDLE         hSiteMgr,
     case PRINT_FAILURE_EVENTS:
         {
 
-		WLAN_OS_REPORT(("\n PRINT HEALTH MONITOR LOG\n"));
-		healthMonitor_printFailureEvents (pStadHandles->hHealthMonitor);
-		apConn_printStatistics(pStadHandles->hAPConnection);
+	WLAN_OS_REPORT(("\n PRINT HEALTH MONITOR LOG\n"));
+	healthMonitor_printFailureEvents (pStadHandles->hHealthMonitor);
+	apConn_printStatistics(pStadHandles->hAPConnection);
 #ifdef REPORT_LOG		
         conn_ibssPrintStatistics(pStadHandles->hConn);
 #endif

@@ -57,11 +57,11 @@
 #include "eventMbox_api.h"
 #include "CmdBld.h"
 #include "CmdMBox_api.h"
-
 #ifdef TI_RANDOM_DEFAULT_MAC
 #include <linux/random.h>
 #include <linux/jiffies.h>
 #endif
+
 
 extern void TWD_FinalizeOnFailure   (TI_HANDLE hTWD);
 extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, FwStaticData_t *pFwInfo);
@@ -97,9 +97,9 @@ extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, Fw
 
 /* Maximal block size in a single SDIO transfer --> Firmware image load chunk size */
 #ifdef _VLCT_
-#define MAX_SDIO_BLOCK					(4000)	
+#define MAX_SDIO_BLOCK					(4000)
 #else
-#define MAX_SDIO_BLOCK					(500)	
+#define MAX_SDIO_BLOCK					(500)
 #endif
 
 #define ACX_EEPROMLESS_IND_REG        (SCR_PAD4)
@@ -131,15 +131,18 @@ extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, Fw
 
 /* time to wait till we check if fw is running */
 #define STALL_TIMEOUT   7
+
 #ifdef DOWNLOAD_TIMER_REQUIERD
 #define FIN_LOOP 10
 #endif
+
 
 #ifdef _VLCT_
 #define FIN_LOOP 10
 #else
 #define FIN_LOOP 20000
 #endif
+
 
 /************************************************************************
  * Macros
@@ -201,7 +204,7 @@ extern void cmdBld_FinalizeDownload (TI_HANDLE hCmdBld, TBootAttr *pBootAttr, Fw
              return TXN_STATUS_PENDING;                         \
         default:                                                \
             if(phwinit != NULL)                                 \
-             TWD_FinalizeOnFailure (phwinit->hTWD);             \
+                TWD_FinalizeOnFailure (phwinit->hTWD);          \
              return TXN_STATUS_ERROR;                           \
     }
 
@@ -348,8 +351,8 @@ typedef struct
      TI_UINT32               uRegStage;
     TI_UINT32               uRegLoop;
     TI_UINT32               uRegSeqStage;
-    TI_UINT32               uRegData;  
-    TI_HANDLE               hStallTimer;
+    TI_UINT32               uRegData;
+	TI_HANDLE               hStallTimer;
 
     /* Top register Read/Write SM temporary data*/
     TI_UINT32               uTopRegAddr;
@@ -358,7 +361,6 @@ typedef struct
     TI_UINT32               uTopRegUpdateValue;
     TI_UINT32               uTopStage;
     TI_STATUS               uTopStatus;
-
 
     TI_UINT8                auFwTmpBuf [WSPI_PAD_LEN_WRITE + MAX_SDIO_BLOCK];
 
@@ -451,9 +453,10 @@ TI_STATUS hwInit_Destroy (TI_HANDLE hHwInit)
     if (pHwInit->hStallTimer)
     {
 #ifdef DOWNLOAD_TIMER_REQUIERD
-        tmr_DestroyTimer (pHwInit->hStallTimer);
+		tmr_DestroyTimer (pHwInit->hStallTimer);
 #endif
-    }
+    }        
+
     /* Free HwInit Module */
     os_memoryFree (pHwInit->hOs, pHwInit, sizeof(THwInit));
 
@@ -470,12 +473,12 @@ TI_STATUS hwInit_Destroy (TI_HANDLE hHwInit)
 *               TI_NOK - Configuration unsuccessful
 ***************************************************************************/
 TI_STATUS hwInit_Init (TI_HANDLE      hHwInit,
-                         TI_HANDLE      hReport,
-			 TI_HANDLE      hTimer,
-                         TI_HANDLE      hTWD,
-                         TI_HANDLE 	hFinalizeDownload, 
-			 TFinalizeCb    fFinalizeDownload, 
-                         TEndOfHwInitCb fInitHwCb)
+                       TI_HANDLE      hReport,
+                       TI_HANDLE      hTimer,
+                       TI_HANDLE      hTWD,
+                       TI_HANDLE 	  hFinalizeDownload, 
+                       TFinalizeCb    fFinalizeDownload, 
+                       TEndOfHwInitCb fInitHwCb)
 {
     THwInit   *pHwInit = (THwInit *)hHwInit;
     TTxnStruct* pTxn;
@@ -493,7 +496,6 @@ TI_STATUS hwInit_Init (TI_HANDLE      hHwInit,
     pHwInit->hFinalizeDownload 	= hFinalizeDownload;
 
     SET_DEF_NVS(pHwInit->aDefaultNVS)
-
 #ifdef TI_RANDOM_DEFAULT_MAC
     /* Create random MAC address: offset 3, 4 and 5 */
     srandom32((u32)jiffies);
@@ -511,11 +513,11 @@ TI_STATUS hwInit_Init (TI_HANDLE      hHwInit,
     }
 
 #ifdef DOWNLOAD_TIMER_REQUIERD
-    pHwInit->hStallTimer = tmr_CreateTimer (hTimer);
-    if (pHwInit->hStallTimer == NULL)
-    {
-        return TI_NOK;
-    }
+	pHwInit->hStallTimer = tmr_CreateTimer (hTimer);
+	if (pHwInit->hStallTimer == NULL) 
+	{
+		return TI_NOK;
+	}
 #endif
 
     TRACE0(pHwInit->hReport, REPORT_SEVERITY_INIT, ".....HwInit configured successfully\n");
@@ -602,8 +604,8 @@ TI_STATUS hwInit_Boot (TI_HANDLE hHwInit)
     TWlanParams  *pWlanParams = &DB_WLAN(pTWD->hCmdBld);
     TBootAttr     tBootAttr;
 
-    tBootAttr.MacClock = pWlanParams->MacClock;
-    tBootAttr.ArmClock = pWlanParams->ArmClock;
+    tBootAttr.MacClock      = pWlanParams->MacClock;
+    tBootAttr.ArmClock      = pWlanParams->ArmClock;
     tBootAttr.FirmwareDebug = TI_FALSE;
 
     /*
@@ -719,7 +721,6 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         /* Wait 500uS */
         os_StalluSec (pHwInit->hOs, 500);
 
-
         /* Set the bus addresses partition to DRPw registers region */
         SET_DRP_PARTITION(pHwInit->aPartition)
         hwInit_SetPartition (pHwInit,pHwInit->aPartition);
@@ -741,7 +742,7 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
         /* Then, move it 4 places to the right, to alter Fref relevant bits in register 0x2c */
         clkVal = pHwInit->aHwInitTxn[pHwInit->uTxnIndex].uData;
         pHwInit->uTxnIndex = 0; /* Reset index only after getting the last read value! */
-        clkVal |= ((pGenParams->RefClk & 0x3) << 1) << 4;
+        clkVal |= (pGenParams->RefClk << 1) << 4;
         if ((pGenParams->GeneralSettings & DRPw_MASK_CHECK) > 0)
         {
             clkVal |= DRPw_MASK_SET;
@@ -1056,6 +1057,7 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
     TI_STATUS status = TI_OK;
     TTxnStruct* pTxn;
 
+
     while (TI_TRUE)
     {
         switch (pHwInit->uFinStage)
@@ -1122,7 +1124,7 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
                 pHwInit->uFinStage = 4;
 
 #ifndef DOWNLOAD_TIMER_REQUIERD
-                os_StalluSec (pHwInit->hOs, 50);
+				os_StalluSec (pHwInit->hOs, 50);
 #endif
 
                 /* Read interrupt status register */
@@ -1173,7 +1175,6 @@ static TI_STATUS hwInit_FinalizeDownloadSm (TI_HANDLE hHwInit)
                 return TXN_STATUS_PENDING;
 #endif
             }
-
 #ifndef DOWNLOAD_TIMER_REQUIERD
             continue;
 #endif
@@ -1380,7 +1381,6 @@ static TI_STATUS hwInit_EepromlessStartBurstSm (TI_HANDLE hHwInit)
 
             pHwInit->uEEPROMStage = 3;
     
-
             /* Set the bus addresses partition to its "running" mode */
             SET_WORK_PARTITION(pHwInit->aPartition)
             hwInit_SetPartition (pHwInit,pHwInit->aPartition);
@@ -1480,7 +1480,7 @@ static TI_STATUS hwInit_LoadFwImageSm (TI_HANDLE hHwInit)
 
 			TRACE2(pHwInit->hReport, REPORT_SEVERITY_INIT , "Image addr=0x%x, Len=0x%x\n", pHwInit->pFwBuf, pHwInit->uFwLength);
 
-	/* Set bus memory partition to current download area */
+			/* Set bus memory partition to current download area */
            SET_FW_LOAD_PARTITION(pHwInit->aPartition,pHwInit->uFwAddress)
            hwInit_SetPartition (pHwInit,pHwInit->aPartition);
             status = TI_OK;
@@ -2191,12 +2191,12 @@ TI_STATUS hwInit_InitTopRegisterWrite(TI_HANDLE hHwInit, TI_UINT32 uAddress, TI_
          case 1:
 
              pHwInit->uTxnIndex = 0;
-
-             if (pHwInit->uTopStatus == TXN_STATUS_PENDING)
+             
+             if (pHwInit->uTopStatus == TXN_STATUS_PENDING) 
              {
                  hwInit_BootSm (hHwInit);
              }
-
+             
              return TI_OK;
 
          } /* End switch */
@@ -2246,10 +2246,10 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
         Write 0x2 to the OCP_CMD register.
         Poll bit [18] of OCP_DATA_RD for data valid indication
         Check bits 17:16 of OCP_DATA_RD:
-        00 - no response
-        01 - data valid / accept
-        10 - request failed
-        11 - response error
+        00 – no response
+        01 – data valid / accept
+        10 – request failed
+        11 – response error
         Read the data from the OCP_DATA_RD register
      */
 
@@ -2299,7 +2299,6 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
                if ((pHwInit->uTopRegValue & BIT_16) && (!(pHwInit->uTopRegValue & BIT_17)))
                {
                    pHwInit->uTopRegValue &= 0xffff;
-
                    pHwInit->uTxnIndex = 0;
                    pHwInit->uRegLoop = 0;
                    if (pHwInit->uTopStatus == TXN_STATUS_PENDING) 
@@ -2344,21 +2343,20 @@ TI_STATUS hwInit_InitTopRegisterRead(TI_HANDLE hHwInit, TI_UINT32 uAddress)
 
  }
 
+
 /****************************************************************************
 *                      hwInit_StallTimerCb ()
 ****************************************************************************
 * DESCRIPTION: CB timer function in fTimerFunction format that calls hwInit_StallTimerCb
-* INPUTS:  TI_HANDLE hHwInit
-*
+* INPUTS:  TI_HANDLE hHwInit    
+* 
 * OUTPUT:  None
-*
+* 
 * RETURNS: None
 ****************************************************************************/
 #ifdef DOWNLOAD_TIMER_REQUIERD
  static void hwInit_StallTimerCb (TI_HANDLE hHwInit, TI_BOOL bTwdInitOccured)
 {
-        hwInit_FinalizeDownloadSm(hHwInit);
+	hwInit_FinalizeDownloadSm (hHwInit);
 }
 #endif
-
-

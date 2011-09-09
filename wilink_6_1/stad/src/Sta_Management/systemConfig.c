@@ -133,7 +133,8 @@ typedef enum
 
 #define MAX_GB_MODE_CHANEL		14
 
-#define MAX_RSN_DATA_SIZE       512
+#define MAX_RSN_DATA_SIZE       256
+
 /* RSSI values boundaries and metric values for best, good, etc  signals */
 #define SELECT_RSSI_BEST_LEVEL      (-22)
 #define SELECT_RSSI_GOOD_LEVEL      (-38)
@@ -222,8 +223,8 @@ siteEntry_t *addSelfSite(TI_HANDLE hSiteMgr)
 	pSite->barkerPreambleType = PREAMBLE_UNSPECIFIED;
 
    	pSiteMgr->pSitesMgmtParams->pPrimarySite = pSite;
-        pSite->siteType = SITE_SELF;
-        pSite->bssType = BSS_INDEPENDENT;
+	pSite->siteType = SITE_SELF;
+    pSite->bssType = BSS_INDEPENDENT;
 
 	return pSite;
 }
@@ -298,7 +299,7 @@ static TI_STATUS sendProbeResponse(siteMgr_t *pSiteMgr, TMacAddr *pBssid)
 	/* Build ssid */
 	os_memoryZero(pSiteMgr->hOs, (void *)ssid.serviceSetId, MAX_SSID_LEN);
 
-    ssid.hdr[1] = pSiteMgr->pDesiredParams->siteMgrDesiredSSID.len;
+    ssid.hdr[1] = pSiteMgr->pDesiredParams->siteMgrDesiredSSID.len;   
     if (ssid.hdr[1] > MAX_SSID_LEN)
     {
         TRACE2(pSiteMgr->hReport, REPORT_SEVERITY_ERROR,
@@ -307,7 +308,7 @@ static TI_STATUS sendProbeResponse(siteMgr_t *pSiteMgr, TMacAddr *pBssid)
         ssid.hdr[1] = MAX_SSID_LEN;
     }
     os_memoryCopy(pSiteMgr->hOs, (void *)ssid.serviceSetId, (void *)pSiteMgr->pDesiredParams->siteMgrDesiredSSID.str, ssid.hdr[1]);
-
+	
 	if(pSiteMgr->pDesiredParams->siteMgrDesiredChannel <= MAX_GB_MODE_CHANEL)
 		siteMgr_updateRates(pSiteMgr, TI_FALSE, TI_TRUE);
 	else
@@ -424,12 +425,9 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
 	dot11_ACParameters_t *p_ACParametersDummy = NULL;
     TtxCtrlHtControl tHtControl;
 
-    TI_UINT8 eCipherSuite = 0;
-
     curRsnData = os_memoryAlloc(pSiteMgr->hOs, MAX_RSN_DATA_SIZE);
     if (!curRsnData)
         return TI_NOK;
-
     pParam = (paramInfo_t *)os_memoryAlloc(pSiteMgr->hOs, sizeof(paramInfo_t));
     if (!pParam) {
         os_memoryFree(pSiteMgr->hOs, curRsnData, MAX_RSN_DATA_SIZE);
@@ -590,7 +588,7 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
 	 qosMngr_setParams(pSiteMgr->hQosMngr, pParam);
 	 
      /* Set active protocol in qosMngr according to station desired mode and site capabilities 
-     Must be called BEFORE setting the "CURRENT_PS_MODE" into the QosMngr */
+	    Must be called BEFORE setting the "CURRENT_PS_MODE" into the QosMngr */
      qosMngr_selectActiveProtocol(pSiteMgr->hQosMngr);
 
 	 /* set PS capability parameter */
@@ -614,29 +612,18 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
      /* verify that WME flag enable */
      qosMngr_GetWmeEnableFlag (pSiteMgr->hQosMngr, &bWmeEnable); 
 
-     /* Privacy - Used later on HT */
-     pParam->paramType = RSN_ENCRYPTION_STATUS_PARAM;
-     status = rsn_getParam(pSiteMgr->hRsn, pParam);
-
-     if (status == TI_OK)
-     {
-         eCipherSuite = pParam->content.rsnEncryptionStatus;
-     }  
-
      if ((b11nEnable != TI_FALSE) &&
          (bWmeEnable != TI_FALSE) &&
          (pPrimarySite->tHtCapabilities.tHdr[0] != TI_FALSE) && 
          (pPrimarySite->tHtInformation.tHdr[0] != TI_FALSE))
      {
-       if ((eCipherSuite != TWD_CIPHER_TKIP) && (eCipherSuite != TWD_CIPHER_WEP) && (eCipherSuite != TWD_CIPHER_WEP104))
-       {
          TWD_CfgSetFwHtCapabilities (pSiteMgr->hTWD, &pPrimarySite->tHtCapabilities, TI_TRUE);
          TWD_CfgSetFwHtInformation (pSiteMgr->hTWD, &pPrimarySite->tHtInformation);
 
          /* the FW not supported in HT control field in TX */
-         tHtControl.bHtEnable = TI_FALSE;
+
+        tHtControl.bHtEnable = TI_FALSE;
          txCtrlParams_SetHtControl (pSiteMgr->hTxCtrl, &tHtControl);
-       }
      }
      else
      {
@@ -703,10 +690,8 @@ TI_STATUS systemConfig(siteMgr_t *pSiteMgr)
     /* Updating the Measurement Module Mode */
     measurementMgr_setMeasurementMode(pSiteMgr->hMeasurementMgr, capabilities, 
 									pIeBuffer, PktLength);
-
     os_memoryFree(pSiteMgr->hOs, curRsnData, MAX_RSN_DATA_SIZE);
     os_memoryFree(pSiteMgr->hOs, pParam, sizeof(paramInfo_t));
-    
 	return TI_OK;
 }
 

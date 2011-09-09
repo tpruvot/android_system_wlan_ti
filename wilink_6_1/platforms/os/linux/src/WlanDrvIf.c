@@ -55,13 +55,13 @@
 #include <linux/etherdevice.h>
 #include <linux/delay.h>
 #include <linux/netlink.h>
+#include <linux/version.h>
+
 
 #include "WlanDrvIf.h"
 #include "osApi.h"
 #include "host_platform.h"
 #include "context.h"
-#include "CmdDispatcher.h"
-#include "siteMgrApi.h"
 #include "CmdHndlr.h"
 #include "WlanDrvWext.h"
 #include "DrvMain.h"
@@ -69,13 +69,11 @@
 #include "txMgmtQueue_Api.h"
 #include "TWDriver.h"
 #include "Ethernet.h"
-#include "SdioDrv.h"
-
 #ifdef TI_DBG
 #include "tracebuf_api.h"
 #endif
-
 #include "bmtrace_api.h"
+#include "SdioDrv.h"
 #ifdef STACK_PROFILE
 #include "stack_profile.h"
 #endif
@@ -85,14 +83,9 @@ static TWlanDrvIfObj *pDrvStaticHandle;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT			(0xFFFFFFFF)	/* assume OS never reach that limit */
 
-
+MODULE_AUTHOR("Texas Instruments Inc - built by CyanogenDefy");
 MODULE_DESCRIPTION("TI WLAN Embedded Station Driver");
-MODULE_LICENSE("Dual BSD/GPL");
-
-static void wlanDrvIf_early_suspend(struct early_suspend *h);
-static void wlanDrvIf_late_resume(struct early_suspend *h);
-static void wlanDrvIf_suspend_resume_hlpr(TWlanDrvIfObj *drv, int value);
-int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv);
+MODULE_LICENSE("GPL");
 
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
 static int wlanDrvIf_Xmit(struct sk_buff *skb, struct net_device *dev);
@@ -306,7 +299,7 @@ irqreturn_t wlanDrvIf_HandleInterrupt (int irq, void *hDrv, struct pt_regs *cpu_
  * \return void
  * \sa     
  */ 
-#ifdef PERIODIC_INTERRUPT
+#ifdef PRIODIC_INTERRUPT
 static void wlanDrvIf_PollIrqHandler (TI_HANDLE parm)
 {
    TWlanDrvIfObj *drv = (TWlanDrvIfObj *)parm;
@@ -509,11 +502,13 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         pFileInfo->uLength = drv->tCommon.tNvsImage.uSize; 
         break;
 	case FILE_TYPE_FW:
-        if (drv->tCommon.tFwImage.pImage == NULL)
-        {	
-            ti_dprintf(TIWLAN_LOG_ERROR, "wlanDrv_GetFile: ERROR: no Firmware image, Exiting");
-            return TI_NOK;
-        }
+
+                if (drv->tCommon.tFwImage.pImage == NULL)
+                {
+                    ti_dprintf(TIWLAN_LOG_ERROR, "wlanDrv_GetFile: ERROR: no Firmware image, exiting\n");
+                    return TI_NOK;
+                }
+
 		pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tFwImage.pImage; 
 		pFileInfo->bLast		= TI_FALSE;
 		pFileInfo->uLength	= 0;
@@ -635,6 +630,7 @@ void wlanDrvIf_SetMacAddress (TI_HANDLE hOs, TI_UINT8 *pMacAddr)
  */ 
 int wlanDrvIf_Start (struct net_device *dev)
 {
+    int status = 0;
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Start()\n");
@@ -647,7 +643,6 @@ int wlanDrvIf_Start (struct net_device *dev)
 
     if (DRV_STATE_FAILED == drv->tCommon.eDriverState)
     {
-		ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Start() Driver failed!\n");
         return -ENODEV;
     }
     
@@ -656,12 +651,14 @@ int wlanDrvIf_Start (struct net_device *dev)
      *      and wait for action completion (all init process).
      */
     os_wake_lock_timeout_enable(drv);
-    if (TI_OK != drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_START)) 
-    {
-        return -ENODEV;
-    }
+    status = drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_START);
 
-    return 0;
+    if (status){
+        return -1;
+    }
+    else {
+        return 0;
+    }
 }
 
 int wlanDrvIf_Open (struct net_device *dev)
@@ -681,12 +678,6 @@ int wlanDrvIf_Open (struct net_device *dev)
     if (drv->tCommon.eDriverState == DRV_STATE_STOPPED ||
         drv->tCommon.eDriverState == DRV_STATE_IDLE) {
         status = wlanDrvIf_Start(dev);
-    }
-    drv->allow_suspend = 1;
-
-    if (drv->skipped_suspend){
-       wlanDrvIf_suspend_resume_hlpr(drv, 1);  
-       drv->skipped_suspend = 0;
     }
 
     /*
@@ -733,10 +724,7 @@ int wlanDrvIf_Stop (struct net_device *dev)
      *      and wait for Stop process completion.
      */
     os_wake_lock_timeout_enable(drv);
-    if (TI_OK != drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_STOP)) 
-    {
-        return -ENODEV;
-    }
+    drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_STOP);
 
     return 0;
 }
@@ -783,11 +771,11 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
    strcpy (dev->name, TIWLAN_DRV_IF_NAME);
    netif_carrier_off (dev);
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
-   /* the following is required on at least BSP 23.8 and higher.
+/* the following is required on at least BSP 23.8 and higher.
     Without it, the Open function of the driver will not be called
     when trying to 'ifconfig up' the interface */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-   dev->validate_addr = NULL;
+   dev->validate_addr	= NULL;
 #endif
    dev->open = wlanDrvIf_Open;
    dev->stop = wlanDrvIf_Release;
@@ -876,17 +864,17 @@ static int wlanDrvIf_Create (void)
 
     drv->tCommon.eDriverState = DRV_STATE_IDLE;
 
-	drv->tiwlan_wq = create_freezeable_workqueue(DRIVERWQ_NAME);
-    if (!drv->tiwlan_wq) {
-		ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
-        rc = -EINVAL;
+       drv->tiwlan_wq = create_freezeable_workqueue(DRIVERWQ_NAME);
+       if (!drv->tiwlan_wq) {
+               ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
+		rc = -EINVAL;
 		goto drv_create_end_1;
-   }
-   drv->wl_packet = 0;
-   drv->wl_count = 0;
+       }
+       drv->wl_packet = 0;
+       drv->wl_count = 0;
 #ifdef CONFIG_HAS_WAKELOCK
-   wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
-   wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
+       wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
+       wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
@@ -939,7 +927,7 @@ static int wlanDrvIf_Create (void)
     /* 
      *  Initialize interrupts (or polling mode for debug):
      */
-#ifdef PERIODIC_INTERRUPT
+#ifdef PRIODIC_INTERRUPT
     /* Debug mode: Polling (the timer is started by HwInit process) */
     drv->hPollTimer = os_timerCreate ((TI_HANDLE)drv, wlanDrvIf_PollIrqHandler, (TI_HANDLE)drv);
 #else 
@@ -950,17 +938,7 @@ static int wlanDrvIf_Create (void)
         ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to register interrupt handler!\n");
         goto drv_create_end_5;
     }
-#endif  /* PERIODIC_INTERRUPT */
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-       init_MUTEX(&drv->sem);
-       drv->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 20;
-       drv->early_suspend.suspend = wlanDrvIf_early_suspend;
-       drv->early_suspend.resume = wlanDrvIf_late_resume;
-       drv->allow_suspend = 0;
-       drv->skipped_suspend = 0;
-       register_early_suspend(&drv->early_suspend);
-#endif 
+#endif  /* PRIODIC_INTERRUPT */
 
    return 0;
 drv_create_end_5:
@@ -1014,17 +992,6 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
 {
     if (!drv)
         return;
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-    if(drv->early_suspend.suspend)
-    {
-       unregister_early_suspend(&drv->early_suspend);
-    }
-#endif /* defined(CONFIG_HAS_EARLYSUSPEND) */
-
-	if (drv->tiwlan_wq) {
-		cancel_work_sync(&drv->tWork);
-		flush_workqueue(drv->tiwlan_wq);
-	}
 
     /* Release the driver network interface */
     if (drv->netdev)
@@ -1048,17 +1015,20 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
     }
 
     /* Release the driver interrupt (or polling timer) */
-#ifdef PERIODIC_INTERRUPT
+#ifdef PRIODIC_INTERRUPT
     os_timerDestroy (drv, drv->hPollTimer);
 #else
-    hPlatform_freeInterrupt (drv);
+    if (drv->irq)
+    {
+        hPlatform_freeInterrupt (drv);
+    }
 #endif
-   if (drv->tiwlan_wq)
-       destroy_workqueue(drv->tiwlan_wq);
+       if (drv->tiwlan_wq)
+               destroy_workqueue(drv->tiwlan_wq);
 
 #ifdef CONFIG_HAS_WAKELOCK
-   wake_lock_destroy(&drv->wl_wifi);
-   wake_lock_destroy(&drv->wl_rxwake);
+       wake_lock_destroy(&drv->wl_wifi);
+       wake_lock_destroy(&drv->wl_rxwake);
 #endif
 
 
@@ -1109,17 +1079,25 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
  * \return Init: 0 - OK, else - failure.   Exit: void
  * \sa     wlanDrvIf_Create, wlanDrvIf_Destroy
  */
+
+static int sdc_ctrl = 2;
+module_param(sdc_ctrl, int, S_IRUGO | S_IWUSR | S_IWGRP);
+
 static int __init wlanDrvIf_ModuleInit (void)
 {
     printk(KERN_INFO "TIWLAN: driver init\n");
-    sdioDrv_init();
+#ifndef CONFIG_MMC_EMBEDDED_SDIO
+    sdioDrv_init(sdc_ctrl);
+#endif
     return wlanDrvIf_Create ();
 }
 
 static void __exit wlanDrvIf_ModuleExit (void)
 {
     wlanDrvIf_Destroy (pDrvStaticHandle);
+#ifndef CONFIG_MMC_EMBEDDED_SDIO
     sdioDrv_exit();
+#endif
     printk (KERN_INFO "TI WLAN: driver unloaded\n");
 }
 
@@ -1159,88 +1137,6 @@ void wlanDrvIf_ResumeTx (TI_HANDLE hOs)
 
     netif_wake_queue (drv->netdev);
 }
-
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-
-int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
-{
-   paramInfo_t param_dtim_set;
-   TI_UINT8 beaconInterval,dtimListenInterval;
-
-   param_dtim_set.paramType = POWER_MGR_DTIM_LISTEN_INTERVAL;
-   param_dtim_set.paramLength = sizeof(TI_UINT8);
-
-   if(drv)
-   {
-      /* Kernel Suspended */
-      if(drv->in_suspend && value)
-      {
-	 dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
-	 beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
-
-	 if (dtimListenInterval==1 && beaconInterval==100)
-	 {
-	    /* Skip 3 DTIM */
-	    param_dtim_set.content.dtimListenInterval = 3;
-	    cmdDispatch_SetParam(drv->tCommon.hCmdDispatch, &param_dtim_set);
-	    //printk("Suspend : DTIM skipping feature : Set DTIM to 3 \n");
-	    drv->in_dtim_skipping = 1;
-	 }else{
-	    /* No Skip */
-	    drv->in_dtim_skipping = 0;
-	 }
-      }
-      else /* Kernel Resume */ 
-      {
-	 if(drv->in_dtim_skipping)
-         {
-             /* Don't skip DTIM's */ 
-             param_dtim_set.content.dtimListenInterval = 1;
-             cmdDispatch_SetParam(drv->tCommon.hCmdDispatch, &param_dtim_set);
-	     //printk("Resume : DTIM skipping feature : Set DTIM back to 1 \n");
-	     drv->in_dtim_skipping = 0;
-	 }
-      }
-   }
-}
-
-static void wlanDrvIf_suspend_resume_hlpr(TWlanDrvIfObj *drv, int value)
-{
-
-   drv->in_suspend = value;
-   down(&drv->sem);
-   wlanDrvIf_set_suspend_resume(value, drv);
-   up(&drv->sem);
-
-}
-
-static void wlanDrvIf_early_suspend(struct early_suspend *h)
-{
-   TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
-
-   if(drv)
-   {
-	if(drv->allow_suspend){
-		wlanDrvIf_suspend_resume_hlpr(drv, 1);
-	}else{
-		drv->skipped_suspend = 1;
-	}
-   }
-}
-
-static void wlanDrvIf_late_resume(struct early_suspend *h)
-{
-   TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
-
-   if(drv)
-   {
-	drv->skipped_suspend = 0;
-	wlanDrvIf_suspend_resume_hlpr(drv, 0);
-   }
-}
-
-#endif
-
 
 module_init (wlanDrvIf_ModuleInit);
 module_exit (wlanDrvIf_ModuleExit);

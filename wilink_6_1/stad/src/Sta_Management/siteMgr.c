@@ -711,7 +711,7 @@ TI_STATUS siteMgr_setParam(TI_HANDLE        hSiteMgr,
 
     case SITE_MGR_SIMPLE_CONFIG_MODE: /* Setting the WiFiSimpleConfig mode */
 		
-		/* Modify the current mode and IE size */
+        /* Modify the current mode and IE size */
 		pSiteMgr->siteMgrWSCCurrMode = pParam->content.siteMgrWSCMode.WSCMode;
 		pSiteMgr->uWscIeSize = pParam->content.siteMgrWSCMode.uWscIeSize;
 
@@ -726,7 +726,7 @@ TI_STATUS siteMgr_setParam(TI_HANDLE        hSiteMgr,
            	param.content.rsnWPAPromoteFlags = ADMCTRL_WPA_OPTION_ENABLE_PROMOTE_AUTH_MODE;
            	rsn_setParam(pSiteMgr->hRsn, &param);
 
-            /*change Power manager priotiy to support Active WPS*/
+			/*change Power manager priotiy to support Active WPS*/
             param.paramType = POWER_MGR_ENABLE_PRIORITY;
             param.content.powerMngPriority = POWER_MANAGER_WPS_PRIORITY;
             powerMgr_setParam(pSiteMgr->hPowerMgr,&param);
@@ -1039,7 +1039,7 @@ TI_STATUS siteMgr_getParam(TI_HANDLE        hSiteMgr,
 
     switch(pParam->paramType)
     {
-   
+
     case SITE_MGR_CONFIGURATION_PARAM:
         pParam->content.pSiteMgrConfiguration->Length = sizeof(OS_802_11_CONFIGURATION);
         pParam->content.pSiteMgrConfiguration->ATIMWindow = pSiteMgr->pDesiredParams->siteMgrDesiredAtimWindow;
@@ -1305,10 +1305,10 @@ TI_STATUS siteMgr_getParam(TI_HANDLE        hSiteMgr,
         break;
 
     case SITE_MGR_CURRENT_RX_RATE_PARAM:
-        {   
+        {
             pParam->paramType = RX_DATA_RATE_PARAM;
             rxData_getParam (pSiteMgr->hRxData, pParam);
-            pParam->content.siteMgrCurrentRxRate = 
+            pParam->content.siteMgrCurrentRxRate =
                 (TI_UINT8)rate_DrvToNet ((ERate)pParam->content.siteMgrCurrentRxRate);
         }
         break;
@@ -1469,7 +1469,7 @@ TI_STATUS siteMgr_getParam(TI_HANDLE        hSiteMgr,
 
     case SITE_MGRT_GET_RATE_MANAGMENT:
          return cmdBld_ItrRateParams (pSiteMgr->hTWD,
-                                      pParam->content.interogateCmdCBParams.fCb, 
+                                      pParam->content.interogateCmdCBParams.fCb,
                                       pParam->content.interogateCmdCBParams.hCb,
                                       (void*)pParam->content.interogateCmdCBParams.pCb);
 
@@ -2672,7 +2672,7 @@ static void updateRates(siteMgr_t *pSiteMgr, siteEntry_t *pSite, mlmeFrameInfo_t
         return;
     }
 
-    /* Update the rate elements */
+	    /* Update the rate elements */
     maxBasicRate = (TI_UINT8)rate_GetMaxBasicFromStr ((TI_UINT8 *)pFrameInfo->content.iePacket.pRates->rates,pFrameInfo->content.iePacket.pRates->hdr[1], (ENetRate)maxBasicRate);
     maxActiveRate = (TI_UINT8)rate_GetMaxActiveFromStr ((TI_UINT8 *)pFrameInfo->content.iePacket.pRates->rates,pFrameInfo->content.iePacket.pRates->hdr[1], (ENetRate)maxActiveRate);
 
@@ -3131,14 +3131,14 @@ RETURN:
 ************************************************************************/
 static ERate translateRateMaskToValue(siteMgr_t *pSiteMgr, TI_UINT32 rateMask)
 {
-    if (rateMask & DRV_RATE_MASK_MCS_7_OFDM)
+	if (rateMask & DRV_RATE_MASK_MCS_7_OFDM)
         return DRV_RATE_MCS_7;
     if (rateMask & DRV_RATE_MASK_MCS_6_OFDM)
         return DRV_RATE_MCS_6;
     if (rateMask & DRV_RATE_MASK_MCS_5_OFDM)
-        return DRV_RATE_MCS_5;    
-    if (rateMask & DRV_RATE_MASK_MCS_4_OFDM) 
-        return DRV_RATE_MCS_4; 
+        return DRV_RATE_MCS_5;
+    if (rateMask & DRV_RATE_MASK_MCS_4_OFDM)
+        return DRV_RATE_MCS_4;
     if (rateMask & DRV_RATE_MASK_MCS_3_OFDM)
         return DRV_RATE_MCS_3;
     if (rateMask & DRV_RATE_MASK_MCS_2_OFDM)
@@ -3706,15 +3706,17 @@ void siteMgr_ConfigRate(TI_HANDLE hSiteMgr)
 
     /* use HT MCS rates */
     if (pSiteMgr->pDesiredParams->siteMgrDesiredBSSType == BSS_INFRASTRUCTURE)
-    {
-        OperationMode = DOT11_N_MODE;
-    }
+	{
+		OperationMode = DOT11_N_MODE;
+	}
+	
+    
 
     pSiteMgr->pDesiredParams->siteMgrRegstryBasicRateMask =
         rate_BasicToDrvBitmap ((EBasicRateSet)(pSiteMgr->pDesiredParams->siteMgrRegstryBasicRate[OperationMode]), dot11a);
 
     pSiteMgr->pDesiredParams->siteMgrRegstrySuppRateMask =
-    rate_SupportedToDrvBitmap ((ESupportedRateSet)(pSiteMgr->pDesiredParams->siteMgrRegstrySuppRate[OperationMode]), dot11a);
+        rate_SupportedToDrvBitmap ((ESupportedRateSet)(pSiteMgr->pDesiredParams->siteMgrRegstrySuppRate[OperationMode]), dot11a);
 
     siteMgr_updateRates(pSiteMgr, dot11a, TI_TRUE);
 
@@ -3920,7 +3922,6 @@ TI_STATUS siteMgr_CopyToPrimarySite (TI_HANDLE hSiteMgr, TSiteEntry *pCandidate)
     os_memoryCopy(pSiteMgr->hOs, (void *)&newAP.lastRxTSF, (void *)pCandidate->tsfTimeStamp , TIME_STAMP_LEN);
     newAP.beaconInterval = pCandidate->beaconInterval;
     newAP.capabilities = pCandidate->capabilities;
-    newAP.bssType = pCandidate->bssType;
     newAP.pBuffer = NULL;
     /* get frame type */
     if (TI_TRUE == pCandidate->probeRecv)
@@ -4053,7 +4054,7 @@ TI_STATUS siteMgr_overwritePrimarySite(TI_HANDLE hSiteMgr, bssEntry_t *newAP, TI
 
         /* Update parameters of new AP */
         newApEntry->rssi            = newAP->RSSI;
-        newApEntry->bssType         = newAP->bssType;
+        newApEntry->bssType         = BSS_INFRASTRUCTURE;
         newApEntry->dtimPeriod      = 1;
         newApEntry->rxRate          = (ERate)newAP->rxRate;
         /* Mark the site as regular in order to prevent from calling Power manager during beacon parsing */
@@ -4093,7 +4094,6 @@ TI_STATUS siteMgr_overwritePrimarySite(TI_HANDLE hSiteMgr, bssEntry_t *newAP, TI
         /* Select the entry as primary site */
         newApEntry->siteType = SITE_PRIMARY;
         pSiteMgr->pSitesMgmtParams->pPrimarySite = newApEntry;
-
         return TI_OK;
     }
     else
@@ -4244,7 +4244,7 @@ static void siteMgr_TxPowerAdaptation(TI_HANDLE hSiteMgr, RssiEventDir_e highLow
             /* enable the "Temporary TX power" when close to AP */
             siteMgr_setTemporaryTxPower (pSiteMgr, TI_TRUE) ;  
         }
-        else 
+        else
         {
             /* disable the "Temporary TX power" when we are again far from the AP */
             siteMgr_setTemporaryTxPower (pSiteMgr, TI_FALSE);  

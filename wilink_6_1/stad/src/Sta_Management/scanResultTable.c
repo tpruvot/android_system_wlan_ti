@@ -316,7 +316,7 @@ TI_STATUS scanResultTable_UpdateEntry (TI_HANDLE hScanResultTable, TMacAddr *pBs
                   tTempSsid.len);
     if (MAX_SSID_LEN > tTempSsid.len)
         tTempSsid.str[ tTempSsid.len ] ='\0';
-    
+
     /* check if the SSID:BSSID pair already exists in the table */
     pSite = scanResultTable_GetBySsidBssidPair (hScanResultTable, &tTempSsid ,pBssid);
     if (NULL != pSite)
@@ -326,7 +326,7 @@ TI_STATUS scanResultTable_UpdateEntry (TI_HANDLE hScanResultTable, TMacAddr *pBs
             TRACE0(pScanResultTable->hReport, REPORT_SEVERITY_INFORMATION , "scanResultTable_UpdateEntry: entry already exists, updating\n");
             /* BSSID exists: update its data */
             scanResultTable_UpdateSiteData (hScanResultTable, pSite, pFrame);
-         }
+        }
     }
     else
     {
@@ -684,7 +684,7 @@ void scanResultTable_UpdateSiteData (TI_HANDLE hScanResultTable, TSiteEntry *pSi
     UPDATE_BEACON_TIMESTAMP (pScanResultTable, pSite, pFrame);
     scanResultTable_UpdateWSCParams (pSite, pFrame);
     siteMgr_UpdatHtParams (pScanResultTable->hSiteMgr, pSite, pFrame->parsedIEs);
-    
+
     if (BEACON == pFrame->parsedIEs->subType)
     {
         /* DTIM is only available in beacons */
@@ -1196,7 +1196,7 @@ TI_STATUS scanResultTable_GetBssidList (TI_HANDLE hScanResultTable,
 			/* Copy the unknown IEs */
 			if ( 0 < pSiteEntry->unknownIeLen  ) {
 					os_memoryCopy (pScanResultTable->hOS, (void *)(&pBssid->IEs[ pBssid->IELength ]),
-								   (void *)pSiteEntry->pUnknownIe, 
+								   (void *)pSiteEntry->pUnknownIe,
 								   pSiteEntry->unknownIeLen );
 					pBssid->IELength += pSiteEntry->unknownIeLen;
 			}

@@ -1,34 +1,16 @@
 /*
  * SdioDrv.c
  *
- * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.
- * All rights reserved.
+ * Copyright (C) 2009 Texas Instruments, Inc. - http://www.ti.com/
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as 
+ * published by the Free Software Foundation version 2.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *  * Neither the name Texas Instruments nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * This program is distributed "as is" WITHOUT ANY WARRANTY of any
+ * kind, whether express or implied; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 
 #include <linux/kernel.h>
@@ -41,6 +23,7 @@
 #include <linux/types.h>
 #include <linux/dma-mapping.h>
 #include <linux/platform_device.h>
+#include <linux/i2c/twl4030.h>
 #include <linux/errno.h>
 #include <linux/clk.h>
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
@@ -60,19 +43,27 @@
 #include <mach/resource.h>
 #endif
 typedef void *	TI_HANDLE;
+#include <linux/of.h>
 #include "host_platform.h"
 #include "SdioDrvDbg.h"
 #include "SdioDrv.h"
 
 /* #define TI_SDIO_DEBUG */
 
+#ifndef CONFIG_MMC_EMBEDDED_SDIO
+
+#define SDIOWQ_NAME			"sdio_wq"
+
 /*
  * HSMMC Address and DMA Settings
  */
+static unsigned long TIWLAN_MMC_CONTROLLER = 2; /* MMC3 */
 static unsigned long TIWLAN_MMC_CONTROLLER_BASE_ADDR = OMAP_HSMMC3_BASE;
+#define TIWLAN_MMC_CONTROLLER_BASE_SIZE	512
 
 static unsigned long TIWLAN_MMC_DMA_TX = OMAP34XX_DMA_MMC3_TX;
 static unsigned long TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
+static unsigned long OMAP_MMC_IRQ = INT_MMC3_IRQ;
 
 #define OMAP_MMC_MASTER_CLOCK          96000000
 /*
@@ -187,11 +178,6 @@ static unsigned long TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 	OMAP_HSMMC_WRITE(CMD, cmd); \
 } while (0)
 
-#define SDIO_SEND_COMMAND(cmdreg, cmdarg)   do \
-{ \
-    OMAP_HSMMC_WRITE(STAT, OMAP_HSMMC_STAT_CLEAR); \
-    OMAP_HSMMC_SEND_COMMAND((cmdreg), (cmdarg)); \
-}  while (0)
 #define OMAP_HSMMC_CMD52_WRITE     ((SD_IO_RW_DIRECT    << 24) | (OMAP_HSMMC_CMD_SHORT_RESPONSE << 16))
 #define OMAP_HSMMC_CMD52_READ      (((SD_IO_RW_DIRECT   << 24) | (OMAP_HSMMC_CMD_SHORT_RESPONSE << 16)) | DDIR)
 #define OMAP_HSMMC_CMD53_WRITE     (((SD_IO_RW_EXTENDED << 24) | (OMAP_HSMMC_CMD_SHORT_RESPONSE << 16)) | DP_SELECT)
@@ -205,7 +191,7 @@ static unsigned long TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 #define SDIO_CMD53_READ(v1,v2,v3,v4,v5,v6)  (SDIO_RWFLAG(v1)|SDIO_FUNCN(v2)|SDIO_BLKM(v3)| SDIO_OPCODE(v4)|SDIO_ADDRREG(v5)|(v6&0x1ff))
 #define SDIO_CMD53_WRITE(v1,v2,v3,v4,v5,v6) (SDIO_RWFLAG(v1)|SDIO_FUNCN(v2)|SDIO_BLKM(v3)| SDIO_OPCODE(v4)|SDIO_ADDRREG(v5)|(v6&0x1ff))
 
-#define SDIODRV_MAX_LOOPS 50000
+#define SDIODRV_MAX_LOOPS	50000
 
 #define VMMC2_DEV_GRP		0x2B
 #define VMMC2_DEDICATED		0x2E
@@ -217,7 +203,6 @@ static unsigned long TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 #define VSIM_DEV_GRP		0x37
 #define VSIM_DEDICATED		0x3A
 #define TWL4030_MODULE_PM_RECIEVER	0x13
-
 
 typedef struct OMAP3430_sdiodrv
 {
@@ -239,10 +224,8 @@ typedef struct OMAP3430_sdiodrv
 	size_t dma_read_size;
 	dma_addr_t dma_write_addr;
 	size_t dma_write_size;
-	struct workqueue_struct *pWorkQueue;
+	struct workqueue_struct *sdio_wq; /* Work Queue */
 	struct work_struct sdiodrv_work;
-	struct timer_list inact_timer;
-	int    inact_timer_running;
 } OMAP3430_sdiodrv_t;
 
 struct omap_hsmmc_regs {
@@ -265,26 +248,24 @@ static struct platform_device dummy_pdev = {
 #endif
 
 #define SDIO_DRIVER_NAME 			"TIWLAN_SDIO"
-#define SDIO_WQ_NAME                "sdio_wq"
 
 module_param(g_sdio_debug_level, int, 0644);
 MODULE_PARM_DESC(g_sdio_debug_level, "debug level");
 int g_sdio_debug_level = SDIO_DEBUGLEVEL_ERR;
-EXPORT_SYMBOL(g_sdio_debug_level);
+EXPORT_SYMBOL( g_sdio_debug_level);
 
 OMAP3430_sdiodrv_t g_drv;
 
+static int sdiodrv_dma_on = 0;
 static int sdiodrv_irq_requested = 0;
 static int sdiodrv_iclk_got = 0;
 static int sdiodrv_fclk_got = 0;
 
+int sdioDrv_clk_enable(void);
+void sdioDrv_clk_disable(void);
 static void sdioDrv_hsmmc_save_ctx(void);
 static void sdioDrv_hsmmc_restore_ctx(void);
 
-static void sdiodrv_dma_shutdown(void);
-static void sdioDrv_inact_timer(unsigned long);
-
-#if 0
 void sdio_init( int sdcnum )
 {
        struct device_node *node;
@@ -315,7 +296,6 @@ void sdio_init( int sdcnum )
 		OMAP_MMC_IRQ = INT_MMC3_IRQ;
 	}
 }
-#endif
 
 static void sdioDrv_hsmmc_save_ctx(void)
 {
@@ -342,26 +322,6 @@ static void sdioDrv_hsmmc_restore_ctx(void)
         OMAP_HSMMC_WRITE(IE, hsmmc_ctx.ie);
         OMAP_HSMMC_WRITE(SYSCTL, hsmmc_ctx.sysctl);
         OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | SDBP);
-}
-
-static void sdioDrv_inact_timer(unsigned long data)
-{
-	sdioDrv_clk_disable();
-	g_drv.inact_timer_running = 0;
-}
-
-void sdioDrv_start_inact_timer(void)
-{
-	mod_timer(&g_drv.inact_timer, jiffies + msecs_to_jiffies(1000));
-	g_drv.inact_timer_running = 1;
-}
-
-void sdioDrv_cancel_inact_timer(void)
-{
-	if(g_drv.inact_timer_running) {
-		del_timer_sync(&g_drv.inact_timer);
-		g_drv.inact_timer_running = 0;
-	}
 }
 
 void sdiodrv_task(struct work_struct *unused)
@@ -397,13 +357,11 @@ irqreturn_t sdiodrv_irq(int irq, void *drv)
 	if (g_drv.async_status) {
 		PERR("sdiodrv_irq: ERROR in STAT = 0x%x\n", status);
 	}
-
-	status = queue_work (g_drv.pWorkQueue, &g_drv.sdiodrv_work);
+	status = queue_work(g_drv.sdio_wq, &g_drv.sdiodrv_work);
     if (!status)
     {
 		printk("\n***Error sdiodrv_irq:  failed to enqueue work,status = %d\n", status);		
     }
-
 	return IRQ_HANDLED;
 }
 
@@ -415,19 +373,16 @@ void sdiodrv_dma_read_cb(int lch, u16 ch_status, void *data)
 
 	g_drv.async_status = ch_status & (1 << 7);
 
-	status = queue_work (g_drv.pWorkQueue, &g_drv.sdiodrv_work);
-	
+    status = queue_work(g_drv.sdio_wq, &g_drv.sdiodrv_work);
 	if (! status ) 
 	{
 		printk("\n***Error sdiodrv_dma_read_cb:  failed to enqueue work ,status = %d\n", status);
 	}
 
-	sdiodrv_dma_shutdown();
 }
 
-void sdiodrv_dma_write_cb(int lch, u16 ch_status, void *data)
+void sdiodrv_dma_write_cb(int lch, u16 ch_status, void *data) 
 {
-	sdiodrv_dma_shutdown();
 }
 
 int sdiodrv_dma_init(void)
@@ -464,7 +419,7 @@ out:
 	return rc;
 }
 
-static void sdiodrv_dma_shutdown(void)
+void sdiodrv_dma_shutdown(void)
 {
   omap_free_dma(g_drv.dma_tx_channel);
   omap_free_dma(g_drv.dma_rx_channel);
@@ -612,11 +567,14 @@ static void sdiodrv_free_resources(void)
 	}
 
         if (sdiodrv_irq_requested) {
-                free_irq(g_drv.irq, &g_drv);
+                free_irq(OMAP_MMC_IRQ, &g_drv);
                 sdiodrv_irq_requested = 0;
         }
 
-	sdioDrv_cancel_inact_timer();
+        if (sdiodrv_dma_on) {
+                sdiodrv_dma_shutdown();
+                sdiodrv_dma_on = 0;
+        }
 }
 
 int sdioDrv_InitHw(void)
@@ -676,6 +634,7 @@ int sdioDrv_InitHw(void)
 		goto err;
 	}
 	OMAP_HSMMC_WRITE(CON, OMAP_HSMMC_READ(CON) & ~INIT_STREAM);
+
 
 	return 0;
 
@@ -833,6 +792,7 @@ int sdioDrv_DisconnectBus (void)
 {
 	/* Disable clocks to handle driver stop command */
 	sdioDrv_clk_disable();
+
 	return 0;
 }
 
@@ -928,37 +888,21 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 
 	uCmdArg = SDIO_CMD53_READ(0, uFunc, bBlkMode, bIncAddr, uHwAddr, uNumBlks);
 
+	iStatus = sdiodrv_send_data_xfer_commad(OMAP_HSMMC_CMD53_READ_DMA, uCmdArg, uNumBlks, BRE, bBlkMode);
+
+	if (!(iStatus & BRE)) 
 	{
-		u32  cmd =  OMAP_HSMMC_CMD53_READ_DMA;
-		if(bBlkMode) {
-		/*
-		 * Bits 31:16 of BLK reg: NBLK Blocks count for current transfer.
-		 * in case of Block MOde the lenght is treated here as number of blocks 
-		 * (and not as a length).
-		 * Bits 11:0 of BLK reg: BLEN Transfer Block Size. in case of block mode set that field to block size. 
-		 */
-			OMAP_HSMMC_WRITE(BLK, (uNumBlks << 16) | (g_drv.uBlkSize << 0));
-
-			/*
-			 * In CMD reg:
-			 * BCE: Block Count Enable
-			 * MSBS: Multi/Single block select
-			 */
-			cmd |= MSBS | BCE ;
-		} else {
-			OMAP_HSMMC_WRITE(BLK, uNumBlks);
-		}
-		SDIO_SEND_COMMAND(cmd, uCmdArg);
+		PERR("sdioDrv_ReadAsync() buffer disabled! length = %d BLK = 0x%x PSTATE = 0x%x, BlkMode = %d\n", 
+			uLen, OMAP_HSMMC_READ(BLK), iStatus, bBlkMode);
+		return -1;
 	}
-
-	sdiodrv_dma_init();
 
 	PDEBUG("sdiodrv_read_async() dma_ch=%d \n",g_drv.dma_rx_channel);
 
 	dma_bus_address = dma_map_single(g_drv.dev, pData, uLen, DMA_FROM_DEVICE);
 	if (!dma_bus_address) {
 		PERR("sdioDrv_ReadAsync: dma_map_single failed\n");
-		goto err;
+		return -1;
 	}		
 
 	if (g_drv.dma_read_addr != 0) {
@@ -977,19 +921,10 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 
 	omap_set_dma_transfer_params(g_drv.dma_rx_channel, OMAP_DMA_DATA_TYPE_S32, uNumOfElem , uDmaBlockCount , OMAP_DMA_SYNC_FRAME, TIWLAN_MMC_DMA_RX, OMAP_DMA_SRC_SYNC);
 
-	iStatus  = sdiodrv_poll_status(OMAP_HSMMC_STAT, CC, MMC_TIMEOUT_MS);
-	if (!(iStatus & CC)) {
-		omap_clear_dma(g_drv.dma_rx_channel);
-		PERR("sdioDrv_ReadeAsync: Commmand 53 failed\n");
-		goto err;
-	}
-
 	omap_start_dma(g_drv.dma_rx_channel);
 
 	/* Continued at sdiodrv_irq() after DMA transfer is finished */
 	return 0;
-err:
-	return -1;
 }
 
 
@@ -1052,38 +987,20 @@ int sdioDrv_WriteAsync (unsigned int uFunc,
 
 	uCmdArg = SDIO_CMD53_WRITE(1, uFunc, bBlkMode, bIncAddr, uHwAddr, uNumBlks);
 
+	iStatus = sdiodrv_send_data_xfer_commad(OMAP_HSMMC_CMD53_WRITE_DMA, uCmdArg, uNumBlks, BWE, bBlkMode);
+	if (!(iStatus & BWE)) 
 	{
-		u32  cmd =  OMAP_HSMMC_CMD53_WRITE_DMA;
-		/* block mode */
-		if(bBlkMode) {
-		/* 
-		 * Bits 31:16 of BLK reg: NBLK Blocks count for current transfer.
-		 * in case of Block MOde the lenght is treated here as number of blocks 
-		 * (and not as a length).
-		 * Bits 11:0 of BLK reg: BLEN Transfer Block Size. in case of block mode set that field to block size. 
-		 */
-			OMAP_HSMMC_WRITE(BLK, (uNumBlks << 16) | (g_drv.uBlkSize << 0));
-	    
-			/*
-			 * In CMD reg:
-			 * BCE: Block Count Enable
-			 * MSBS: Multi/Single block select
-			 */
-			cmd |=  MSBS | BCE ;
-		} else {
-			OMAP_HSMMC_WRITE(BLK, uNumBlks);
-		}
-		SDIO_SEND_COMMAND(cmd, uCmdArg);
+		PERR("sdioDrv_WriteAsync() buffer disabled! length = %d, BLK = 0x%x, Status = 0x%x\n", 
+			uLen, OMAP_HSMMC_READ(BLK), iStatus);
+		return -1;
 	}
 
 	OMAP_HSMMC_WRITE(ISE, TC);
 
-	sdiodrv_dma_init();
-
 	dma_bus_address = dma_map_single(g_drv.dev, pData, uLen, DMA_TO_DEVICE);
 	if (!dma_bus_address) {
 		PERR("sdioDrv_WriteAsync: dma_map_single failed\n");
-		goto err;
+		return -1;
 	}
 
 	if (g_drv.dma_write_addr != 0) {
@@ -1102,18 +1019,10 @@ int sdioDrv_WriteAsync (unsigned int uFunc,
 
 	omap_set_dma_transfer_params(g_drv.dma_tx_channel, OMAP_DMA_DATA_TYPE_S32, uNumOfElem, uDmaBlockCount, OMAP_DMA_SYNC_FRAME, TIWLAN_MMC_DMA_TX, OMAP_DMA_DST_SYNC);
 
-	iStatus  = sdiodrv_poll_status(OMAP_HSMMC_STAT, CC, MMC_TIMEOUT_MS);
-	if (!(iStatus & CC)) {
-		omap_clear_dma(g_drv.dma_tx_channel);
-		PERR("sdioDrv_WriteAsync: Commmand 53 failed\n");
-		goto err;
-	}
 	omap_start_dma(g_drv.dma_tx_channel);
 
 	/* Continued at sdiodrv_irq() after DMA transfer is finished */
 	return 0;
-err:
-	return -1;
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -1194,20 +1103,27 @@ static int sdioDrv_probe(struct platform_device *pdev)
 	if (g_drv.irq < 0)
 		return -ENXIO;
 
-	rc = request_irq(g_drv.irq, sdiodrv_irq, 0, SDIO_DRIVER_NAME, &g_drv);
-	if (rc != 0) {
-	    PERR("sdioDrv_probe() - request_irq FAILED!!\n");
-	    return rc;
-	}
-	sdiodrv_irq_requested = 1;
+        rc= request_irq(OMAP_MMC_IRQ, sdiodrv_irq, 0, SDIO_DRIVER_NAME, &g_drv);
+        if (rc != 0) {
+                PERR("sdioDrv_probe() - request_irq FAILED!!\n");
+                return rc;
+        }
+        sdiodrv_irq_requested = 1;
+
+        rc = sdiodrv_dma_init();
+        if (rc != 0) {
+                PERR("sdiodrv_init() - sdiodrv_dma_init FAILED!!\n");
+                free_irq(OMAP_MMC_IRQ, &g_drv);
+                return rc;
+        }
+        sdiodrv_dma_on = 1;
 
 	spin_lock_init(&g_drv.clk_lock);
-	
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
-	dummy_pdev.id = pdev->id;
-	dev_set_name(&dummy_pdev.dev, "mmci-omap-hs.%lu", (unsigned long)pdev->id);
+	dummy_pdev.id = TIWLAN_MMC_CONTROLLER;
+	dev_set_name(&dummy_pdev.dev, "mmci-omap-hs.%lu", TIWLAN_MMC_CONTROLLER);
 	g_drv.fclk = clk_get(&dummy_pdev.dev, "fck");
-#else
+#else	
 	g_drv.fclk = clk_get(&pdev->dev, "mmchs_fck");
 #endif
 
@@ -1244,11 +1160,6 @@ static int sdioDrv_probe(struct platform_device *pdev)
 		TIWLAN_MMC_DMA_TX = OMAP34XX_DMA_MMC3_TX;
 		TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 	}
-
-	/* inactivity timer initialization*/
-	init_timer(&g_drv.inact_timer);
-	g_drv.inact_timer.function = sdioDrv_inact_timer;
-	g_drv.inact_timer_running = 0;
 
 	return 0;
 err:
@@ -1290,9 +1201,8 @@ static int sdioDrv_suspend(struct platform_device *pdev, pm_message_t state)
 /* Routine to resume the MMC device */
 static int sdioDrv_resume(struct platform_device *pdev)
 {
+/*	int rc; */
 #if 0	
-    int rc
-
 	printk(KERN_INFO "TISDIO: sdioDrv is resuming\n");
 	
 	rc = sdioDrv_probe(pdev);
@@ -1369,24 +1279,18 @@ done:
 	spin_unlock_irqrestore(&g_drv.clk_lock, flags);
 }
 
-int sdioDrv_init(void)
-#if 0
 int sdioDrv_init(int sdcnum)
-#endif
 {
 	memset(&g_drv, 0, sizeof(g_drv));
 	memset(&hsmmc_ctx, 0, sizeof(hsmmc_ctx));
 
 	printk(KERN_INFO "TIWLAN SDIO init\n");
 
-#if 0
-        /* MMC port init is done by the kernel on boot, so this is not needed */
 	sdio_init( sdcnum );
-#endif
 
-	g_drv.pWorkQueue = create_freezeable_workqueue(SDIO_WQ_NAME);
-	if (!g_drv.pWorkQueue) {
-		printk("TISDIO: Failed to create SDIO WQ\n");
+	g_drv.sdio_wq = create_freezeable_workqueue(SDIOWQ_NAME);
+	if (!g_drv.sdio_wq) {
+		printk("TISDIO: Fail to create SDIO WQ\n");
 		return -EINVAL;
 	}
 	/* Register the sdio driver */
@@ -1398,9 +1302,14 @@ void sdioDrv_exit(void)
 {
 	/* Unregister sdio driver */
 	platform_driver_unregister(&sdioDrv_struct);
-	if(g_drv.pWorkQueue)
+	if (g_drv.sdio_wq)
 	{
-		destroy_workqueue(g_drv.pWorkQueue);
+		destroy_workqueue(g_drv.sdio_wq);
 	}
 }
 
+MODULE_DESCRIPTION("TI WLAN SDIO driver");
+MODULE_LICENSE("GPL");
+MODULE_ALIAS(SDIO_DRIVER_NAME);
+MODULE_AUTHOR("Texas Instruments Inc");
+#endif

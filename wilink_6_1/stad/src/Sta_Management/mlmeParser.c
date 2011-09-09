@@ -93,7 +93,7 @@ extern int WMEQosTagToACTable[MAX_NUM_OF_802_1d_TAGS];
 
 TI_STATUS mlmeParser_recv(TI_HANDLE hMlme, void *pBuffer, TRxAttr* pRxAttr)
 {
-    TI_STATUS              status = TI_NOK;
+    TI_STATUS              status;
     mlme_t                 *pHandle = (mlme_t *)hMlme;
     TI_UINT8               *pData;
     TI_INT32               bodyDataLen;
@@ -141,8 +141,8 @@ TI_STATUS mlmeParser_recv(TI_HANDLE hMlme, void *pBuffer, TRxAttr* pRxAttr)
     }
 
     pParam = (paramInfo_t *)os_memoryAlloc(pHandle->hOs, sizeof(paramInfo_t));
-    if (!pParam) 
-    {
+    if (!pParam)
+	{
         RxBufFree(pHandle->hOs, pBuffer);
         return TI_NOK;
     }
@@ -542,7 +542,7 @@ TI_STATUS mlmeParser_recv(TI_HANDLE hMlme, void *pBuffer, TRxAttr* pRxAttr)
 		else /* (SCAN_RESULT_TAG_CURENT_BSS!= pRxAttr->eScanTag) & (SCAN_RESULT_TAG_MEASUREMENT != pRxAttr->eScanTag) */
         {
             /* result CB is registered - results are sent to the registered callback */
-            scanCncn_MlmeResultCB( pHandle->hScanCncn, 
+            scanCncn_MlmeResultCB (pHandle->hScanCncn, 
                                    &(pHandle->tempFrameInfo.bssid), 
                                    &(pHandle->tempFrameInfo.frame), 
                                    pRxAttr,
@@ -688,7 +688,7 @@ TI_STATUS mlmeParser_recv(TI_HANDLE hMlme, void *pBuffer, TRxAttr* pRxAttr)
 		else /* (SCAN_RESULT_TAG_CURENT_BSS!= pRxAttr->eScanTag) & (SCAN_RESULT_TAG_MEASUREMENT != pRxAttr->eScanTag) */
 		{
 			/* result CB is registered - results are sent to the registered callback */
-            scanCncn_MlmeResultCB( pHandle->hScanCncn, 
+            scanCncn_MlmeResultCB (pHandle->hScanCncn, 
                                    &(pHandle->tempFrameInfo.bssid), 
                                    &(pHandle->tempFrameInfo.frame), 
                                    pRxAttr,
@@ -847,7 +847,7 @@ TI_STATUS mlmeParser_recv(TI_HANDLE hMlme, void *pBuffer, TRxAttr* pRxAttr)
 						break;
 						
 					default:
-                        TRACE1(pHandle->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: Error, category is invalid for action management frame %d \n",pHandle->tempFrameInfo.frame.content.action.category );
+                        TRACE1(pHandle->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: Error, category is invalid for action management frame %d \n",							pHandle->tempFrameInfo.frame.content.action.category );
 						break;
 				}
 				
@@ -866,6 +866,8 @@ mlme_recv_end:
     /* release BUF */
     os_memoryFree(pHandle->hOs, pParam, sizeof(paramInfo_t));
 	RxBufFree(pHandle->hOs, pBuffer);
+    if (status != TI_OK)
+        return TI_NOK;
     return status;
 }
 
@@ -1145,26 +1147,26 @@ TI_STATUS mlmeParser_readWMEParams(mlme_t *pMlme,TI_UINT8 *pData, TI_UINT32 data
 
 	/* Note:  This function actually reads either the WME-Params IE or the WME-Info IE! */
 
-    pWMEParamIE->hdr[0] = *pData;
-    pWMEParamIE->hdr[1] = *(pData+1);
+	pWMEParamIE->hdr[0] = *pData;
+	pWMEParamIE->hdr[1] = *(pData+1);
 
-    *pReadLen = pWMEParamIE->hdr[1] + 2;
+	*pReadLen = pWMEParamIE->hdr[1] + 2;
 
-    if (dataLen < *pReadLen)
-    {
-TRACE2(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: WME Parameter: eleLen=%d is too long (%d)\n", *pReadLen, dataLen);
+	if (dataLen < *pReadLen)
+	{
+		TRACE2(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: WME Parameter: eleLen=%d is too long (%d)\n", *pReadLen, dataLen);
 		*pReadLen = dataLen;
 		return TI_NOK;
-    }
+	}
 
-    if ((pWMEParamIE->hdr[1]> WME_TSPEC_IE_LEN) || (pWMEParamIE->hdr[1]< DOT11_WME_ELE_LEN))
-    {
+	if ((pWMEParamIE->hdr[1]> WME_TSPEC_IE_LEN) || (pWMEParamIE->hdr[1]< DOT11_WME_ELE_LEN))
+	{
         TRACE1(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: WME Parameter IE error: eleLen=%d\n", pWMEParamIE->hdr[1]);
-        return TI_NOK;
-    }
+		return TI_NOK;
+	}
 
 	ieSubtype = *((TI_UINT8*)(pData+6));
-    switch (ieSubtype)
+	switch (ieSubtype)
 	{
 		case dot11_WME_OUI_SUB_TYPE_IE:
 			/* Read WMM IE */
@@ -1209,9 +1211,9 @@ TRACE2(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: WME Parameter: eleLe
             {
                 TRACE2(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: WME TSPEC IE length error: dataLen = %d, IeLen = %d\n", dataLen, pWMEParamIE->hdr[1]);
 				return TI_NOK;
-			}
+            }
 
-			ac = WMEQosTagToACTable [ GET_USER_PRIORITY_FROM_WME_TSPEC_IE(pData) ];
+            ac = WMEQosTagToACTable [ GET_USER_PRIORITY_FROM_WME_TSPEC_IE(pData) ];
 
 			if (ac == QOS_AC_VO)
 			{
@@ -1328,7 +1330,7 @@ TI_STATUS mlmeParser_readHtInformationIE(mlme_t *pMlme,TI_UINT8 *pData, TI_UINT3
     if (pHtInformation->tHdr[1] < DOT11_HT_INFORMATION_ELE_LEN)
     {
         TRACE2(pMlme->hReport, REPORT_SEVERITY_ERROR, "MLME_PARSER: HT Information IE error: eleLen=%d, ExpectedLen=%d\n", pHtInformation->tHdr[1], DOT11_HT_INFORMATION_ELE_LEN);
-        return TI_NOK;
+		return TI_NOK;
     }
 
     if (pHtInformation->tHdr[1] != DOT11_HT_INFORMATION_ELE_LEN)
@@ -1616,7 +1618,8 @@ TI_STATUS mlmeParser_parseIEs(TI_HANDLE hMlme,
 				{
 					TRACE2(pHandle->hReport, REPORT_SEVERITY_ERROR, "Channel ERROR - incompatible channel source information: Frame=%d Vs Radio=%d.\nparser ABORTED!!!\n",
 						frame->pDSParamsSet->currChannel , params->rxChannel);
-                                        return TI_NOK;
+
+					return TI_NOK;
 				}
 			}
 			break;
@@ -1674,13 +1677,12 @@ TI_STATUS mlmeParser_parseIEs(TI_HANDLE hMlme,
 					 */
                     TRACE0(pHandle->hReport, REPORT_SEVERITY_WARNING, "MLME_PARSER: error reading Channel Switch announcement parameters - ignore IE\n");
 				}
-			}
+            }
             else
             {
-                    /* Set the IE length to readLen in order to skip this IE for the next iteration */
-                    readLen = pData[1] + 2;
+                /* Set the IE length to readLen in order to skip this IE for the next iteration */
+                readLen = pData[1] + 2;
             }
-
 			break;
 
 		/* read Quiet IE */
@@ -1827,6 +1829,7 @@ TI_STATUS mlmeParser_parseIEs(TI_HANDLE hMlme,
 
 		pData += readLen;
 		bodyDataLen -= readLen;
+
 #if CHECK_PARSING_ERROR_CONDITION_PRINT
 		/* CHECK_PARSING_ERROR_CONDITION((bodyDataLen < 0), ("MLME_PARSER: negative bodyDataLen %d bytes\n", bodyDataLen),TI_TRUE); */
 		if (bodyDataLen < 0)
@@ -1836,7 +1839,9 @@ TI_STATUS mlmeParser_parseIEs(TI_HANDLE hMlme,
 			report_PrintDump (pPacketBody, packetLength);
 		}
 #endif
+
 	}   // while
+
 
 	return TI_OK;
 }

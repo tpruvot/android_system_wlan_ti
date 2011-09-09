@@ -230,7 +230,7 @@ void currBSS_init (TStadHandlesList *pStadHandles)
     pCurrBSS->hPowerMngr    = pStadHandles->hPowerMgr;
     pCurrBSS->hSme          = pStadHandles->hSme;
     pCurrBSS->hSiteMgr      = pStadHandles->hSiteMgr;
-    pCurrBSS->hConn         = pStadHandles->hConn;
+	pCurrBSS->hConn         = pStadHandles->hConn;
     pCurrBSS->hReport       = pStadHandles->hReport;
     pCurrBSS->hScanMngr     = pStadHandles->hScanMngr;
     pCurrBSS->hEvHandler    = pStadHandles->hEvHandler;
@@ -270,7 +270,7 @@ TI_STATUS currBSS_SetDefaults (TI_HANDLE hCurrBSS, TCurrBssInitParams *pInitPara
     currBSS_t *pCurrBSS = (currBSS_t *)hCurrBSS;
     TRroamingTriggerParams params;
     RssiSnrTriggerCfg_t tTriggerCfg;
-
+    
     /* save the roaming operational mode */
     pCurrBSS->RoamingOperationalMode = pInitParams->RoamingOperationalMode;
 
@@ -300,7 +300,7 @@ TI_STATUS currBSS_SetDefaults (TI_HANDLE hCurrBSS, TCurrBssInitParams *pInitPara
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_0, 0, (void*)currBSS_lowRssiThrCrossed, hCurrBSS);
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_1, 0, (void*)currBSS_lowSnrThrCrossed, hCurrBSS);
         currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_4, 0, (void*)currBSS_BackgroundScanQuality, hCurrBSS);
-        currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_7, 0, (void*)currBSS_BackgroundScanQuality, hCurrBSS);
+		currBSS_RegisterTriggerEvent(hCurrBSS, TWD_OWN_EVENT_RSSI_SNR_TRIGGER_7, 0, (void*)currBSS_BackgroundScanQuality, hCurrBSS);
 
         pCurrBSS->lowRssiThreshold = RSSI_DEFAULT_THRESHOLD;
         tTriggerCfg.index     = TRIGGER_EVENT_LOW_RSSI;
@@ -346,6 +346,7 @@ TI_STATUS currBSS_SetDefaults (TI_HANDLE hCurrBSS, TCurrBssInitParams *pInitPara
 		tTriggerCfg.hystersis = TRIGGER_BG_SCAN_HYSTERESIS;
 		tTriggerCfg.enable    = TI_TRUE;
 		TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
+
 
 
          /* Register for 'BSS-Loss' event */
@@ -575,40 +576,40 @@ TRACE1(pCurrBSS->hReport, REPORT_SEVERITY_INFORMATION, "CurrBSS_SGConf: SG =%d\n
 void currBSS_updateBSSLoss(currBSS_t   *pCurrBSS)
 {
     TRroamingTriggerParams roamingTriggersParams;
-    TI_UINT16 desiredBeaconInterval = 0;
-    TI_UINT32 connSelfTimeout = 0;
-    paramInfo_t *pParam;
+	TI_UINT16 desiredBeaconInterval = 0;
+	TI_UINT32 connSelfTimeout = 0;
+	paramInfo_t *pParam;
 
-    pParam = (paramInfo_t *)os_memoryAlloc(pCurrBSS->hOs, sizeof(paramInfo_t));
+	pParam = (paramInfo_t *)os_memoryAlloc(pCurrBSS->hOs, sizeof(paramInfo_t));
     if (pParam)
     {
-        pParam->paramType = SITE_MGR_DESIRED_BEACON_INTERVAL_PARAM;
-        siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
-        desiredBeaconInterval = pParam->content.siteMgrDesiredBeaconInterval;
+		pParam->paramType = SITE_MGR_DESIRED_BEACON_INTERVAL_PARAM;
+		siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
+		desiredBeaconInterval = pParam->content.siteMgrDesiredBeaconInterval;
 
-        pParam->paramType = CONN_SELF_TIMEOUT_PARAM;
-        conn_getParam(pCurrBSS->hConn, pParam);
-        connSelfTimeout = pParam->content.connSelfTimeout;
+		pParam->paramType = CONN_SELF_TIMEOUT_PARAM;
+		conn_getParam(pCurrBSS->hConn, pParam);
+		connSelfTimeout = pParam->content.connSelfTimeout;
 
-        os_memoryFree(pCurrBSS->hOs, pParam, sizeof(paramInfo_t));
-    }
-    else
-    {
-        TRACE0(pCurrBSS->hReport, REPORT_SEVERITY_ERROR, "currBSS_updateBSSLoss: Error allocating paramInfo_t\n");
-    }
+		os_memoryFree(pCurrBSS->hOs, pParam, sizeof(paramInfo_t));
+	}
+	else
+	{
+		TRACE0(pCurrBSS->hReport, REPORT_SEVERITY_ERROR, "currBSS_updateBSSLoss: Error allocating paramInfo_t\n");
+	}
 
     if (pCurrBSS->type == BSS_INDEPENDENT)
     {
        if (desiredBeaconInterval > 0)
        {
-           /* Calculate the number of beacons for miss timeout */
+		   /* Calculate the number of beacons for miss timeout */
            roamingTriggersParams.TsfMissThreshold = connSelfTimeout / desiredBeaconInterval;
        }
-       else
-       {
-           /* Use default parameter */
-           roamingTriggersParams.TsfMissThreshold = OUT_OF_SYNC_IBSS_THRESHOLD;
-       }
+	   else
+	   {
+		   /* Use default parameter */
+		   roamingTriggersParams.TsfMissThreshold = OUT_OF_SYNC_IBSS_THRESHOLD; 
+	   }
     }
     else /* In Infra we use the saved parameter */
     {
@@ -718,9 +719,8 @@ TI_STATUS currBSS_probRespReceivedCallb(TI_HANDLE hCurrBSS,
     {
         return TI_NOK;
     }
-    
     pParam->paramType = SITE_MGR_CURRENT_BSSID_PARAM;
-    siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
+    siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);    
 
     if (pCurrBSS->isConnected && MAC_EQUAL (pParam->content.siteMgrDesiredBSSID, *bssid))
     {
@@ -764,7 +764,7 @@ TI_STATUS currBSS_beaconReceivedCallb(TI_HANDLE hCurrBSS,
     currBSS_t           *pCurrBSS = (currBSS_t *)hCurrBSS;
     paramInfo_t         *pParam;
     ScanBssType_e       eFrameBssType, eCurrentBSSType;
-    TMacAddr            desiredBSSID;
+	TMacAddr            desiredBSSID;
 
     pParam = (paramInfo_t *)os_memoryAlloc(pCurrBSS->hOs, sizeof(paramInfo_t));
     if (!pParam)
@@ -781,55 +781,56 @@ TI_STATUS currBSS_beaconReceivedCallb(TI_HANDLE hCurrBSS,
 
     /* Get current BSSID */
     pParam->paramType = SITE_MGR_CURRENT_BSSID_PARAM;
-    siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
-   TRACE12(pCurrBSS->hReport, REPORT_SEVERITY_INFORMATION,
-            "currBSS_beaconReceivedCallb: bssid = %02x.%02x.%02x.%02x.%02x.%02x, siteMgrDesiredBSSID = %02x.%02x.%02x.%02x.%02x.%02x\n",
-            (*bssid)[0], (*bssid)[1], (*bssid)[2], (*bssid)[3], (*bssid)[4], (*bssid)[5],
-            pParam->content.siteMgrDesiredBSSID[0],
-            pParam->content.siteMgrDesiredBSSID[1],
-            pParam->content.siteMgrDesiredBSSID[2],
-            pParam->content.siteMgrDesiredBSSID[3],
-            pParam->content.siteMgrDesiredBSSID[4],
-            pParam->content.siteMgrDesiredBSSID[5]);
-    MAC_COPY(desiredBSSID, pParam->content.siteMgrDesiredBSSID);
+    siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);   
+	TRACE12(pCurrBSS->hReport, REPORT_SEVERITY_INFORMATION,
+			"currBSS_beaconReceivedCallb: bssid = %02x.%02x.%02x.%02x.%02x.%02x, siteMgrDesiredBSSID = %02x.%02x.%02x.%02x.%02x.%02x\n",
+			(*bssid)[0], (*bssid)[1], (*bssid)[2], (*bssid)[3], (*bssid)[4], (*bssid)[5],
+			pParam->content.siteMgrDesiredBSSID[0],
+			pParam->content.siteMgrDesiredBSSID[1],
+			pParam->content.siteMgrDesiredBSSID[2],
+			pParam->content.siteMgrDesiredBSSID[3],
+			pParam->content.siteMgrDesiredBSSID[4],
+			pParam->content.siteMgrDesiredBSSID[5]);
+	MAC_COPY(desiredBSSID, pParam->content.siteMgrDesiredBSSID);
 
     if (pCurrBSS->isConnected && (eCurrentBSSType == eFrameBssType))
     {
-        TI_BOOL bFramePrivacy = 0, bCurrentSitePrivacy = 0;
+		TI_BOOL bFramePrivacy = 0, bCurrentSitePrivacy = 0;
         /* if the bss type is ibss save set the current site privacy (the beacons transimted by STA)
 		   and set the privacy from the received frame, so that if the privacy is different there will
 		   be no connection */
-        if (eFrameBssType == BSS_INDEPENDENT)
-        {
-            pParam->paramType = SITE_MGR_SITE_CAPABILITY_PARAM;
-            siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
+		if (eFrameBssType == BSS_INDEPENDENT)
+		{
+			pParam->paramType = SITE_MGR_SITE_CAPABILITY_PARAM;
+			siteMgr_getParam(pCurrBSS->hSiteMgr, pParam);
 
-            bCurrentSitePrivacy = ((pParam->content.siteMgrSiteCapability >> CAP_PRIVACY_SHIFT) & CAP_PRIVACY_MASK) ? TI_TRUE : TI_FALSE;
-            bFramePrivacy       = ((pFrameInfo->content.iePacket.capabilities >> CAP_PRIVACY_SHIFT) & CAP_PRIVACY_MASK) ? TI_TRUE : TI_FALSE;
-        }
+			bCurrentSitePrivacy = ((pParam->content.siteMgrSiteCapability >> CAP_PRIVACY_SHIFT) & CAP_PRIVACY_MASK) ? TI_TRUE : TI_FALSE;
+			bFramePrivacy       = ((pFrameInfo->content.iePacket.capabilities >> CAP_PRIVACY_SHIFT) & CAP_PRIVACY_MASK) ? TI_TRUE : TI_FALSE;
+		}
 
         if (MAC_EQUAL(desiredBSSID, *bssid))
         {
-            if ((eFrameBssType == BSS_INFRASTRUCTURE) ||
-                            ((eFrameBssType == BSS_INDEPENDENT) && (bCurrentSitePrivacy == bFramePrivacy)))
-            {
-                siteMgr_updateSite(pCurrBSS->hSiteMgr, bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band, TI_FALSE);
-                /* Save the IE part of the beacon buffer in the site table */
-                siteMgr_saveBeaconBuffer(pCurrBSS->hSiteMgr, bssid, (TI_UINT8 *)dataBuffer, bufLength);
-            }
+            if ((eFrameBssType == BSS_INFRASTRUCTURE) || 
+			    ((eFrameBssType == BSS_INDEPENDENT) && (bCurrentSitePrivacy == bFramePrivacy)) )
+			{
+				siteMgr_updateSite(pCurrBSS->hSiteMgr, bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band, TI_FALSE);
+				/* Save the IE part of the beacon buffer in the site table */
+				siteMgr_saveBeaconBuffer(pCurrBSS->hSiteMgr, bssid, (TI_UINT8 *)dataBuffer, bufLength);
+			}
         }
     	else if (eFrameBssType == BSS_INDEPENDENT)
         {
            /* Check if the Station sending the beacon uses privacy for the ibss and
 			   compare it to the self site. If privacy usage mathces, merge ibss
 			   and if not continue using self site */
-            if (bCurrentSitePrivacy == bFramePrivacy) 
-            {
-                siteMgr_IbssMerge(pCurrBSS->hSiteMgr, desiredBSSID, *bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band);
-                siteMgr_updateSite(pCurrBSS->hSiteMgr, bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band, TI_FALSE);
-                siteMgr_saveBeaconBuffer(pCurrBSS->hSiteMgr, bssid, (TI_UINT8 *)dataBuffer, bufLength);
-            }
-        }
+			if (bCurrentSitePrivacy == bFramePrivacy) 
+			{
+				siteMgr_IbssMerge(pCurrBSS->hSiteMgr, desiredBSSID, *bssid,
+								  pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band);
+				siteMgr_updateSite(pCurrBSS->hSiteMgr, bssid, pFrameInfo, pRxAttr->channel, (ERadioBand)pRxAttr->band, TI_FALSE);
+				siteMgr_saveBeaconBuffer(pCurrBSS->hSiteMgr, bssid, (TI_UINT8 *)dataBuffer, bufLength);
+			}
+    	}
     }
 
     os_memoryFree(pCurrBSS->hOs, pParam, sizeof(paramInfo_t));
@@ -1209,7 +1210,6 @@ static void currBSS_BackgroundScanQuality(TI_HANDLE hCurrBSS,
     {
         return;
     }
-
     pParam->paramType = SITE_MGR_CURRENT_SIGNAL_PARAM;
     pParam->content.siteMgrCurrentSignal.rssi = averageRssi;
     siteMgr_setParam(pCurrBSS->hSiteMgr, pParam);
@@ -1458,7 +1458,6 @@ TI_STATUS currBss_registerTxRetryEvent(TI_HANDLE hCurrBSS,TI_UINT8 uMaxTxRetryTh
     currBSS_t *pCurrBSS = (currBSS_t *)hCurrBSS;
 
     TRACE2(pCurrBSS->hReport,REPORT_SEVERITY_INFORMATION , "currBss_registerTxRetryEvent() uMaxTxRetryThreshold=%d,uClientID =%d \n", uMaxTxRetryThreshold,uClientID );
-
    /* Register for 'Consec. Tx error' */
     TWD_RegisterEvent (pCurrBSS->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY, (void *)currBSS_MaxTxRetryThresholdCrossed, pCurrBSS);
     TWD_EnableEvent (pCurrBSS->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY);
@@ -1524,7 +1523,6 @@ TI_STATUS currBSS_setParam(TI_HANDLE hCurrBSS, paramInfo_t *pParam)
                 {
                     tTriggerCfg.index = (uint8)triggerID; /* the index is used for the eventMBox triggerID mapping*/
                 }
-
                 /* Send user defined trigger to FW (the related FW events are handled by the currBSS) */
                 status = TWD_CfgRssiSnrTrigger (pCurrBSS->hTWD, &tTriggerCfg);
 

@@ -82,7 +82,7 @@ TSiteEntry *sme_Select (TI_HANDLE hSme)
 
     /* on SG avalanche, select is not needed, send connect event automatically */
     if (TI_TRUE == pSme->bReselect)
-    {        
+    {
         paramInfo_t *pParam;
 
         TRACE0(pSme->hReport, REPORT_SEVERITY_INFORMATION , "sme_Select: reselect flag is on, reselecting the current site\n");
@@ -323,8 +323,7 @@ TI_BOOL sme_SelectSsidMatch (TI_HANDLE hSme, TSsid *pSiteSsid, TSsid *pDesiredSs
 TI_BOOL sme_SelectBssidMatch (TMacAddr *pSiteBssid, TMacAddr *pDesiredBssid)
 {
     /* check if the desired BSSID is broadcast (no need to match) */
-    if ((TI_TRUE == MAC_BROADCAST (*pDesiredBssid)) ||
-        (TI_TRUE == MAC_NULL(*pDesiredBssid)))
+    if (TI_TRUE == MAC_BROADCAST (*pDesiredBssid))
     {
         return TI_TRUE;
     }

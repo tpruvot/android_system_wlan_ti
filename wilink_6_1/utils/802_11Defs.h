@@ -345,9 +345,8 @@ NOTE: We only support packets coming from within the DS (i.e. From DS = 0)
 /* mgmt body max length */
 #define MAX_MGMT_BODY_LENGTH                2312
 /* maximal length of beacon body - note that actual beacons may actually be longer
-   than this size, at least according to the spec, but so far no larger beacon was seen 
-  Note: 1500 is the recommended size by the Motorola Standard team. TI recommendation is 700*/
-#define MAX_BEACON_BODY_LENGTH              1500 //IKSTABLEONE-1238 - port IKSHADOW-7661
+   than this size, at least according to the spec, but so far no larger beacon was seen */
+#define MAX_BEACON_BODY_LENGTH              700
 
 #define ASSOC_RESP_FIXED_DATA_LEN           6
 #define ASSOC_RESP_AID_MASK                 0x3FFF  /* The AID is only in 14 LS bits. */
@@ -1097,7 +1096,7 @@ typedef struct
 typedef struct
 {
     dot11_header_t   hdr;
-    TI_UINT8  securityOverhead[AES_AFTER_HEADER_FIELD_SIZE];
+	TI_UINT8 	securityOverhead[AES_AFTER_HEADER_FIELD_SIZE];
     Wlan_LlcHeader_T LLC;
     TI_UINT16 hardType;
     TI_UINT16 protType;

@@ -3,9 +3,8 @@ include $(CLEAR_VARS)
 
 STATIC_LIB ?= y
 DEBUG ?= y
-BUILD_SUPPL ?= y
+BUILD_SUPPL = y
 WPA_ENTERPRISE ?= y
-CONFIG_WPS = y
 
 WILINK_ROOT = ../..
 CUDK_ROOT ?= $(WILINK_ROOT)/CUDK
@@ -29,8 +28,15 @@ WPA_SUPPL_DIR_INCLUDE += $(WPA_SUPPL_DIR)/src \
 	$(WPA_SUPPL_DIR)/src/utils \
 	$(WPA_SUPPL_DIR)/src/wps
 endif
+
 ifeq ($(DEBUG),y)
- DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin   # "-O" is needed to expand inlines
+DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin
+else
+DEBUGFLAGS = -O2
+endif
+
+ifeq ($(DEBUG),y)
+DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin   # "-O" is needed to expand inlines
 #  DEBUGFLAGS+= -DDEBUG_MESSAGES
 else
 DEBUGFLAGS = -O2
@@ -53,8 +59,8 @@ endif
 ifeq ($(BUILD_SUPPL), y)
 DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
 -include $(WPA_SUPPL_DIR)/.config
-ifeq ($(CONFIG_WPS), y)
-DK_DEFINES += -DCONFIG_WPS
+ifdef CONFIG_WPS
+	DK_DEFINES += -DCONFIG_WPS
 endif
 endif
 
@@ -99,6 +105,7 @@ LOCAL_SHARED_LIBRARIES = \
 	libwpa_client
 endif
 
+LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE:= wlan_cu
 
 include $(BUILD_EXECUTABLE)

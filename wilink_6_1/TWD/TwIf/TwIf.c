@@ -176,7 +176,7 @@ typedef struct _TTwIfObj
 #endif
    
     TI_BOOL         bTxnDoneInRecovery;      /* Indicate that current TxnDone is within recovery process */
-    TI_BOOL         bPendRestartTimerRunning;/* Indicate that the restart guard timer is running */
+    TI_BOOL         bPendRestartTimerRunning;/* Indicate that the restart guard timer is running */ 
     TI_HANDLE       hPendRestartTimer;       /* The restart process guard timer */
 
 } TTwIfObj;
@@ -259,7 +259,6 @@ TI_STATUS twIf_Destroy (TI_HANDLE hTwIf)
         }
         os_memoryFree (pTwIf->hOs, pTwIf, sizeof(TTwIfObj));     
     }
-
     return TI_OK;
 }
 
@@ -281,12 +280,12 @@ TI_STATUS twIf_Destroy (TI_HANDLE hTwIf)
  * \return void        
  * \sa     
  */ 
-void twIf_Init (TI_HANDLE hTwIf,
-                TI_HANDLE hReport,
-                TI_HANDLE hContext,
-                TI_HANDLE hTimer,
-                TI_HANDLE hTxnQ,
-                TRecoveryCb fRecoveryCb,
+void twIf_Init (TI_HANDLE hTwIf, 
+                TI_HANDLE hReport, 
+                TI_HANDLE hContext, 
+                TI_HANDLE hTimer, 
+                TI_HANDLE hTxnQ, 
+                TRecoveryCb fRecoveryCb, 
                 TI_HANDLE hRecoveryCb)
 {
     TTwIfObj   *pTwIf = (TTwIfObj*)hTwIf;
@@ -384,7 +383,7 @@ ETxnStatus twIf_Restart (TI_HANDLE hTwIf)
     eStatus = txnQ_Restart (pTwIf->hTxnQ, TXN_FUNC_ID_WLAN);
 
     /* If pending upon ongoing transaction, start guard timer in case SDIO does not call us back */
-    if (eStatus == TXN_STATUS_PENDING)
+    if (eStatus == TXN_STATUS_PENDING) 
     {
         pTwIf->bPendRestartTimerRunning = TI_TRUE;
 		tmr_StartTimer (pTwIf->hPendRestartTimer, twIf_PendRestratTimeout, hTwIf, PEND_RESTART_TIMEOUT, TI_FALSE);
@@ -431,7 +430,6 @@ void twIf_RegisterErrCb (TI_HANDLE hTwIf, void *fErrCb, TI_HANDLE hErrCb)
 static void twIf_WriteElpReg (TTwIfObj *pTwIf, TI_UINT32 uValue)
 {
     TRACE1(pTwIf->hReport, REPORT_SEVERITY_INFORMATION, "twIf_WriteElpReg:  ELP Txn data = 0x%x\n", uValue);
-
     /* Send ELP (awake or sleep) transaction to TxnQ */
     if (uValue == ELP_CTRL_REG_AWAKE)
     {
@@ -730,12 +728,11 @@ static ETxnStatus twIf_SendTransaction (TTwIfObj *pTwIf, TTxnStruct *pTxn)
     TI_UINT32  data = 0;
 
     /* Verify that the Txn HW-Address is 4-bytes aligned */
-	if (pTxn->uHwAddr & 0x3)
-	{
-TRACE2(pTwIf->hReport, REPORT_SEVERITY_ERROR, "twIf_SendTransaction: Unaligned HwAddr! HwAddr=0x%x, Params=0x%x\n", pTxn->uHwAddr, pTxn->uTxnParams);
+    if (pTxn->uHwAddr & 0x3)
+    {
+        TRACE2(pTwIf->hReport, REPORT_SEVERITY_ERROR, "twIf_SendTransaction: Unaligned HwAddr! HwAddr=0x%x, Params=0x%x\n", pTxn->uHwAddr, pTxn->uTxnParams);
 		return TXN_STATUS_ERROR;
-	}	
-
+    }	
 #endif
 
     context_EnterCriticalSection (pTwIf->hContext);
@@ -943,7 +940,7 @@ static void twIf_HandleTxnDone (TI_HANDLE hTwIf)
     {
         TRACE0(pTwIf->hReport, REPORT_SEVERITY_INFORMATION, "twIf_HandleTxnDone: call RecoveryCb\n");
         pTwIf->bTxnDoneInRecovery = TI_FALSE;
-        if (pTwIf->bPendRestartTimerRunning)
+        if (pTwIf->bPendRestartTimerRunning) 
         {
             tmr_StopTimer (pTwIf->hPendRestartTimer);
             pTwIf->bPendRestartTimerRunning = TI_FALSE;
@@ -1053,19 +1050,19 @@ static void twIf_ClearTxnDoneQueue (TI_HANDLE hTwIf)
 }
 
 
-/**
+/** 
  * \fn     twIf_PendRestratTimeout
  * \brief  Pending restart process timeout handler
- *
- * Called if timer expires upon fail to complete the last bus transaction that was
+ * 
+ * Called if timer expires upon fail to complete the last bus transaction that was 
  *   pending during restart process.
  * Calls the recovery callback to continue the restart process.
- *
- * \note
+ *  
+ * \note   
  * \param  hTwIf - The module's object
  * \return void
- * \sa
- */
+ * \sa     
+ */ 
 static void twIf_PendRestratTimeout (TI_HANDLE hTwIf, TI_BOOL bTwdInitOccured)
 {
     TTwIfObj *pTwIf = (TTwIfObj*)hTwIf;
@@ -1124,7 +1121,7 @@ TI_BOOL	twIf_isValidRegAddr(TI_HANDLE hTwIf, TI_UINT32 Address, TI_UINT32 Length
 void twIf_PrintModuleInfo (TI_HANDLE hTwIf) 
 {
 #ifdef REPORT_LOG
-    TTwIfObj *pTwIf = (TTwIfObj*)hTwIf;
+	TTwIfObj *pTwIf = (TTwIfObj*)hTwIf;
 	
 	WLAN_OS_REPORT(("-------------- TwIf Module Info-- ------------------------\n"));
 	WLAN_OS_REPORT(("==========================================================\n"));

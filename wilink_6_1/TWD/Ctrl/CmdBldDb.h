@@ -335,9 +335,9 @@ typedef struct
     TKeepAliveList             klvList;             /* Keep-Alive paramters     */  
     TSecurReconf               keys;                /* Security keys            */
     TRxDataFiltersTable        rxDataFilters;       /* Rx data filters          */
-    IniFileGeneralParam        tPlatformGenParams;  /* platfrom gen params from public_radio.h  */
+    IniFileGeneralParam        tPlatformGenParams;  /* platfrom gen params from public_radio.h  */   
     IniFileRadioParam          tRadioIniParams;     /* Radio ini params from public_radio.h     */
-    IniFileExtendedRadioParam  tExtRadioIniParams;  /* Extended Radio ini params from public_radio.h     */
+	IniFileExtendedRadioParam  tExtRadioIniParams;  /* Extended Radio ini params from public_radio.h     */
 	TRateMngParams		       tRateMngParams;      /* rate management params */
 } TCmdBldDb;
 

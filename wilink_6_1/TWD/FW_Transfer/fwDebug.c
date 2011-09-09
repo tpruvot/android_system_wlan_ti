@@ -234,8 +234,8 @@ TI_STATUS fwDbg_ValidateSdio(TI_HANDLE hFwDebug, TI_UINT32 uNumOfLoops, TI_UINT3
     /* Parameter range check - Make sure uTxnSize is in range */
     if( (uTxnSize == 0) || (uTxnSize > TWD_SDIO_VALIDATION_TXN_SIZE_MAX) )
     {
-        TRACE2(pFwDebug->hReport, REPORT_SEVERITY_WARNING, "fwDbg_ValidateSdio() - uTxnSize (%d) is out of range. Set to %d. \n", 
-            uTxnSize, TWD_SDIO_VALIDATION_TXN_SIZE_DEFAULT);
+        WLAN_OS_REPORT(("fwDbg_ValidateSdio() - uTxnSize (%d) is out of range. Set to %d. \n", 
+            uTxnSize, TWD_SDIO_VALIDATION_TXN_SIZE_DEFAULT));
 
         uTxnSize = TWD_SDIO_VALIDATION_TXN_SIZE_DEFAULT;
     }
@@ -243,8 +243,8 @@ TI_STATUS fwDbg_ValidateSdio(TI_HANDLE hFwDebug, TI_UINT32 uNumOfLoops, TI_UINT3
     /* Parameter range check - Make sure uNumOfLoops is in range */
     if(uNumOfLoops > TWD_SDIO_VALIDATION_NUM_LOOPS_MAX)
     {
-        TRACE2(pFwDebug->hReport, REPORT_SEVERITY_WARNING, "fwDbg_ValidateSdio() - uNumOfLoops (%d) is out of range. Set to %d. \n", 
-            uNumOfLoops, TWD_SDIO_VALIDATION_NUM_LOOPS_DEFAULT);
+        WLAN_OS_REPORT(("fwDbg_ValidateSdio() - uNumOfLoops (%d) is out of range. Set to %d. \n", 
+            uNumOfLoops, TWD_SDIO_VALIDATION_NUM_LOOPS_DEFAULT));
         
         uNumOfLoops = TWD_SDIO_VALIDATION_NUM_LOOPS_DEFAULT;
     }
@@ -363,7 +363,7 @@ TI_STATUS fwDbg_WriteAddr (TI_HANDLE hFwDebug,
 	/* check if length is large than default threshold */
 	if (Length > DMA_SIZE_BUF)
     {
-        TRACE1(pFwDebug->hReport, REPORT_SEVERITY_ERROR, "fwDbg_WriteAddr : Buffer Length too large -- %d",Length);
+TRACE1(pFwDebug->hReport, REPORT_SEVERITY_ERROR, "fwDbg_WriteAddr : Buffer Length too large -- %d",Length);
 		return TXN_STATUS_ERROR;
     }
 
@@ -412,7 +412,7 @@ TI_STATUS fwDbg_ReadAddr (TI_HANDLE hFwDebug,
 	/* check if length is large than default threshold */
 	if (Length > DMA_SIZE_BUF)
 	{
-        TRACE1(pFwDebug->hReport, REPORT_SEVERITY_ERROR, "fwDbg_ReadAddr : Buffer Length too large -- %d",Length);
+TRACE1(pFwDebug->hReport, REPORT_SEVERITY_ERROR, "fwDbg_ReadAddr : Buffer Length too large -- %d",Length);
 		return TXN_STATUS_ERROR;
 	}
 

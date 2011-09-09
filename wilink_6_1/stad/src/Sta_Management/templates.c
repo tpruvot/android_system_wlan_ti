@@ -56,7 +56,6 @@
 #include "TWDriver.h"
 #include "StaCap.h"
 #include "qosMngr_API.h"
-#include "txCtrl.h"
 
 /********************************************/
 /*		Functions Implementation 			*/
@@ -774,41 +773,17 @@ TI_STATUS buildArpRspTemplate(siteMgr_t *pSiteMgr, TSetTemplate *pTemplate, TIpA
 	TI_UINT16           macAddrItr;
 	TI_BOOL   			privacyInvoked;
 	TI_UINT8  			encryptionFieldSize, copyPayloadOffset, lenToCopy;
-	txCtrl_t           *pTxCtrl = (txCtrl_t *)(pSiteMgr->hTxCtrl);
+
 
 
 	/* Reset the buffer */
 	os_memoryZero(pSiteMgr->hOs, pBuffer, sizeof(ArpRspTemplate_t));
 
-	if (BSS_INDEPENDENT == pTxCtrl->currBssType)
-	{
-		/* - Set Destination Address: ARP response should be sent with broadcast DA - Set accordingly */
-		for (macAddrItr = 0; macAddrItr < MAC_ADDR_LEN; macAddrItr++)
-		{
-			pBuffer->hdr.address1[macAddrItr] = 0xFF;
-		}
 
-		/* - Set Source Address */
-		param.paramType = CTRL_DATA_MAC_ADDRESS;
-		ctrlData_getParam(pSiteMgr->hCtrlData, &param);
-		MAC_COPY (pBuffer->hdr.address2, param.content.ctrlDataDeviceMacAddress);
+	/* Turn on the To_DS bit in the Frame Control field */
+	fc = (1 << DOT11_FC_TO_DS_SHIFT);
 
-		/* - Set BSSID */
-		if (pPrimarySite)
-		{
-			MAC_COPY (pBuffer->hdr.address3, pPrimarySite->bssid);
-		}
-		else
-		{
-			TRACE0(pSiteMgr->hReport, REPORT_SEVERITY_INFORMATION, "No Primary site so cannot fill QosNullData template.\n");
-		}
-	}
-	else /* Infrastructure mode */
-	{
-		/* Turn on the To_DS bit in the Frame Control field */
-		fc = (1 << DOT11_FC_TO_DS_SHIFT);
-
-		/* Set MAC header address fields:
+    /* Set MAC header address fields:
 		-----------------------------
 		Since To_DS is on and From_DS is off the address meaning is as follows:
 		Address1 - BSSID
@@ -816,25 +791,24 @@ TI_STATUS buildArpRspTemplate(siteMgr_t *pSiteMgr, TSetTemplate *pTemplate, TIpA
 		Address3 - Destination Address
 		Address4 - Not present */
 
-		/* - Set BSSID */
-		if (pPrimarySite)
-		{
-			MAC_COPY (pBuffer->hdr.address1, pPrimarySite->bssid);
-		}
-		else
-		{
-			TRACE0(pSiteMgr->hReport, REPORT_SEVERITY_INFORMATION, "No Primary site so cannot fill QosNullData template.\n");
-		}
-		/* - Set Source Address */
-		param.paramType = CTRL_DATA_MAC_ADDRESS;
-		ctrlData_getParam(pSiteMgr->hCtrlData, &param);
-		MAC_COPY (pBuffer->hdr.address2, param.content.ctrlDataDeviceMacAddress);
-		/* - Set Destination Address: ARP response should be sent with broadcast DA - Set accordingly */
-		for (macAddrItr = 0; macAddrItr < MAC_ADDR_LEN; macAddrItr++)
-		{
-			pBuffer->hdr.address3[macAddrItr] = 0xFF;
-		}
+	/* - Set BSSID */
+    if (pPrimarySite)
+	{
+		MAC_COPY (pBuffer->hdr.address1, pPrimarySite->bssid);
 	}
+	else
+	{
+		TRACE0(pSiteMgr->hReport, REPORT_SEVERITY_INFORMATION, "No Primary site so cannot fill QosNullData template.\n");
+	}
+    /* - Set Source Address */
+    param.paramType = CTRL_DATA_MAC_ADDRESS;
+    ctrlData_getParam(pSiteMgr->hCtrlData, &param);
+	MAC_COPY (pBuffer->hdr.address2, param.content.ctrlDataDeviceMacAddress);
+	/* - Set Destination Address: ARP response should be sent with broadcast DA - Set accordingly */
+	for (macAddrItr = 0; macAddrItr < MAC_ADDR_LEN; macAddrItr++)
+    {
+        pBuffer->hdr.address3[macAddrItr] = 0xFF;
+    }
 
     pBuffer->LLC.DSAP    = 0xaa;
     pBuffer->LLC.SSAP    = 0xaa;
@@ -900,4 +874,6 @@ TI_STATUS buildArpRspTemplate(siteMgr_t *pSiteMgr, TSetTemplate *pTemplate, TIpA
 	return TI_OK;
 }
 
-
+   
+   
+   

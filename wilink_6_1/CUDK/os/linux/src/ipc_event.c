@@ -40,8 +40,10 @@
 #include <linux/wireless.h>
 #include "cu_osapi.h"
 #include "oserr.h"
+
 #include "TWDriver.h"
 #include "STADExternalIf.h"
+
 #include "ParsEvent.h"
 #include "ipc_event.h"
 
@@ -55,6 +57,11 @@
 #define IPC_EVENT_MSG_KILL                  "IPC_EVENT_MSG_KILL"
 #define IPC_EVENT_MSG_UPDATE_DEBUG_LEVEL    "IPC_EVENT_MSG_UPDATE_DEBUG_LEVEL"
 #define IPC_EVENT_MSG_MAX_LEN   50
+
+/* Macros */
+#define PRINT_FORMAT_S8_VAL(signedVal) \
+(((U8)signedVal > 127) ? (0xFFFFFF00 | signedVal) : signedVal)
+/***********/
 
 /* local types */
 /***************/
@@ -249,7 +256,7 @@ static VOID IpcEvent_PrintEvent(IpcEvent_Child_t* pIpcEventChild, U32 EventId, T
                 os_error_printf(CU_MSG_ERROR, "MinimumServiceInterval = %d\n",tspec->uMinimumServiceInterval);
                 os_error_printf(CU_MSG_ERROR, "MaximumServiceInterval = %d\n",tspec->uMaximumServiceInterval);
                 os_error_printf(CU_MSG_ERROR, "uMediumTime = %d\n\n",tspec->uMediumTime);
-
+           
                 break;
             case IPC_EVENT_TSPEC_RATE_STATUS:
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_TSPEC_RATE_STATUS\n");
@@ -280,10 +287,13 @@ static VOID IpcEvent_PrintEvent(IpcEvent_Child_t* pIpcEventChild, U32 EventId, T
             case IPC_EVENT_WPS_SESSION_OVERLAP:
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_WPS_SESSION_OVERLAP\n");
                 break;
-            case IPC_EVENT_RSSI_SNR_TRIGGER:
+        case IPC_EVENT_RSSI_SNR_TRIGGER:
+            {
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_RSSI_SNR_TRIGGER (index = %d), Data = %d\n", 
                                 (S8)(*(pData + 2) - 1),PRINT_FORMAT_S8_VAL(*pData));
                 break;
+            }
+                
             case IPC_EVENT_TIMEOUT:
                 os_error_printf(CU_MSG_ERROR, (PS8)"IpcEvent_PrintEvent - received IPC_EVENT_TIMEOUT\n");
                 break;
@@ -332,25 +342,25 @@ static VOID IpcEvent_wext_event_wireless(IpcEvent_Child_t* pIpcEventChild, PS8 d
                     (iwe.u.ap_addr.sa_data[4] == 0) &&
                     (iwe.u.ap_addr.sa_data[5] == 0))
                 {
-                     EventId=IPC_EVENT_DISASSOCIATED;
+					EventId=IPC_EVENT_DISASSOCIATED;
                      IpcEvent_PrintEvent(pIpcEventChild, EventId, NULL,0);
                 } 
                 else 
                 {
 #ifdef XCC_MODULE_INCLUDED
                     /* Send a signal to the udhcpc application to trigger the renew request */
-                    system("killall -SIGUSR1 udhcpc");
+                    system("killall -SIGUSR1 udhcpc"); 
 #endif
-                    EventId=IPC_EVENT_ASSOCIATED;
-                    IpcEvent_PrintEvent(pIpcEventChild, EventId, NULL,0);
+					EventId=IPC_EVENT_ASSOCIATED;
+                     IpcEvent_PrintEvent(pIpcEventChild, EventId, NULL,0);                
                 }
                 break;
             case IWEVMICHAELMICFAILURE:
-                EventId=IPC_EVENT_MEDIA_SPECIFIC;
+				EventId=IPC_EVENT_MEDIA_SPECIFIC;
                 IpcEvent_PrintEvent(pIpcEventChild, EventId, NULL,0);
                 break;
             case IWEVCUSTOM:
-                pEvent =  (IPC_EV_DATA*)iwe.u.data.pointer;
+				pEvent =  (IPC_EV_DATA*)iwe.u.data.pointer;
                 if (pEvent)
                 {
                     EventId = (U32)pEvent->EvParams.uEventType;
@@ -358,7 +368,7 @@ static VOID IpcEvent_wext_event_wireless(IpcEvent_Child_t* pIpcEventChild, PS8 d
                 }
 				break;
             case SIOCGIWSCAN:
-                EventId=IPC_EVENT_SCAN_COMPLETE;
+				EventId=IPC_EVENT_SCAN_COMPLETE;
                 IpcEvent_PrintEvent(pIpcEventChild, EventId, NULL,0);             
                 break;
             case IWEVASSOCREQIE:
@@ -648,7 +658,7 @@ S32 IpcEvent_EnableEvent(THandle hIpcEvent, U32 event)
     
     if(pIpcEvent->p_shared_memory->event_mask & ((u64)1 << event))
     {
-      return EOALERR_IPC_EVENT_ERROR_EVENT_ALREADY_ENABLED;
+        return EOALERR_IPC_EVENT_ERROR_EVENT_ALREADY_ENABLED;
     }
     else
     {

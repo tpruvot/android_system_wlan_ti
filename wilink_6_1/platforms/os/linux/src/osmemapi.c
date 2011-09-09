@@ -99,7 +99,6 @@ os_memoryAlloc(
 {
     struct os_mem_block *blk;
     __u32 total_size = Size + sizeof(struct os_mem_block) + sizeof(__u32);
-	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 
 #ifdef TI_MEM_ALLOC_TRACE
     os_printf("MTT:%s:%d ::os_memoryAlloc(0x%p, %lu) : %lu\n",__FUNCTION__, __LINE__,OsContext,Size,total_size);
@@ -116,7 +115,14 @@ os_memoryAlloc(
     if (total_size < 2 * 4096)  
 #endif
     {
-		blk = kmalloc(total_size, flags);
+        if (in_atomic())
+        {
+            blk = kmalloc(total_size, GFP_ATOMIC);
+        }
+        else
+        {
+            blk = kmalloc(total_size, GFP_KERNEL);
+        }
         if (!blk)
         {            
             printk("%s: NULL\n",__func__);	
@@ -129,15 +135,11 @@ os_memoryAlloc(
 		/* We expect that the big allocations should be made outside the interrupt,
 			otherwise fail
 		*/
-		if (in_interrupt()) {
-			printk("%s: NULL\n",__func__);
+		if (in_interrupt())
 			return NULL;
-		}
         blk = vmalloc(total_size);
-	        if (!blk) {
-			printk("%s: NULL\n",__func__);
+        if (!blk)
             return NULL;
-		}
         blk->f_free = (os_free)vfree;
     }
 
@@ -216,12 +218,8 @@ os_memoryFree(
         TI_UINT32 Size
         )
 {
-	struct os_mem_block *blk;
-	if (!pMemPtr) {
-		printk("%s: NULL\n",__func__); 
-		return;
-	}
-	blk = (struct os_mem_block *)((char *)pMemPtr - sizeof(struct os_mem_block));
+    struct os_mem_block *blk =
+        (struct os_mem_block *)((char *)pMemPtr - sizeof(struct os_mem_block));
    
 #ifdef TI_MEM_ALLOC_TRACE
     os_printf("MTT:%s:%d ::os_memoryFree(0x%p, 0x%p, %lu) : %d\n",__FUNCTION__,__LINE__,OsContext,pMemPtr,Size,-Size);
@@ -268,10 +266,6 @@ os_memorySet(
     TI_UINT32 Length
     )
 {
-	if (!pMemPtr) {
-		printk("%s: NULL\n",__func__);
-		return;
-	}
    memset(pMemPtr,Value,Length);
 }
 
@@ -297,18 +291,14 @@ os_memoryAlloc4HwDma(
 {
     struct os_mem_block *blk;
 	__u32 total_size = Size + sizeof(struct os_mem_block) + sizeof(__u32);
-	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-
 	/* 
 		if the size is greater than 2 pages then we cant allocate the memory through kmalloc so the function fails
 	*/
 	if (Size < 2 * OS_PAGE_SIZE)
     {
-		blk = kmalloc(total_size, flags | GFP_DMA);
-		if (!blk) {
-			printk("%s: NULL\n",__func__);
+       	blk = kmalloc(total_size, GFP_ATOMIC|GFP_DMA);
+		if (!blk)
 			return NULL;
-		}
        	blk->f_free = (os_free)kfree;
 	}
     else
@@ -349,13 +339,8 @@ os_memory4HwDmaFree(
     TI_UINT32 Size
     )
 {
-	struct os_mem_block *blk;
-
-	if (!pMem_ptr) {
-		printk("%s: NULL\n",__func__);
-		return;
-	}
-	blk = (struct os_mem_block *)((char *)pMem_ptr - sizeof(struct os_mem_block));
+    struct os_mem_block *blk =
+        (struct os_mem_block *)((char *)pMem_ptr - sizeof(struct os_mem_block));
 
 	if (blk->signature != MEM_BLOCK_START)
     {
@@ -394,10 +379,6 @@ os_memoryZero(
     TI_UINT32 Length
     )
 {
-	if (!pMemPtr) {
-		printk("%s: NULL\n",__func__);
-		return;
-	}
    memset(pMemPtr,0,Length);
 }
 

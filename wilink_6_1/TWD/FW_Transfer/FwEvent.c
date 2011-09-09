@@ -75,7 +75,7 @@ extern int trigger_another_read;
  * Note: This structure actually includes two separate areas in the FW:
  *          1) Interrupt-Status register - a 32 bit register (clear on read).
  *          2) FW-Status structure - 64 bytes memory area
- *       The two areas are read in a single transaction thanks to a special memory
+ *       The two areas are read in a single transaction thanks to a special memory 
  *           partition that maps them as contiguous memory.
  */
 #define FW_STATUS_ADDR           0x14FC0 + 0xA000
@@ -93,7 +93,7 @@ extern int trigger_another_read;
 
 typedef enum
 {
-    FWEVENT_STATE_IDLE,
+    FWEVENT_STATE_IDLE,    
     FWEVENT_STATE_WAIT_INTR_INFO,
     FWEVENT_STATE_WAIT_HANDLE_COMPLT
 
@@ -244,8 +244,8 @@ TI_STATUS fwEvent_Init (TI_HANDLE hFwEvent, TI_HANDLE hTWD)
     pFwEvent->uEventVector      = 0;
 
     /* Prepare Interrupts Mask regiter Txn structure */
-    /*
-     * Note!!: The mask transaction is sent in low priority because it is used in the
+    /* 
+     * Note!!: The mask transaction is sent in low priority because it is used in the 
      *           init process which includes a long sequence of low priority transactions,
      *           and the order of this sequence is important so we must use the same priority
      */
@@ -255,7 +255,7 @@ TI_STATUS fwEvent_Init (TI_HANDLE hFwEvent, TI_HANDLE hTWD)
 
     /* Prepare FW status Txn structure (includes 4 bytes interrupt status reg and 64 bytes FW-status from memory area) */
     /* Note: This is the only transaction that is sent in high priority.
-     *       The original reason was to lower the interrupt latency, but we may consider using the
+     *       The original reason was to lower the interrupt latency, but we may consider using the 
      *         same priority as all other transaction for simplicity.
      */
     pTxn = (TTxnStruct*)&pFwEvent->tFwStatusTxn.tTxnStruct;
@@ -280,14 +280,14 @@ TI_STATUS fwEvent_Init (TI_HANDLE hFwEvent, TI_HANDLE hTWD)
 
 /*
  * \brief	FW interrupt handler, just switch to WLAN context for handling
- *
+ * 
  * \param   hFwEvent - FwEvent Driver handle
  * \return  void
- *
+ * 
  * \par Description
  * Called by the FW-Interrupt ISR (external context!).
  * Requests the context engine to schedule the driver task for handling the FW-Events.
- *
+ * 
  * \sa
  */
 void fwEvent_InterruptRequest (TI_HANDLE hFwEvent)
@@ -306,14 +306,14 @@ void fwEvent_InterruptRequest (TI_HANDLE hFwEvent)
 
 /*
  * \brief   The CB called in the driver context upon new interrupt
- *
+ * 
  * \param   hFwEvent - FwEvent Driver handle
  * \return  void
- *
+ * 
  * \par Description
  * Called by the context module after scheduled by fwEvent_InterruptRequest().
  * If IDLE, start the SM, and if not just indicate pending event for later.
- *
+ * 
  * \sa
  */
 static void fwEvent_NewEvent (TI_HANDLE hFwEvent)
@@ -322,14 +322,14 @@ static void fwEvent_NewEvent (TI_HANDLE hFwEvent)
     CL_TRACE_START_L2();
 
     /* If the SM is idle, call it to start handling new events */
-    if (pFwEvent->eSmState == FWEVENT_STATE_IDLE)
+    if (pFwEvent->eSmState == FWEVENT_STATE_IDLE) 
     {
         TRACE0(pFwEvent->hReport, REPORT_SEVERITY_INFORMATION, "fwEvent_NewEvent: Start SM\n");
 
         fwEvent_StateMachine (pFwEvent);
     }
     /* Else - SM is busy so set flag to handle it when finished with current events */
-    else
+    else 
     {
         TRACE0(pFwEvent->hReport, REPORT_SEVERITY_INFORMATION, "fwEvent_NewEvent: SM busy, set IntrPending flag\n");
 
@@ -342,12 +342,12 @@ static void fwEvent_NewEvent (TI_HANDLE hFwEvent)
 
 /*
  * \brief	FW-Event state machine
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
- *
+ * 
  * Process the current FW events in a sequence that may progress in the same context,
  *     or exit if pending an Async transaction, which will call back the SM when finished.
  *
@@ -358,10 +358,10 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
     ETxnStatus  eStatus = TXN_STATUS_ERROR; /* Set to error to detect if used uninitialized */
     CL_TRACE_START_L3();
 
-	/*
+	/* 
 	 * Loop through the states sequence as long as the process is synchronous.
-	 * Exit when finished or if an Asynchronous process is required.
-     * In this case the SM will be called back upon Async operation completion.
+	 * Exit when finished or if an Asynchronous process is required. 
+     * In this case the SM will be called back upon Async operation completion. 
 	 */
 	while (1)
 	{
@@ -383,7 +383,7 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
                 CL_TRACE_START_L5();
                 eStatus = fwEvent_SmHandleEvents (pFwEvent);
                 /* If state was changed to IDLE by recovery or stop process, exit (process terminated) */
-                if (pFwEvent->eSmState == FWEVENT_STATE_IDLE)
+                if (pFwEvent->eSmState == FWEVENT_STATE_IDLE) 
                 {
                     CL_TRACE_END_L5("tiwlan_drv.ko", "CONTEXT", "FwEvent", ".HndlEvents");
                     CL_TRACE_END_L3("tiwlan_drv.ko", "CONTEXT", "FwEvent", "");
@@ -397,7 +397,7 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
             case FWEVENT_STATE_WAIT_HANDLE_COMPLT:
             {
                 /* If pending interrupt, read interrupt info (back to WAIT_INTR_INFO state) */
-                if (pFwEvent->bIntrPending)
+                if (pFwEvent->bIntrPending) 
                 {
                     CL_TRACE_START_L5();
                     pFwEvent->bIntrPending = TI_FALSE;
@@ -406,7 +406,7 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
                     CL_TRACE_END_L5("tiwlan_drv.ko", "CONTEXT", "FwEvent", ".HndlCmplt");
                 }
                 /* Else - all done so release TwIf to sleep and exit */
-                else
+                else 
                 {
                     twIf_Sleep(pFwEvent->hTwIf);
                     pFwEvent->eSmState = FWEVENT_STATE_IDLE;
@@ -423,7 +423,7 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
         }  /* switch */
 
         TRACE3(pFwEvent->hReport, REPORT_SEVERITY_INFORMATION, "fwEvent_StateMachine: NewState=%d, Status=%d, IntrPending=%d\n", pFwEvent->eSmState, eStatus, pFwEvent->bIntrPending);
-
+        
 		/* If last status is Pending, exit the SM (to be called back upon Async operation completion) */
 		if (eStatus == TXN_STATUS_PENDING)
 		{
@@ -448,12 +448,12 @@ static void fwEvent_StateMachine (TfwEvent *pFwEvent)
 
 /*
  * \brief	Read interrupt info from FW
- *
+ * 
  * \param   hFwEvent  - FwEvent Driver handle
  * \return  void
- *
+ * 
  * \par Description
- *
+ * 
  * Indicate the TwIf that HW is available and initiate transactions for reading
  *     the Interrupt status and the FW status.
  *
@@ -478,7 +478,7 @@ static ETxnStatus fwEvent_SmReadIntrInfo (TfwEvent *pFwEvent)
      * Note: This structure actually includes two separate areas in the FW:
      *          1) Interrupt-Status register - a 32 bit register (clear on read).
      *          2) FW-Status structure - 64 bytes memory area
-     *       The two areas are read in a single transaction thanks to a special memory
+     *       The two areas are read in a single transaction thanks to a special memory 
      *           partition that maps them as contiguous memory.
      */
     TXN_FW_EVENT_SET_FW_STAT_ADDR(pFwEvent)
@@ -492,15 +492,15 @@ static ETxnStatus fwEvent_SmReadIntrInfo (TfwEvent *pFwEvent)
 
 
 /*
- * \brief	Handle the Fw Status information
- *
+ * \brief	Handle the Fw Status information 
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
  * This function is called from fwEvent_Handle on a sync read, or from TwIf as a CB on an async read.
  * It calls fwEvent_CallHandlers to handle the triggered interrupts.
- *
+ * 
  * \sa fwEvent_Handle
  */
 static ETxnStatus fwEvent_SmHandleEvents (TfwEvent *pFwEvent)
@@ -509,7 +509,7 @@ static ETxnStatus fwEvent_SmHandleEvents (TfwEvent *pFwEvent)
     CL_TRACE_START_L4();
 
     /* Save delta between driver and FW time (needed for Tx packets lifetime) */
-    pFwEvent->uFwTimeOffset = (os_timeStampMs (pFwEvent->hOs) * 1000) -
+    pFwEvent->uFwTimeOffset = (os_timeStampMs (pFwEvent->hOs) * 1000) - 
                               ENDIAN_HANDLE_LONG (pFwEvent->tFwStatusTxn.tFwStatus.fwLocalTime);
 
 #ifdef HOST_INTR_MODE_LEVEL
@@ -531,17 +531,17 @@ static ETxnStatus fwEvent_SmHandleEvents (TfwEvent *pFwEvent)
 
     /* Return the status of the handlers processing (complete, pending or error) */
     return eStatus;
-}
+} 
 
 
 /*
  * \brief	Call FwEvent clients event handlers
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
- *
+ * 
  * \sa
  */
 static ETxnStatus fwEvent_CallHandlers (TfwEvent *pFwEvent)
@@ -579,7 +579,7 @@ static ETxnStatus fwEvent_CallHandlers (TfwEvent *pFwEvent)
         eStatus = eventMbox_Handle(pFwEvent->hEventMbox,&pFwEvent->tFwStatusTxn.tFwStatus);
         UPDATE_PENDING_HANDLERS_NUMBER(eStatus)
     }
-
+    
     /* The DATA interrupt is shared by all data path events, so call all Tx and Rx clients */
     if (pFwEvent->uEventVector & ACX_INTR_DATA)
     {
@@ -591,7 +591,7 @@ static ETxnStatus fwEvent_CallHandlers (TfwEvent *pFwEvent)
 
         eStatus = txResult_TxCmpltIntrCb (pFwEvent->hTxResult, &pFwEvent->tFwStatusTxn.tFwStatus);
         UPDATE_PENDING_HANDLERS_NUMBER(eStatus)
-    }
+    } 
 
     CL_TRACE_END_L4("tiwlan_drv.ko", "CONTEXT", "FwEvent", "");
 
@@ -602,13 +602,13 @@ static ETxnStatus fwEvent_CallHandlers (TfwEvent *pFwEvent)
 
 /*
  * \brief	Called by any handler that completed after pending
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  *
  * \par Description
  *
  * Decrement pending handlers counter and if 0 call the SM to complete its process.
- *
+ * 
  * \sa
  */
 void fwEvent_HandlerCompleted (TI_HANDLE hFwEvent)
@@ -618,13 +618,13 @@ void fwEvent_HandlerCompleted (TI_HANDLE hFwEvent)
 #ifdef TI_DBG
     TRACE2(pFwEvent->hReport, REPORT_SEVERITY_INFORMATION, "fwEvent_HandlerCompleted: state=%d, NumPendHndlrs=%d\n", pFwEvent->eSmState, pFwEvent->uNumPendHndlrs);
     /* Verify that we really have pending handlers, otherwise it an error */
-    if (pFwEvent->uNumPendHndlrs == 0)
+    if (pFwEvent->uNumPendHndlrs == 0) 
     {
         TRACE0(pFwEvent->hReport, REPORT_SEVERITY_ERROR, "fwEvent_HandlerCompleted: Called while no handlers are pending\n");
         return;
     }
     /* Verify that we are in */
-    if (pFwEvent->eSmState != FWEVENT_STATE_WAIT_HANDLE_COMPLT)
+    if (pFwEvent->eSmState != FWEVENT_STATE_WAIT_HANDLE_COMPLT) 
     {
         TRACE1(pFwEvent->hReport, REPORT_SEVERITY_ERROR, "fwEvent_HandlerCompleted: Called while not in WAIT_HANDLE_COMPLT state (state=%d)\n", pFwEvent->eSmState);
         return;
@@ -633,7 +633,7 @@ void fwEvent_HandlerCompleted (TI_HANDLE hFwEvent)
 
     /* Decrement the pending handlers counter and if zero call the SM to complete the process */
     pFwEvent->uNumPendHndlrs--;
-    if (pFwEvent->uNumPendHndlrs == 0)
+    if (pFwEvent->uNumPendHndlrs == 0) 
     {
         fwEvent_StateMachine (pFwEvent);
     }
@@ -642,14 +642,14 @@ void fwEvent_HandlerCompleted (TI_HANDLE hFwEvent)
 
 /*
  * \brief	Translate host to FW time (Usec)
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \param  uHostTime - The host time in MS to translate
  *
  * \return FW Time in Usec
- *
+ * 
  * \par Description
- *
+ * 
  * \sa
  */
 TI_UINT32 fwEvent_TranslateToFwTime (TI_HANDLE hFwEvent, TI_UINT32 uHostTime)
@@ -662,13 +662,13 @@ TI_UINT32 fwEvent_TranslateToFwTime (TI_HANDLE hFwEvent, TI_UINT32 uHostTime)
 
 /*
  * \brief	Unmask only cmd-cmplt and events interrupts (needed for init phase)
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return Event mask
- *
+ * 
  * \par Description
  * Unmask only cmd-cmplt and events interrupts (needed for init phase).
- *
+ * 
  * \sa
  */
 void fwEvent_SetInitMask (TI_HANDLE hFwEvent)
@@ -676,7 +676,7 @@ void fwEvent_SetInitMask (TI_HANDLE hFwEvent)
     TfwEvent *pFwEvent = (TfwEvent *)hFwEvent;
 
     /* Unmask only the interrupts needed for the FW configuration process. */
-    pFwEvent->uEventMask = ACX_INTR_CMD_COMPLETE | ACX_INTR_EVENT_A | ACX_INTR_EVENT_B;
+    pFwEvent->uEventMask = ACX_INTR_CMD_COMPLETE | ACX_INTR_EVENT_A | ACX_INTR_EVENT_B | ACX_INTR_HW_AVAILABLE;
     pFwEvent->tMaskTxn.uData = ~pFwEvent->uEventMask;
     TXN_FW_EVENT_SET_MASK_ADDR(pFwEvent)
     twIf_Transact(pFwEvent->hTwIf, &(pFwEvent->tMaskTxn.tTxnStruct));
@@ -685,10 +685,10 @@ void fwEvent_SetInitMask (TI_HANDLE hFwEvent)
 
 /*
  * \brief	Stop & reset FwEvent (called by the driver stop process)
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return TI_OK
- *
+ * 
  * \par Description
  *
  * \sa
@@ -701,8 +701,8 @@ TI_STATUS fwEvent_Stop (TI_HANDLE hFwEvent)
     pFwEvent->bIntrPending  = TI_FALSE;
     pFwEvent->uNumPendHndlrs = 0;
     pFwEvent->uEventMask     = 0;
-    pFwEvent->uEventVector   = 0;
-
+    pFwEvent->uEventVector   = 0;    
+    
     return TI_OK;
 }
 
@@ -739,15 +739,15 @@ void fwEvent_MaskAllFwInterrupts(TI_HANDLE hFwEvent)
 
 /*
  * \brief	Unmask all interrupts
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
  *
  * Called after driver Start or Recovery process are completed.
  * Unmask all interrupts.
- *
+ * 
  * \sa
  */
 void fwEvent_EnableExternalEvents (TI_HANDLE hFwEvent)
@@ -764,10 +764,10 @@ void fwEvent_EnableExternalEvents (TI_HANDLE hFwEvent)
 
 /*
  * \brief	Disable the FwEvent client in the context handler
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
  *
  * \sa
@@ -782,10 +782,10 @@ void fwEvent_DisableInterrupts(TI_HANDLE hFwEvent)
 
 /*
  * \brief	Enable the FwEvent client in the context handler
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  * \return void
- *
+ * 
  * \par Description
  *
  * \sa
@@ -820,4 +820,3 @@ void fwEvent_PrintStat (TI_HANDLE hFwEvent)
 
 
 
-  

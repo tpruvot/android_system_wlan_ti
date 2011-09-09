@@ -38,7 +38,7 @@ WPA_SUPPL_DIR_INCLUDE += $(WPA_SUPPL_DIR)/src \
 	$(WPA_SUPPL_DIR)/src/wps
 endif
 
-DK_ROOT = $(BOARD_WLAN_TI_STA_DK_ROOT)
+DK_ROOT = hardware/ti/wlan/$(BOARD_WLAN_DEVICE)
 OS_ROOT = $(DK_ROOT)/platforms
 STAD	= $(DK_ROOT)/stad
 UTILS	= $(DK_ROOT)/utils
@@ -65,8 +65,9 @@ INCLUDES = $(STAD)/Export_Inc \
 	external/openssl/include \
 	$(WPA_SUPPL_DIR_INCLUDE) \
 	$(DK_ROOT)/../lib
-
-L_CFLAGS += -DCONFIG_DRIVER_CUSTOM -DHOST_COMPILE -D__BYTE_ORDER_LITTLE_ENDIAN
+  
+L_CFLAGS = -DCONFIG_DRIVER_CUSTOM -DHOST_COMPILE -D__BYTE_ORDER_LITTLE_ENDIAN
+#L_CFLAGS += -DCONFIG_CONNECTION_SCAN
 L_CFLAGS += -DWPA_SUPPLICANT_$(WPA_SUPPLICANT_VERSION)
 OBJS = driver_ti.c $(LIB)/scanmerge.c $(LIB)/shlist.c
 
@@ -96,8 +97,9 @@ L_CFLAGS += -DCONFIG_WPS
 endif
 
 ########################
-
+ 
 include $(CLEAR_VARS)
+LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE := libCustomWifi
 LOCAL_SHARED_LIBRARIES := libc libcutils
 LOCAL_CFLAGS := $(L_CFLAGS)

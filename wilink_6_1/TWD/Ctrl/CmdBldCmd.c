@@ -709,7 +709,7 @@ TI_STATUS cmdBld_CmdStartJoin (TI_HANDLE hCmdBld, ScanBssType_e BssType, void *f
 
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_START_JOIN)
 
-    /*
+	/*
      * set RxFilter (but don't write it to the FW, this is done in the join command),
      * Configure templates content, ...
      */
@@ -774,7 +774,7 @@ TI_STATUS cmdBld_CmdJoinBss (TI_HANDLE hCmdBld, TJoinBss *pJoinBssParams, void *
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_INVALID(hCmdBld, __CFG_PS_RX_STREAMING);
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_INVALID(hCmdBld, __CMD_STA_STATE);
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_INVALID(hCmdBld, __CMD_ARP_RSP_JOIN);
-    /*
+	/*
      * call the hardware to start/join the bss
      */
     return cmdBld_CmdStartJoin (hCmdBld, pJoinBssParams->bssType, fCb, hCb);
@@ -795,7 +795,7 @@ TI_STATUS cmdBld_CmdTemplate (TI_HANDLE hCmdBld, TSetTemplate *pTemplateParams, 
     {
     case BEACON_TEMPLATE:
 		CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_BEACON_JOIN)
-        eType = TEMPLATE_BEACON;
+		eType = TEMPLATE_BEACON;
         pTemplate = &(DB_TEMP(hCmdBld).Beacon);
         break;
 
@@ -817,15 +817,15 @@ TI_STATUS cmdBld_CmdTemplate (TI_HANDLE hCmdBld, TSetTemplate *pTemplateParams, 
             pTemplate = &(DB_TEMP(hCmdBld).ProbeReq50);
         }
         CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_PROBE_REQ_JOIN)
-        break;
+		break;
 
-    case NULL_DATA_TEMPLATE:
+	case NULL_DATA_TEMPLATE:
         CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_NULL_DATA_JOIN)
         eType = TEMPLATE_NULL_DATA;
         pTemplate = &(DB_TEMP(hCmdBld).NullData);
         break;
 
-    case PS_POLL_TEMPLATE:
+	case PS_POLL_TEMPLATE:
         CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_PS_POLL_JOIN)
         eType = TEMPLATE_PS_POLL;
         pTemplate = &(DB_TEMP(hCmdBld).PsPoll);
@@ -836,14 +836,14 @@ TI_STATUS cmdBld_CmdTemplate (TI_HANDLE hCmdBld, TSetTemplate *pTemplateParams, 
         pTemplate = &(DB_TEMP(hCmdBld).QosNullData);
         break;
 
-    case KEEP_ALIVE_TEMPLATE:
+	case KEEP_ALIVE_TEMPLATE:
         CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_KEEP_ALIVE_TMPL_JOIN)
         eType = TEMPLATE_KLV;
         uIndex = pTemplateParams->index;
         pTemplate = &(DB_TEMP(hCmdBld).KeepAlive[uIndex]);
         break;
 
-    case DISCONN_TEMPLATE:
+	case DISCONN_TEMPLATE:
         CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_DISCONN_JOIN)
         eType = TEMPLATE_DISCONNECT;
         pTemplate = &(DB_TEMP(hCmdBld).Disconn);
@@ -851,8 +851,8 @@ TI_STATUS cmdBld_CmdTemplate (TI_HANDLE hCmdBld, TSetTemplate *pTemplateParams, 
 
     case ARP_RSP_TEMPLATE:
 		CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CMD_ARP_RSP_JOIN);
-        eType = TEMPLATE_ARP_RSP;
-        pTemplate = &(DB_TEMP(hCmdBld).ArpRsp);
+		eType = TEMPLATE_ARP_RSP;
+        pTemplate = &(DB_TEMP(hCmdBld).ArpRsp); 
         break;
 
     default:
@@ -1397,7 +1397,7 @@ TI_STATUS cmdBld_CmdSetWepDefaultKeyId (TI_HANDLE hCmdBld, TI_UINT8 aKeyIdVal, v
 
 	CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(hCmdBld, __CFG_KEYS);
 
-    /* Save the deafult key ID for reconfigure phase */
+	/* Save the deafult key ID for reconfigure phase */
     DB_KEYS(pCmdBld).bDefaultKeyIdValid  = TI_TRUE;
     DB_KEYS(pCmdBld).uReconfDefaultKeyId = aKeyIdVal;
 

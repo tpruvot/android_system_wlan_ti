@@ -114,8 +114,8 @@ TI_STATUS fsm_Create(TI_HANDLE				hOs,
 		os_memoryFree(hOs, *pFsm, sizeof(fsm_stateMachine_t));
 		return TI_NOK;
 	}
-
-	os_memoryZero(hOs, (*pFsm)->stateEventMatrix, (MaxNoOfStates * MaxNoOfEvents * sizeof(fsm_actionCell_t)));
+	os_memoryZero(hOs, (*pFsm)->stateEventMatrix, 
+		(MaxNoOfStates * MaxNoOfEvents * sizeof(fsm_actionCell_t)));
 	/* update pFsm structure with parameters */
 	(*pFsm)->MaxNoOfStates = MaxNoOfStates;
 	(*pFsm)->MaxNoOfEvents = MaxNoOfEvents;
@@ -242,15 +242,15 @@ TI_STATUS fsm_Config(fsm_stateMachine_t	*pFsm,
 *
 * \sa fsm_Init
 */
-TI_STATUS fsm_Event (fsm_stateMachine_t  *pFsm,
-                     TI_UINT8            *currentState,
-                     TI_UINT8            event,
-                     void                *pData)
+TI_STATUS fsm_Event(fsm_stateMachine_t		*pFsm,
+				 TI_UINT8					*currentState,
+				 TI_UINT8					event,
+				 void					*pData)
 {
-	TI_UINT8    oldState;
-	TI_STATUS   status;
+	TI_UINT8		oldState;
+	TI_STATUS		status;
 
-	/* check for FSM existence */
+	/* check for FSM existance */
 	if (pFsm == NULL)
 	{
 		return TI_NOK;
@@ -266,12 +266,12 @@ TI_STATUS fsm_Event (fsm_stateMachine_t  *pFsm,
 	/* update current state */
 	*currentState = pFsm->stateEventMatrix[(*currentState * pFsm->ActiveNoOfEvents) + event].nextState;
 
-    /* activate transition function */
-    if ((*pFsm->stateEventMatrix[(oldState * pFsm->ActiveNoOfEvents) + event].actionFunc) == NULL)
+	/* activate transition function */
+    if ((*pFsm->stateEventMatrix[(oldState * pFsm->ActiveNoOfEvents) + event].actionFunc) == NULL) 
     {
         return TI_NOK;
     }
-    status = (*pFsm->stateEventMatrix[(oldState * pFsm->ActiveNoOfEvents) + event].actionFunc)(pData);
+	status = (*pFsm->stateEventMatrix[(oldState * pFsm->ActiveNoOfEvents) + event].actionFunc)(pData);
 
 	return status;
 }

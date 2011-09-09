@@ -1118,7 +1118,7 @@ static TI_STATUS regulatoryDomain_getChannelCapability(regulatoryDomain_t *pRegu
 	{
 		return TI_NOK;
 	}
-	
+
 	channelCapabilityRet->channelValidity = TI_FALSE;
 	channelCapabilityRet->maxTxPowerDbm = 0;
 	if ((channelCapabilityReq.channelNum==0 ) || (channelCapabilityReq.channelNum > A_5G_BAND_MAX_CHANNEL))
@@ -1192,7 +1192,6 @@ static TI_STATUS regulatoryDomain_getChannelCapability(regulatoryDomain_t *pRegu
 				channelCapabilityReq.band, 
 				bServingChannel);
             os_memoryFree(pRegulatoryDomain->hOs, pParam, sizeof(paramInfo_t));
-
 		}
 	}
 	else	/* Passive scanning */

@@ -391,6 +391,7 @@ TI_STATUS sme_SetParam (TI_HANDLE hSme, paramInfo_t *pParam)
         break;
 
     case SME_DESIRED_SSID_ACT_PARAM:
+
         if (pParam->content.smeDesiredSSID.len > MAX_SSID_LEN)
         {
             return PARAM_VALUE_NOT_VALID;   /* SSID length is out of range */
@@ -431,8 +432,6 @@ TI_STATUS sme_SetParam (TI_HANDLE hSme, paramInfo_t *pParam)
             pSme->bConstantScan = TI_FALSE;
         }
 
-        pSme->bRunning = TI_TRUE;     // set it to TRUE in case it's accidentally altered.
-
         /* now send a disconnect event */
         sme_SmEvent (pSme->hSmeSm, SME_SM_EVENT_DISCONNECT, hSme);
         break;
@@ -446,7 +445,6 @@ TI_STATUS sme_SetParam (TI_HANDLE hSme, paramInfo_t *pParam)
             pSme->uScanCount = 0;
             /* now send a disconnect event */
             sme_SmEvent (pSme->hSmeSm, SME_SM_EVENT_DISCONNECT, hSme);
-  
         }
         break;
 
@@ -465,8 +463,8 @@ TI_STATUS sme_SetParam (TI_HANDLE hSme, paramInfo_t *pParam)
             {
                 pSme->hScanResultTable = pSme->hScanCncnScanResulTable;
             }
-            /* now send a disconnect event */
-            sme_SmEvent (pSme->hSmeSm, SME_SM_EVENT_DISCONNECT, hSme);
+        /* now send a disconnect event */
+        sme_SmEvent (pSme->hSmeSm, SME_SM_EVENT_DISCONNECT, hSme);
         }
         break;
 

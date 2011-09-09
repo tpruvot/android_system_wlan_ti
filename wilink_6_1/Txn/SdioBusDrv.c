@@ -380,7 +380,7 @@ static TI_BOOL busDrv_PrepareTxnParts (TBusDrvObj *pBusDrv, TTxnStruct *pTxn)
         }
 
         /* For write transaction, copy the data to the DMA buffer */
-        if (bWrite)
+        if (bWrite) 
         {
             os_memoryCopy (pBusDrv->hOs, pHostBuf + pBusDrv->uTxnLength, pTxn->aBuf[uBufNum], uBufLen);
         }

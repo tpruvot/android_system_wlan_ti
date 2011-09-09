@@ -126,6 +126,7 @@ TI_STATUS cmdHndlr_Destroy (TI_HANDLE hCmdHndlr, TI_HANDLE hEvHandler)
 		cmdInterpret_Destroy (pCmdHndlr->hCmdInterpret, hEvHandler);
 	}
 
+
 	if (pCmdHndlr->hCmdQueue)
 	{
 		que_Destroy (pCmdHndlr->hCmdQueue);
@@ -153,14 +154,14 @@ void cmdHndlr_ClearQueue (TI_HANDLE hCmdHndlr)
     TCmdHndlrObj    *pCmdHndlr = (TCmdHndlrObj *)hCmdHndlr;
     TConfigCommand  *pCurrCmd;
 
-    /* Dequeue and free all queued commands in a critical section */
+    /* Dequeue and free all queued commands */
     do {
         context_EnterCriticalSection (pCmdHndlr->hContext);
         pCurrCmd = (TConfigCommand *)que_Dequeue(pCmdHndlr->hCmdQueue);
         context_LeaveCriticalSection (pCmdHndlr->hContext);
         if (pCurrCmd != NULL) {
-        /* Just release the semaphore. The command is freed subsequently. */
-        os_SignalObjectSet (pCmdHndlr->hOs, pCurrCmd->pSignalObject);
+            /* Just release the semaphore. The command is freed subsequently. */
+            os_SignalObjectSet (pCmdHndlr->hOs, pCurrCmd->pSignalObject);
         }
     } while (pCurrCmd != NULL);
 }
@@ -238,6 +239,7 @@ TI_STATUS cmdHndlr_InsertCommand (TI_HANDLE     hCmdHndlr,
     TCmdHndlrObj     *pCmdHndlr = (TCmdHndlrObj *)hCmdHndlr;
 	TConfigCommand   *pNewCmd;
 	TI_STATUS         eStatus;
+	int ret;
 
 	/* Allocated command structure */
 	pNewCmd = os_memoryAlloc (pCmdHndlr->hOs, sizeof (TConfigCommand));
@@ -273,14 +275,14 @@ TI_STATUS cmdHndlr_InsertCommand (TI_HANDLE     hCmdHndlr,
     /* Enter critical section to protect queue access */
     context_EnterCriticalSection (pCmdHndlr->hContext);
 
-	/* Enqueue the command (if failed, release memory and return NOK) */
+    /* Enqueue the command (if failed, release memory and return NOK) */
     eStatus = que_Enqueue (pCmdHndlr->hCmdQueue, (TI_HANDLE)pNewCmd);
     if (eStatus != TI_OK) 
-	{
-		os_printf("cmdPerform: Failed to enqueue new command\n");
-		os_SignalObjectFree (pCmdHndlr->hOs, pNewCmd->pSignalObject);
+    {
+        os_printf("cmdPerform: Failed to enqueue new command\n");
+        os_SignalObjectFree (pCmdHndlr->hOs, pNewCmd->pSignalObject);
         pNewCmd->pSignalObject = NULL;
-		os_memoryFree (pCmdHndlr->hOs, pNewCmd, sizeof (TConfigCommand));
+        os_memoryFree (pCmdHndlr->hOs, pNewCmd, sizeof (TConfigCommand));
         context_LeaveCriticalSection (pCmdHndlr->hContext);  /* Leave critical section */
         return TI_NOK;
     }
@@ -315,21 +317,27 @@ TI_STATUS cmdHndlr_InsertCommand (TI_HANDLE     hCmdHndlr,
 	os_SignalObjectWait (pCmdHndlr->hOs, pNewCmd->pSignalObject);
 
 	/* After "wait" - the command has already been processed by the drivers' context */
-    /* Indicate the end of command process, from adding it to the queue until get return status form it */  
-    pNewCmd->bWaitFlag = TI_FALSE;
+	/* Indicate the end of command process, from adding it to the queue until get return status form it */  
+	pNewCmd->bWaitFlag = TI_FALSE;
 
 	/* Copy the return code */
 	eStatus = pNewCmd->return_code;
 
+#ifdef HAVE_SIGNAL_OBJECT_CHECK
+	/* Check signalling object status */
+	ret = os_SignalObjectCheck (pCmdHndlr->hOs, pNewCmd->pSignalObject);
+#else
+	ret = TI_OK;
+#endif
 	/* Free signalling object and command structure */
 	os_SignalObjectFree (pCmdHndlr->hOs, pNewCmd->pSignalObject);
 	pNewCmd->pSignalObject = NULL;
 
-    /* If command not completed in this context (Async) don't free the command memory */
-    if(COMMAND_PENDING != pNewCmd->eCmdStatus)
-    {
-        os_memoryFree (pCmdHndlr->hOs, pNewCmd, sizeof (TConfigCommand));
-    }
+	/* If signalling object is not completion, don't free the memory */
+	if( (COMMAND_PENDING != pNewCmd->eCmdStatus) && (ret == TI_OK) )
+	{
+		os_memoryFree (pCmdHndlr->hOs, pNewCmd, sizeof (TConfigCommand));
+	}
 
 	/* Return to calling process with command return code */
 	return eStatus;

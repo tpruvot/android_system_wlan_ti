@@ -432,7 +432,7 @@ TI_STATUS scanSRVSM_handleTimerExpiry( TI_HANDLE hScanSrv )
     scanSRV_t *pScanSRV = (scanSRV_t*)hScanSrv;
 
     /* 
-     No scan complete event will trigger recovery only after a consecutive configurable number of
+     No scan complete event will trigger recovery only after a consecutive configurable number of 
 	 no scan complete events occurred.
      */
     pScanSRV->currentNumberOfConsecutiveNoScanCompleteEvents++;

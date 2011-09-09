@@ -77,8 +77,6 @@ void      context_DisableClient   (TI_HANDLE hContext, TI_UINT32 uClientId);
 
 void      context_EnterCriticalSection (TI_HANDLE hContext);
 void      context_LeaveCriticalSection (TI_HANDLE hContext);
-void      context_DisableClient   (TI_HANDLE hContext, TI_UINT32 uClientId);
-void      context_EnableClient    (TI_HANDLE hContext, TI_UINT32 uClientId);
 #ifdef TI_DBG
 void      context_Print           (TI_HANDLE hContext);
 #endif /* TI_DBG */

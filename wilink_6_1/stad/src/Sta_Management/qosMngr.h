@@ -167,7 +167,7 @@ typedef struct
 
     /* PS Rx streaming parameters */
     TPsRxStreaming      aTidPsRxStreaming[MAX_NUM_OF_802_1d_TAGS];/* Per TID PS-Rx-Streaming configured parameters */
-    TPsRxStreaming      AutoRxStreaming;                    /* auto rx streaming configured parameters*/
+	TPsRxStreaming		AutoRxStreaming;					/* auto rx streaming configured parameters*/
     TI_UINT32           uNumEnabledPsRxStreams;             /* the number of enabled TID-PS-Rx-Streams */
 
     /* traffic admission control parameters */
@@ -190,7 +190,7 @@ typedef struct
     /* 802.11n BA session */
     TI_UINT8               aBaPolicy[MAX_NUM_OF_802_1d_TAGS];
     TI_UINT16              aBaInactivityTimeout[MAX_NUM_OF_802_1d_TAGS];
-    TI_BOOL                bEnableBurstMode;
+	TI_BOOL				bEnableBurstMode;
 } qosMngr_t;
 
 

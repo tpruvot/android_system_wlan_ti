@@ -146,5 +146,6 @@ TI_UINT32 qosMngr_buildTSPec(TI_HANDLE hQosMngr, TI_UINT32 user_priority, TI_UIN
 TI_STATUS qosMngr_GetWmeEnableFlag(TI_HANDLE hQosMngr, TI_BOOL *bWmeEnable);
 void qosMngr_UpdatePsTraffic   (TI_HANDLE hQosMngr,TI_BOOL bPsTrafficOn );
 
+
 #endif /* __QOS_MNGR_API_H__ */
 

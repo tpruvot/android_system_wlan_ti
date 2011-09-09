@@ -268,7 +268,7 @@ void scanCncnSm_StartScan (TI_HANDLE hScanCncnClient)
     pScanCncnClient->uResultCounter = 0;
     pScanCncnClient->uResultExpectedNumber = 0;
     pScanCncnClient->bScanCompletePending = TI_FALSE;
-	pScanCncnClient->bScanRejectedOn2_4 = TI_FALSE;
+	pScanCncnClient->bScanRejectedOn2_4 = TI_FALSE;  
 
     /* call the specific start scan command. It will handle errors by itself */
     pScanCncnClient->fStartScan (hScanCncnClient);

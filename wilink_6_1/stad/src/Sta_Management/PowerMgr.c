@@ -90,6 +90,7 @@ static TI_STATUS    powerMgrSendMBXWakeUpConditions(TI_HANDLE hPowerMgr,TI_UINT8
 static TI_STATUS    powerMgrNullPacketRateConfiguration(TI_HANDLE hPowerMgr);
 static PowerMgr_PowerMode_e powerMgrGetHighestPriority(TI_HANDLE hPowerMgr);
 
+
 /*****************************************************************************
  **         Public Function prototypes                                      **
  *****************************************************************************/
@@ -184,7 +185,7 @@ void PowerMgr_init (TStadHandlesList *pStadHandles)
     pPowerMgr->hTWD             = pStadHandles->hTWD;
     pPowerMgr->hSoftGemini      = pStadHandles->hSoftGemini;
     pPowerMgr->hTimer           = pStadHandles->hTimer;
-    pPowerMgr->hQosMngr		    = pStadHandles->hQosMngr;
+	pPowerMgr->hQosMngr			= pStadHandles->hQosMngr;
     pPowerMgr->psEnable         = TI_FALSE;
 
     /* initialize the power manager keep-alive sub module */
@@ -491,6 +492,7 @@ TI_STATUS PowerMgr_stopPS(TI_HANDLE hPowerMgr, TI_BOOL bDisconnect)
 	{
 		qosMngr_UpdatePsTraffic(pPowerMgr->hQosMngr,TI_FALSE);
 	}
+	
     TWD_SetPsMode (pPowerMgr->hTWD, POWER_SAVE_OFF, TI_FALSE, NULL, NULL, NULL);
 
     /* set the power policy of the system */
@@ -688,14 +690,6 @@ TI_STATUS powerMgr_setParam(TI_HANDLE thePowerMgrHandle,
 
     switch ( theParamP->paramType )
     {
-    case POWER_MGR_DTIM_LISTEN_INTERVAL:
-        pPowerMgr->dtimListenInterval = theParamP->content.dtimListenInterval;
-        if (pPowerMgr->dtimListenInterval > 1)
-            powerMgrSendMBXWakeUpConditions(thePowerMgrHandle,pPowerMgr->dtimListenInterval,TNET_WAKE_ON_N_DTIM);
-        else
-            powerMgrSendMBXWakeUpConditions(thePowerMgrHandle,pPowerMgr->dtimListenInterval,TNET_WAKE_ON_DTIM);
-        break;
-
     case POWER_MGR_POWER_MODE:
         pPowerMgr->powerMngModePriority[theParamP->content.powerMngPowerMode.PowerMngPriority].powerMode
                         = theParamP->content.powerMngPowerMode.PowerMode;
@@ -742,17 +736,6 @@ TI_STATUS powerMgr_setParam(TI_HANDLE thePowerMgrHandle,
     case POWER_MGR_KEEP_ALIVE_ADD_REM:
         return powerMgrKL_setParam (pPowerMgr->hPowerMgrKeepAlive, theParamP);
 
-    case POWER_MGR_SET_VOICE_POWER_POLICY:
-        pPowerMgr->powerMngModePriority[POWER_MANAGER_VOIP_PRIORITY].powerMode = POWER_MODE_SHORT_DOZE;
-        pPowerMgr->powerMngModePriority[POWER_MANAGER_VOIP_PRIORITY].priorityEnable = TI_TRUE;
-        PowerMgr_setPowerMode(thePowerMgrHandle);
-        break;
- 
-    case POWER_MGR_CANCEL_VOICE_POWER_POLICY:
-        pPowerMgr->powerMngModePriority[POWER_MANAGER_VOIP_PRIORITY].priorityEnable = TI_FALSE;
-        PowerMgr_setPowerMode(thePowerMgrHandle);
-        break;    
-
     default:
         TRACE1(pPowerMgr->hReport, REPORT_SEVERITY_ERROR, "PowerMgr_setParam - ERROR - Param is not supported, %d\n\n", theParamP->paramType);
 
@@ -771,10 +754,6 @@ TI_STATUS powerMgr_getParam(TI_HANDLE thePowerMgrHandle,
 
     switch ( theParamP->paramType )
     {
-    case POWER_MGR_DTIM_LISTEN_INTERVAL:
-        theParamP->content.dtimListenInterval = pPowerMgr->dtimListenInterval;
-        break;
-
     case POWER_MGR_POWER_MODE:
         theParamP->content.PowerMode = PowerMgr_getPowerMode(thePowerMgrHandle);
         break;
@@ -898,7 +877,7 @@ static void PowerMgrTMThresholdCrossCB( TI_HANDLE hPowerMgr, TI_UINT32 cookie )
 	{
 		TI_BOOL bPsTrafficOn = ((PowerMgr_PowerMode_e)cookie == POWER_MODE_ACTIVE) ? TI_TRUE : TI_FALSE;
 		qosMngr_UpdatePsTraffic(pPowerMgr->hQosMngr,bPsTrafficOn);
-    }
+	}
     else
     {
         TRACE2( pPowerMgr->hReport, REPORT_SEVERITY_ERROR, "PowerMgrTMThresholdCrossCB: TM motification when psEnable is :%d or desired profile is: %d\n", pPowerMgr->psEnable, pPowerMgr->desiredPowerModeProfile);

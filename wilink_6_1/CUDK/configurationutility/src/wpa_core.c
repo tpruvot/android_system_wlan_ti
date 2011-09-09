@@ -139,7 +139,7 @@ THandle WpaCore_Create(PS32 pRes, PS8 pSupplIfFile)
 		return NULL;
 	}
 
-	pWpaCore->hIpcWpa = IpcWpa_Create(pRes, pSupplIfFile);
+    pWpaCore->hIpcWpa = IpcWpa_Create(pRes, pSupplIfFile);
 	if(pWpaCore->hIpcWpa == NULL)
 	{	
 		WpaCore_Destroy(pWpaCore);
@@ -163,9 +163,9 @@ VOID WpaCore_Destroy(THandle hWpaCore)
 #ifdef ANDROID
 	if(pWpaCore->hIpcWpa)
 	{
-        /* Restore configuration back to AP_SCAN 1 for Android */
-        IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"AP_SCAN 1", FALSE);
-        IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"SAVE_CONFIG", FALSE);
+		/* Restore configuration back to AP_SCAN 1 for Android */
+		IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"AP_SCAN 1", FALSE);
+		IpcWpa_Command(pWpaCore->hIpcWpa, (PS8)"SAVE_CONFIG", FALSE);
 	}
 #endif
 
@@ -441,7 +441,7 @@ S32 WpaCore_StartWpsPBC(THandle hWpaCore)
 {
 	TWpaCore* pWpaCore = (TWpaCore*)hWpaCore;
 	S8 cmd[100];
-	
+
 	pWpaCore->WpaSupplParams.WscMode = WSC_MODE_PBC;
 
 #ifdef SUPPL_WPS_SUPPORT

@@ -108,13 +108,13 @@ TI_STATUS       fwEvent_Init                (TI_HANDLE hFwEvent, TI_HANDLE hTWD)
 
 /*
  * \brief	Called by any handler that completed after pending
- *
+ * 
  * \param  hFwEvent  - FwEvent Driver handle
  *
  * \par Description
  *
  * Decrement pending handlers counter and if 0 call the SM to complete its process.
- *
+ * 
  * \sa
  */
 void            fwEvent_HandlerCompleted    (TI_HANDLE hFwEvent);

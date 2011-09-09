@@ -32,7 +32,7 @@
 #define OK                      0
 #define FALSE                   0
 #define TRUE                    1
-#define OSAL_ERROR					-1
+#define OSAL_ERROR				-1
 #define OSAL_SUCCESS				0
 #define OSAL_FAILURE				1
 #define OS_GETINPUTSTRING_CONTINUE  TRUE+1
@@ -43,16 +43,8 @@
 /* replaces IFNAMSIZ in Linux */
 #define IF_NAME_SIZE    16
 
-
-
-/* Macros */
-#define PRINT_FORMAT_S8_VAL(signedVal) \
-(((U8)signedVal > 127) ? (0xFFFFFF00 | signedVal) : signedVal)
-/***********/
-
-
 /* 
- * supp declares its OS abstarction with primitive types, so these must
+ * TODO : supp declares its OS abstarction with primitive types, so these must
  * be specifically declared here, and only if they weren't defined before by someone
  * including common.h
  */
@@ -61,6 +53,7 @@ typedef unsigned char   u8;
 typedef unsigned short u16;
 typedef unsigned long   u32;
 typedef unsigned long long u64;
+
 #ifndef BIT
 #define BIT(x) (1 << (x))
 #endif

@@ -234,7 +234,7 @@ TI_STATUS TWD_SetParam (TI_HANDLE hTWD, TTwdParamInfo *pParamInfo)
             break;
 
         case TWD_DCO_ITRIM_PARAMS_ID:
-            cmdBld_CfgDcoItrimParams (pTWD->hCmdBld, pParamInfo->content.tDcoItrimParams.enable,
+            cmdBld_CfgDcoItrimParams (pTWD->hCmdBld, pParamInfo->content.tDcoItrimParams.enable, 
                                       pParamInfo->content.tDcoItrimParams.moderationTimeoutUsec, NULL, NULL);
             break;
 

@@ -284,15 +284,15 @@ void smeSm_PreConnect (TI_HANDLE hSme)
             {
                 /* makr whether we need to stop the attempt connection in manual mode */
                 pSme->bConnectRequired = TI_FALSE;
-    
-                TRACE0(pSme->hReport, REPORT_SEVERITY_INFORMATION , "smeSm_PreConnect: No candidate available, sending connect failure\n");
+
+				TRACE0(pSme->hReport, REPORT_SEVERITY_INFORMATION , "smeSm_PreConnect: No candidate available, sending connect failure\n");
                 /* manual mode and no connection candidate is available - connection failed */
                 sme_SmEvent (pSme->hSmeSm, SME_SM_EVENT_CONNECT_FAILURE, hSme);
 			}
 
 			else		/* IBSS */
 			{
-				TI_UINT8     uDesiredChannel;
+				TI_UINT8    uDesiredChannel;
                 TI_BOOL     channelValidity;
 
 		        pSme->bConnectRequired = TI_FALSE;
@@ -324,7 +324,7 @@ void smeSm_PreConnect (TI_HANDLE hSme)
 				pParam->content.channelCapabilityReq.scanOption = ACTIVE_SCANNING;
 				pParam->content.channelCapabilityReq.channelNum = uDesiredChannel;
 
-				regulatoryDomain_getParam (pSme->hRegDomain,pParam);
+				regulatoryDomain_getParam (pSme->hRegDomain, pParam);
                 channelValidity = pParam->content.channelCapabilityRet.channelValidity;
                 os_memoryFree(pSme->hOS, pParam, sizeof(paramInfo_t));
 				if (!channelValidity)
@@ -370,7 +370,7 @@ void smeSm_PreConnect (TI_HANDLE hSme)
  */ 
 void smeSm_Connect (TI_HANDLE hSme)
 {
-    TSme        *pSme = (TSme*)hSme;
+    TSme            *pSme = (TSme*)hSme;
     TI_STATUS       tStatus;
     paramInfo_t     *pParam;
 
@@ -406,8 +406,8 @@ void smeSm_Connect (TI_HANDLE hSme)
                pParam->content.connType = CONNECTION_IBSS;
            }
        else
-            pParam->content.connType = CONNECTION_INFRA;
-       conn_setParam(pSme->hConn, pParam);   
+           pParam->content.connType = CONNECTION_INFRA;
+       conn_setParam(pSme->hConn, pParam);
        os_memoryFree(pSme->hOS, pParam, sizeof(paramInfo_t));
 
        /* start the connection process */
@@ -461,12 +461,11 @@ void smeSm_Disconnect (TI_HANDLE hSme)
 {
     TSme        *pSme = (TSme*)hSme;
     TI_STATUS   tStatus;
-    siteMgr_t   *pSiteMgr = (siteMgr_t *)(pSme->hSiteMgr);
 
     /* set the SCr group to connecting */
     scr_setGroup (pSme->hScr, SCR_GID_CONNECT);
 
-    if (BSS_INFRASTRUCTURE == pSiteMgr->pSitesMgmtParams->pPrimarySite->bssType)
+    if (BSS_INFRASTRUCTURE == pSme->pCandidate->bssType)
     {
 		 /* Call the AP connection to perform disconnect */
 		 tStatus = apConn_stop (pSme->hApConn, TI_TRUE);
@@ -516,15 +515,6 @@ void smeSm_DisconnectDone (TI_HANDLE hSme)
 
     siteMgr_disSelectSite (pSme->hSiteMgr);
     
-
-    {
-        TI_UINT8  broadcastMacAddr[MAC_ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-     
-        /* clear the desired BSSID */
-        MAC_COPY (pSme->tBssid, broadcastMacAddr);
-        pSme->uScanCount = 0;
-    }   
-
     /* try to reconnect */
     smeSm_Start (hSme);
 }
@@ -682,7 +672,7 @@ TI_STATUS sme_StartScan (TI_HANDLE hSme)
         bBandCountryFound[ uIndex ] = pParam->content.bIsCountryFound;
         /* also nullify the channel exist indication for this band */
         bBandChannelExist[ uIndex ] = TI_FALSE;
-    }  
+    }
     os_memoryFree(pSme->hOS, pParam, sizeof(paramInfo_t));
 
     /* First fill the channels */
@@ -957,7 +947,7 @@ void sme_updateScanCycles (TI_HANDLE hSme,
             {
                 pSme->tScanParams.uCycleNum = pSme->tInitParams.uCycleNum;
             }
-        }   
+        }
         os_memoryFree(pSme->hOS, pParam, sizeof(paramInfo_t));
     }
 

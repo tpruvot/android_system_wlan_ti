@@ -518,6 +518,29 @@ EScanCncnResultStatus scanCncn_StartPeriodicScan (TI_HANDLE hScanCncn,
     return SCAN_CRS_SCAN_RUNNING;
 }
 
+#ifdef CONNECTION_SCAN_PM
+/**
+ *  fn     scanCncn_Suspend
+ *  brief  Performs necessary prepartions for suspend (e.g. stops any running scans)
+ *
+ *  Performs necessary prepartions for suspend (e.g. stops any running scans)
+ *
+ *  param  hScanCncn - handle to the scan concentrator object
+ *  param  eClient - the client requesting to stop the scan operation
+ *  return None
+ *  */
+void scanCncn_Suspend(TI_HANDLE hScanCncn)
+{
+        /* stops any one-shot scan */
+        scanCncn_StopScan(hScanCncn, SCAN_SCC_APP_ONE_SHOT);
+
+        /* scan any periodic scans */
+        scanCncn_StopPeriodicScan(hScanCncn, SCAN_SCC_APP_PERIODIC);
+}
+
+#endif
+
+
 /** 
  * \fn     scanCncn_StopPeriodicScan 
  * \brief  Stop an on-going periodic scan operation
@@ -773,6 +796,7 @@ void scanCncn_MlmeResultCB (TI_HANDLE hScanCncn, TMacAddr* bssid, mlmeFrameInfo_
                 TRACE6(pScanCncn->hReport, REPORT_SEVERITY_INFORMATION , "scanCncn_MlmeResultCB: discarding frame from SSID: , BSSID: %02x:%02x:%02x:%02x:%02x:%02x, because SSID different from desired or from current AP!\n", (*bssid)[ 0 ], (*bssid)[ 1 ], (*bssid)[ 2 ], (*bssid)[ 3 ], (*bssid)[ 4 ], (*bssid)[ 5 ]);
                 bValidResult = TI_FALSE;
             }
+
         }
 
         /* if rssi is lower than the Rssi threshold, discard frame */
@@ -1246,7 +1270,7 @@ void scanCncn_VerifyChannelsWithRegDomain (TI_HANDLE hScanCncn, UScanParams *puS
                 }
             }
         }
-    }    
+    }
     os_memoryFree(pScanCncn->hOS, pParam, sizeof(paramInfo_t));
 }
 

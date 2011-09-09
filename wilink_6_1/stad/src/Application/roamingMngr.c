@@ -363,10 +363,10 @@ TI_STATUS roamingMngr_connStatusCb(TI_HANDLE hRoamingMngr, void *pData)
     {
          switch (connStatus)
          {
-          case CONN_STATUS_CONNECTED:
+          case CONN_STATUS_CONNECTED: 
         		roamingEvent = (roamingMngr_smEvents)ROAMING_MANUAL_EVENT_START;
-                apConn_getStaCapabilities(pRoamingMngr->hAPConnection,&pRoamingMngr->staCapabilities);
-                break;
+                apConn_getStaCapabilities(pRoamingMngr->hAPConnection,&pRoamingMngr->staCapabilities); 
+                break;     
           case CONN_STATUS_NOT_CONNECTED:
                 roamingEvent = (roamingMngr_smEvents)ROAMING_MANUAL_EVENT_STOP;
                 break;

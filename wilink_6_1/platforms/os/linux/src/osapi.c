@@ -146,29 +146,25 @@ void os_printf(const char *format ,...)
 	/* Format the message and keep the message length */
    va_start(ap,format);
    message_len = vsnprintf(&msg[0], sizeof(msg) -1 , format, ap);
+   if( from_new_line )
+	{
+		if (msg[1] == '$')
+		{
+			p_msg += 4;
+		}
 
-   if(message_len > 0)
-   {
-      if( from_new_line )
-      {
-         if (msg[1] == '$')
-         {
-            p_msg += 4;
-         }
+		sec = os_timeStampUs(NULL);
+		uSec = sec % MICROSECOND_IN_SECONDS;
+		sec /= MICROSECOND_IN_SECONDS;
 
-         sec = os_timeStampUs(NULL);
-         uSec = sec % MICROSECOND_IN_SECONDS;
-         sec /= MICROSECOND_IN_SECONDS;
+		printk(KERN_INFO DRIVER_NAME ": %d.%06d: %s",sec,uSec,p_msg);
+	}
+	else
+	{
+	printk(&msg[0]);
+	}
 
-         printk(KERN_INFO DRIVER_NAME ": %d.%06d: %s",sec,uSec,p_msg);
-      }
-      else
-      {
-         printk(&msg[0]);
-      }
-
-      from_new_line = ( msg[message_len - 1] == '\n' );
-   }
+	from_new_line = ( msg[message_len - 1] == '\n' );
 
 	va_end(ap);
 }
@@ -200,12 +196,9 @@ TI_HANDLE os_timerCreate (TI_HANDLE OsContext, fTimerFunction pRoutine, TI_HANDL
 {
     TOsTimer *pOsTimer = os_memoryAlloc (OsContext, sizeof(TOsTimer));
 
-    if(pOsTimer)
-    {
-        init_timer (pOsTimer);
-        pOsTimer->function = (void *)pRoutine;
-        pOsTimer->data     = (int)hFuncHandle;
-    }
+    init_timer (pOsTimer);
+    pOsTimer->function = (void *)pRoutine;
+    pOsTimer->data     = (int)hFuncHandle;
 
     return (TI_HANDLE)pOsTimer;
 }
@@ -616,8 +609,8 @@ int os_wake_lock_timeout (TI_HANDLE OsContext)
 	int ret = 0;
 	unsigned long flags;
 
+	spin_lock_irqsave(&drv->lock, flags);
 	if (drv) {
-		spin_lock_irqsave(&drv->lock, flags);
 		ret = drv->wl_packet;
 		if (drv->wl_packet) {
 			drv->wl_packet = 0;
@@ -625,8 +618,8 @@ int os_wake_lock_timeout (TI_HANDLE OsContext)
 			wake_lock_timeout(&drv->wl_rxwake, (HZ >> 1));
 #endif
 		}
-		spin_unlock_irqrestore(&drv->lock, flags);
 	}
+	spin_unlock_irqrestore(&drv->lock, flags);
 	/* printk("%s: %d\n", __func__, ret); */
 	return ret;
 }
@@ -644,13 +637,11 @@ int os_wake_lock_timeout_enable (TI_HANDLE OsContext)
 {
 	TWlanDrvIfObj *drv = (TWlanDrvIfObj *)OsContext;
 	unsigned long flags;
-	int ret = 0;
+	int ret;
 
-	if (drv) {
-		spin_lock_irqsave(&drv->lock, flags);
-		ret = drv->wl_packet = 1;
-		spin_unlock_irqrestore(&drv->lock, flags);
-	}
+	spin_lock_irqsave(&drv->lock, flags);
+	ret = drv->wl_packet = 1;
+	spin_unlock_irqrestore(&drv->lock, flags);
 	return ret;
 }
 
@@ -669,16 +660,16 @@ int os_wake_lock (TI_HANDLE OsContext)
 	int ret = 0;
 	unsigned long flags;
 
+	spin_lock_irqsave(&drv->lock, flags);
 	if (drv) {
-		spin_lock_irqsave(&drv->lock, flags);
 #ifdef CONFIG_HAS_WAKELOCK
 		if (!drv->wl_count)
 			wake_lock(&drv->wl_wifi);
 #endif
 		drv->wl_count++;
 		ret = drv->wl_count;
-		spin_unlock_irqrestore(&drv->lock, flags);
 	}
+	spin_unlock_irqrestore(&drv->lock, flags);
 	/* printk("%s: %d\n", __func__, ret); */
 	return ret;
 }
@@ -698,18 +689,16 @@ int os_wake_unlock (TI_HANDLE OsContext)
 	int ret = 0;
 	unsigned long flags;
 
-	if (drv) {
-		spin_lock_irqsave(&drv->lock, flags);
-		if (drv->wl_count) {
-			drv->wl_count--;
+	spin_lock_irqsave(&drv->lock, flags);
+	if (drv && drv->wl_count) {
+		drv->wl_count--;
 #ifdef CONFIG_HAS_WAKELOCK
-			if (!drv->wl_count)
-				wake_unlock(&drv->wl_wifi);
+		if (!drv->wl_count)
+			wake_unlock(&drv->wl_wifi);
 #endif
-			ret = drv->wl_count;
-		}
-		spin_unlock_irqrestore(&drv->lock, flags);
+		ret = drv->wl_count;
 	}
+	spin_unlock_irqrestore(&drv->lock, flags);
 	/* printk("%s: %d\n", __func__, ret); */
 	return ret;
 }
@@ -756,7 +745,7 @@ void *os_SignalObjectCreate (TI_HANDLE OsContext)
    struct completion *myPtr;
    myPtr = os_memoryAlloc(OsContext, sizeof(struct completion));
    if (myPtr)
-       init_completion (myPtr);
+   init_completion (myPtr);
    return (myPtr);
 }
 
@@ -772,13 +761,10 @@ Return Value: TI_OK
 -----------------------------------------------------------------------------*/
 int os_SignalObjectWait (TI_HANDLE OsContext, void *signalObject)
 {
-    if (!signalObject)
-        return TI_NOK;
-	if (!wait_for_completion_timeout((struct completion *)signalObject,
-					msecs_to_jiffies(10000))) {
-		printk("tiwlan: 10 sec %s timeout\n", __func__);
-	}
-    return TI_OK;
+   if (!signalObject)
+      return TI_NOK;
+   wait_for_completion ((struct completion *)signalObject);
+   return TI_OK;
 }
 
 
@@ -793,10 +779,10 @@ Return Value: TI_OK
 -----------------------------------------------------------------------------*/
 int os_SignalObjectSet (TI_HANDLE OsContext, void *signalObject)
 {
-    if (!signalObject)
-        return TI_NOK;
-    complete ((struct completion *)signalObject);
-    return TI_OK;
+   if (!signalObject)
+      return TI_NOK;
+   complete ((struct completion *)signalObject);
+   return TI_OK;
 }
 
 

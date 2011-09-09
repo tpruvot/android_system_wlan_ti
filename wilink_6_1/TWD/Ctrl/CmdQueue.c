@@ -959,13 +959,13 @@ void cmdQueue_PrintHistory (TI_HANDLE hCmdQueue, TI_UINT32 uNumOfCmd)
         {
             first = CMDQUEUE_QUEUE_DEPTH - 1;
         }
-		else
+        else
         {
 			first--;
         }
-	}
+    }
 
-	WLAN_OS_REPORT(("-----------------------------------------------------------------------\n"));
+    WLAN_OS_REPORT(("-----------------------------------------------------------------------\n"));
 #endif
 }
 

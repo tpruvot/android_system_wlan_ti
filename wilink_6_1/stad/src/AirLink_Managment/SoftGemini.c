@@ -85,8 +85,6 @@ static void SoftGemini_DisableProtectiveMode(TI_HANDLE hSoftGemini);
 static char* SoftGemini_ConvertModeToString(ESoftGeminiEnableModes SoftGeminiEnable);
 #endif
 
-void qosMngr_SetMotrxStreaming(TI_HANDLE hQosMngr, TI_BOOL bEnable);
-
 /********************************************************************************/
 /*						Interface functions Implementation.						*/
 /********************************************************************************/
@@ -224,8 +222,7 @@ void SoftGemini_init (TStadHandlesList *pStadHandles)
 	pSoftGemini->hCmdDispatch = pStadHandles->hCmdDispatch;
 	pSoftGemini->hScanCncn    = pStadHandles->hScanCncn;
 	pSoftGemini->hCurrBss	  = pStadHandles->hCurrBss;
-  pSoftGemini->hSme         = pStadHandles->hSme;
-  pSoftGemini->hQosMngr	  = pStadHandles->hQosMngr;
+    pSoftGemini->hSme         = pStadHandles->hSme;
 }
 
 
@@ -849,12 +846,10 @@ TRACE0(pSoftGemini->hReport, REPORT_SEVERITY_WARNING, ": SG is disabled, existin
 	if ( (SENSE_MODE_ENABLE == *str) && (!pSoftGemini->bDriverEnabled) )
 	{
 			SoftGemini_EnableDriver(hSoftGemini);
-			qosMngr_SetMotrxStreaming(pSoftGemini->hQosMngr,TI_TRUE);
 	}
 	else if ( (SENSE_MODE_DISABLE == *str) && (pSoftGemini->bDriverEnabled) )
 	{
 			SoftGemini_DisableDriver(hSoftGemini);
-			qosMngr_SetMotrxStreaming(pSoftGemini->hQosMngr,TI_FALSE);
 	}
 }
 

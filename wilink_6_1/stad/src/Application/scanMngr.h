@@ -319,11 +319,11 @@ typedef struct
                                                                                      */
 
     /* scan policy */
-    TScanPolicy                     scanPolicy;                                     /**< scan policy */
-	TI_BOOL                         bQualityChangeNeeded;                           /**< flag that notifing a quality change */
-	ERssiQuality                    eQuality;                                       /**<
+    TScanPolicy                  scanPolicy;                                     /**< scan policy */
+	TI_BOOL                      bQualityChangeNeeded;                              /**< flag that notifing a quality change */
+	ERssiQuality                 eQuality;                                          /**<
                                                                                      * Indicates whether to use the low
-                                                                                     * quality time or normal quality
+                                                                                     * quality timer, normal quality
                                                                                      * timer or no timer (high quality)
 																					 * for continuous scan.
                                                                                      */

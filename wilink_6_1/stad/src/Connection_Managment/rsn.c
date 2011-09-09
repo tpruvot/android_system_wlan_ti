@@ -461,7 +461,6 @@ TI_STATUS rsn_start(TI_HANDLE hRsn)
     }
 
     TRACE0(pRsn->hReport, REPORT_SEVERITY_INFORMATION, "rsn_start ...\n");
-
     pRsn->rsnStartedTs = os_timeStampMs (pRsn->hOs);
 
     status = pRsn->pMainSecSm->start (pRsn->pMainSecSm);
@@ -671,7 +670,7 @@ TI_STATUS rsn_getParamEncryptionStatus(TI_HANDLE hRsn, ECipherSuite *rsnStatus)
 TI_STATUS rsn_getParam(TI_HANDLE hRsn, void *param)
 {
     rsn_t       *pRsn = (rsn_t *)hRsn;
-    paramInfo_t *pParam = (paramInfo_t*)param;
+    paramInfo_t *pParam = (paramInfo_t *)param;
     TI_STATUS   status = TI_OK;
 
     if ( (NULL == pRsn) || (NULL == pParam) )
@@ -1102,12 +1101,12 @@ TRACE0(pRsn->hReport, REPORT_SEVERITY_INFORMATION, "RSN: remove all Keys\n");
 		   {
            status = rsn_setKey (pRsn, pSecurityKey);  /* send key to FW*/
 
-           /* check this copy 
-           if (status == TI_OK)
-           {
-               os_memoryCopy(pKeyDerive->hOs,&pRsn->pKeyParser->pUcastKey/pBcastKey, pEncodedKey, sizeof(encodedKeyMaterial_t));	
-           }
-           */
+				/* check this copy 
+			    if (status == TI_OK)
+				    {
+					   os_memoryCopy(pKeyDerive->hOs,&pRsn->pKeyParser->pUcastKey/pBcastKey, pEncodedKey, sizeof(encodedKeyMaterial_t));	
+				    } 
+			    */
 
            /* If the Key is not BAD, it may be that WEP key is sent before WEP status is set,
            save the key, and set it later at rsn_start */
@@ -1475,24 +1474,24 @@ TI_STATUS rsn_getInfoElement(TI_HANDLE hRsn, TI_UINT8 *pRsnIe, TI_UINT32 *pRsnIe
     pRsn = (rsn_t*)hRsn;
 
     if (!pRsn->bRsnExternalMode) 
-		{
+    {
 
-			status = pRsn->pAdmCtrl->getInfoElement (pRsn->pAdmCtrl, pRsnIe, &ie_len);
-		
-			TRACE1(pRsn->hReport, REPORT_SEVERITY_INFORMATION, "rsn_getInfoElement pRsnIeLen= %d\n",*pRsnIeLen);
-		
-	        if ( status != TI_OK ) 
-	        {
-	            TRACE0(pRsn->hReport, REPORT_SEVERITY_ERROR, "rsn_getInfoElement() - pAdmCtrl->getInfoElement() returned error. Returning. \n");
-				return status;   
-			}
+        status = pRsn->pAdmCtrl->getInfoElement (pRsn->pAdmCtrl, pRsnIe, &ie_len);
+    
+        TRACE1(pRsn->hReport, REPORT_SEVERITY_INFORMATION, "rsn_getInfoElement pRsnIeLen= %d\n",*pRsnIeLen);
+    
+        if ( status != TI_OK ) 
+        {
+            TRACE0(pRsn->hReport, REPORT_SEVERITY_ERROR, "rsn_getInfoElement() - pAdmCtrl->getInfoElement() returned error. Returning. \n");
+            return status;   
+        }
     }
     else
     {    /* LiorC: We assume the generic IE should be set only in external mode */
          status = rsn_getGenInfoElement(hRsn, pRsnIe, &ie_len);
     }
-
-
+    
+       
     *pRsnIeLen = ie_len;
 
     return status;
@@ -1592,7 +1591,7 @@ TI_STATUS rsn_setKey (rsn_t *pRsn, TSecurityKeys *pKey)
 		return TI_NOK;
 	}
 
-    keyIndex = (TI_UINT8)pKey->keyIndex;
+	keyIndex = (TI_UINT8)pKey->keyIndex;
     if (keyIndex >= MAX_KEYS_NUM)
     {
         return TI_NOK;
@@ -1658,6 +1657,7 @@ TI_STATUS rsn_setKey (rsn_t *pRsn, TSecurityKeys *pKey)
 			        txCtrlParams_setEncryptionFieldSizes (pRsn->hTxCtrl, 0);
                     break;
             }
+
         }
 
         pRsn->keys[keyIndex].keyType = pKey->keyType;
@@ -1742,7 +1742,7 @@ TI_STATUS rsn_removeKey (rsn_t *pRsn, TSecurityKeys *pKey)
 		return TI_NOK;
 	}
 
-    keyIndex = (TI_UINT8)pKey->keyIndex;
+	keyIndex = (TI_UINT8)pKey->keyIndex;
     if (keyIndex >= MAX_KEYS_NUM)
     {
         return TI_NOK;
@@ -1874,7 +1874,7 @@ TI_STATUS rsn_reportMicFailure(TI_HANDLE hRsn, TI_UINT8 *pType, TI_UINT32 Length
     paramInfo_t                         param;
     TI_UINT8                               failureType;
 
-	failureType = *pType;
+    failureType = *pType;
 
    if (((pRsn->paeConfig.unicastSuite == TWD_CIPHER_TKIP) && (failureType == KEY_TKIP_MIC_PAIRWISE)) ||
         ((pRsn->paeConfig.broadcastSuite == TWD_CIPHER_TKIP) && (failureType == KEY_TKIP_MIC_GROUP)))
@@ -1925,7 +1925,6 @@ TI_STATUS rsn_reportMicFailure(TI_HANDLE hRsn, TI_UINT8 *pType, TI_UINT32 Length
                             IPC_EVENT_MEDIA_SPECIFIC, 
                             (TI_UINT8*)AuthBuf,
                             sizeof(TI_UINT32) + sizeof(OS_802_11_AUTHENTICATION_REQUEST));
-
 
 		if ( pRsn->bRsnExternalMode ) {
 			return TI_OK;

@@ -165,11 +165,11 @@ TI_HANDLE cmdBld_Create (TI_HANDLE hOs)
         /* Initialize the Params object database fields*/
         pDmaParams->NumStations                     = DEFAULT_NUM_STATIONS;
         uNumOfStations                              = (TI_UINT32)pDmaParams->NumStations;
-        /*
-         * loop an all rssi_snr triggers and initialize only index number.
+        /* 
+         * loop an all rssi_snr triggers and initialize only index number. 
          * Reason: 'index' not initialized --> 'index = 0' --> triggers 1..7 will overrun trigger '0' in cmdBld_ConfigSeq
          */
-        for (i = 0; i < NUM_OF_RSSI_SNR_TRIGGERS ; i++)
+        for (i = 0; i < NUM_OF_RSSI_SNR_TRIGGERS ; i++) 
         {
            pWlanParams->tRssiSnrTrigger[i].index = i;
         }
@@ -897,10 +897,10 @@ static TI_STATUS __cfg_dco_itrim_params (TI_HANDLE hCmdBld)
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CFG_DCO_ITRIM_PARAMS))
 		return TI_NOK;
 
-    return cmdBld_CfgDcoItrimParams (hCmdBld,
-                                     DB_WLAN(hCmdBld).dcoItrimEnabled,
-                                     DB_WLAN(hCmdBld).dcoItrimModerationTimeoutUsec,
-                                     (void *)cmdBld_ConfigSeq,
+    return cmdBld_CfgDcoItrimParams (hCmdBld, 
+                                     DB_WLAN(hCmdBld).dcoItrimEnabled, 
+                                     DB_WLAN(hCmdBld).dcoItrimModerationTimeoutUsec, 
+                                     (void *)cmdBld_ConfigSeq, 
                                      hCmdBld);
 }
 
@@ -1530,8 +1530,8 @@ static TI_STATUS __cmd_arp_rsp (TI_HANDLE hCmdBld)
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CMD_ARP_RSP))
 		return TI_NOK;
 
-   return cmdBld_CmdIeConfigureTemplateFrame (hCmdBld,
-                                                   NULL,
+   return cmdBld_CmdIeConfigureTemplateFrame (hCmdBld, 
+                                                   NULL, 
                                                    DB_WLAN(hCmdBld).ArpRspTemplateSize,
                                                    TEMPLATE_ARP_RSP,
                                                    0,
@@ -1547,8 +1547,8 @@ static TI_STATUS __cmd_arp_rsp_join (TI_HANDLE hCmdBld)
 
     if ((DB_WLAN(hCmdBld).bJoin) && (DB_TEMP(hCmdBld).ArpRsp.Size != 0))
     {
-        return cmdBld_CmdIeConfigureTemplateFrame (hCmdBld,
-                                                   &(DB_TEMP(hCmdBld).ArpRsp),
+        return cmdBld_CmdIeConfigureTemplateFrame (hCmdBld, 
+                                                   &(DB_TEMP(hCmdBld).ArpRsp), 
                                                    DB_TEMP(hCmdBld).ArpRsp.Size,
                                                    TEMPLATE_ARP_RSP,
                                                    0,
@@ -1671,9 +1671,9 @@ static TI_STATUS __cmd_power_auth (TI_HANDLE hCmdBld)
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CMD_POWER_AUTH ))
 		return TI_NOK;
 
-    return cmdBld_CfgIeSleepAuth (hCmdBld,
-                              DB_WLAN(hCmdBld).minPowerLevel,
-                              (void *)cmdBld_ConfigSeq,
+    return cmdBld_CfgIeSleepAuth (hCmdBld, 
+                              DB_WLAN(hCmdBld).minPowerLevel, 
+                              (void *)cmdBld_ConfigSeq, 
                               hCmdBld);
 }
 
@@ -1795,7 +1795,7 @@ static TI_STATUS __cfg_ht_information (TI_HANDLE hCmdBld)
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CFG_HT_INFORMATION ))
 		return TI_NOK;
 
-    if (DB_WLAN(hCmdBld).bJoin && DB_BSS(hCmdBld).bHtInf)
+	if (DB_WLAN(hCmdBld).bJoin && DB_BSS(hCmdBld).bHtInf)
     {
         /* HT Information must be set after doing join */
         return cmdBld_CfgIeSetFwHtInformation (hCmdBld, 
@@ -2026,7 +2026,7 @@ static TI_STATUS __cfg_sg_enable (TI_HANDLE hCmdBld)
 
 static TI_STATUS __cfg_sg (TI_HANDLE hCmdBld)
 {    
-	/* Set the Soft Gemini params */
+    /* Set the Soft Gemini params */
 
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CFG_SG ))
 		return TI_NOK;
@@ -2042,7 +2042,7 @@ static TI_STATUS __cfg_sg (TI_HANDLE hCmdBld)
 
 
 static TI_STATUS __cfg_fm_coex (TI_HANDLE hCmdBld)
-{
+{    
 	if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CFG_FM_COEX ))
 		return TI_NOK;
 
@@ -2090,7 +2090,7 @@ static const TCmdCfgFunc aCmdIniSeq [] =
 {
     __cfg_platform_params,
     __cfg_radio_params,
-    __cfg_extended_radio_params,
+	__cfg_extended_radio_params,
     __cmd_probe_req,
     __cmd_null_data,
     __cmd_disconn,
@@ -2695,24 +2695,24 @@ TI_STATUS cmdBld_ConvertAppRatesBitmap (TI_UINT32 uAppRatesBitmap, TI_UINT32 uAp
 
 EHwRateBitFiled rateNumberToBitmap(TI_UINT8 uRate)
 {
-    switch(uRate)
-    {
-    case 1:   return HW_BIT_RATE_1MBPS;
-    case 2:   return HW_BIT_RATE_2MBPS;
-    case 5:   return HW_BIT_RATE_5_5MBPS;
-    case 6:   return HW_BIT_RATE_6MBPS;
-    case 9:   return HW_BIT_RATE_9MBPS;
-    case 11:  return HW_BIT_RATE_11MBPS;
-    case 12:  return HW_BIT_RATE_12MBPS;
-    case 18:  return HW_BIT_RATE_18MBPS;
-    case 22:  return HW_BIT_RATE_22MBPS;
-    case 24:  return HW_BIT_RATE_24MBPS;
-    case 36:  return HW_BIT_RATE_36MBPS;
-    case 48:  return HW_BIT_RATE_48MBPS;
-    case 54:  return HW_BIT_RATE_54MBPS;
-    default:
-        return 0;
-    }
+	switch(uRate)
+	{
+	case 1:   return HW_BIT_RATE_1MBPS;
+	case 2:   return HW_BIT_RATE_2MBPS;
+	case 5:   return HW_BIT_RATE_5_5MBPS;
+	case 6:   return HW_BIT_RATE_6MBPS; 
+	case 9:   return HW_BIT_RATE_9MBPS; 
+	case 11:  return HW_BIT_RATE_11MBPS;
+	case 12:  return HW_BIT_RATE_12MBPS;
+	case 18:  return HW_BIT_RATE_18MBPS;
+	case 22:  return HW_BIT_RATE_22MBPS;
+	case 24:  return HW_BIT_RATE_24MBPS;
+	case 36:  return HW_BIT_RATE_36MBPS;
+	case 48:  return HW_BIT_RATE_48MBPS;
+	case 54:  return HW_BIT_RATE_54MBPS;
+	default:
+		return 0;
+	}
 }
 
 TI_STATUS cmdBld_ConvertAppRate (ERate AppRate, TI_UINT8 *pHwRate)

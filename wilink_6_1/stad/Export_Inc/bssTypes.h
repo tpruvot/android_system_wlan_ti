@@ -109,7 +109,6 @@ typedef struct
     TI_INT8                RSSI;                   /**< average RSSI */
     TI_INT8                lastRSSI;               /** last given RSSI */
 	TI_BOOL                bNeighborAP;            /**< Indicates whether this is a neighbor AP */
-    ScanBssType_e          bssType;
 } bssEntry_t;
 
 /** \struct bssList_t

@@ -227,12 +227,13 @@ TI_STATUS scanCncnApp_GetParam (TI_HANDLE hScanCncn, paramInfo_t *pParam)
 
     switch (pParam->paramType)
     {
-    case SCAN_CNCN_NUM_BSSID_IN_LIST_PARAM:
-        /* retrieve the number of BSSID's in the scan result table*/
-        pParam->paramLength = sizeof(TI_UINT32);
-        pParam->content.uNumBssidInList = scanResultTable_GetNumOfBSSIDInTheList (pScanCncn->hScanResultTable);
-        break;
 
+	case SCAN_CNCN_NUM_BSSID_IN_LIST_PARAM:
+        /* retrieve the number of BSSID's in the scan result table*/
+		pParam->paramLength = sizeof(TI_UINT32);
+		pParam->content.uNumBssidInList = scanResultTable_GetNumOfBSSIDInTheList (pScanCncn->hScanResultTable);
+        break;
+        
     case SCAN_CNCN_BSSID_LIST_SIZE_PARAM:
         /* retrieves the size to allocate for the app scan result taBle BBSID list (see next code) */
         pParam->paramLength = sizeof(TI_UINT32);
@@ -241,12 +242,14 @@ TI_STATUS scanCncnApp_GetParam (TI_HANDLE hScanCncn, paramInfo_t *pParam)
 
     case SCAN_CNCN_BSSID_LIST_PARAM:
         /* retrieve the app scan result table */
-        return scanResultTable_GetBssidList (pScanCncn->hScanResultTable, pParam->content.pBssidList, 
+  		return scanResultTable_GetBssidList (pScanCncn->hScanResultTable, pParam->content.pBssidList, 
                                              &pParam->paramLength, TI_TRUE);
 
-    case SCAN_CNCN_BSSID_RATE_LIST_PARAM:
-        /* retrieve supported rates list equivalent to the supported rates list in the scan result table, but is extended to include 11n rates as well*/
-        return scanResultTable_GetBssidSupportedRatesList (pScanCncn->hScanResultTable, pParam->content.pRateList, &pParam->paramLength);
+	case SCAN_CNCN_BSSID_RATE_LIST_PARAM:
+        /* retrieve supported rates list equivalent to the supported rates list
+		 in the scan result table, but is extended to include 11n rates as well*/
+		return scanResultTable_GetBssidSupportedRatesList (pScanCncn->hScanResultTable, pParam->content.pRateList,
+														   &pParam->paramLength);
 
     default:
         TRACE1(pScanCncn->hReport, REPORT_SEVERITY_ERROR , "scanCncnApp_GetParam: unrecognized param type :%d\n", pParam->paramType);

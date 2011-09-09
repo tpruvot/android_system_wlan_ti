@@ -68,8 +68,7 @@ typedef struct
 	TI_HANDLE               hCmdDispatch;
 	TI_HANDLE				hScanCncn;
 	TI_HANDLE				hCurrBss;
-        TI_HANDLE               hSme;
-	TI_HANDLE               hQosMngr;
+    TI_HANDLE               hSme;
 } SoftGemini_t;
 
 TI_STATUS SoftGemini_handleRecovery(TI_HANDLE hSoftGemini);

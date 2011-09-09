@@ -827,7 +827,6 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
 	/* the second one is the measurementSRV request */
     MeasurementRequest_t * pRequestArr[MAX_NUM_REQ];
 	TMeasurementRequest request;
-
     paramInfo_t	*pParam;
     TI_UINT8 numOfRequestsInParallel;
     TI_UINT8 requestIndex;
@@ -880,7 +879,6 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
 	if (status != TI_OK)
 	{	
         TRACE0(pMeasurementMgr->hReport, REPORT_SEVERITY_ERROR, ": Failed getting next request from Request Handler\n");
-
         return measurementMgrSM_event((TI_UINT8 *) &(pMeasurementMgr->currentState), 
 				MEASUREMENTMGR_EVENT_COMPLETE, pMeasurementMgr);  
 	}
@@ -957,7 +955,6 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
         TRACE2(pMeasurementMgr->hReport, REPORT_SEVERITY_INFORMATION, ": Maximum delay to perform measurement operation has passed (%d / %d)\n",						MSR_START_MAX_DELAY, (os_timeStampMs(pMeasurementMgr->hOs) - pMeasurementMgr->currentRequestStartTime));
 
 		pMeasurementMgr->buildRejectReport(pMeasurementMgr, pRequestArr, numOfRequestsInParallel, MSR_REJECT_MAX_DELAY_PASSED);
-
         return measurementMgrSM_event((TI_UINT8 *) &(pMeasurementMgr->currentState), 
 				MEASUREMENTMGR_EVENT_COMPLETE, pMeasurementMgr);  
 	}
@@ -965,7 +962,7 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
     /* set the measurement scan executed flag to TRUE */
     pMeasurementMgr->bMeasurementScanExecuted = TI_TRUE;
 
-    /* Yalla, start measuring */
+	/* Yalla, start measuring */
     TRACE0(pMeasurementMgr->hReport, REPORT_SEVERITY_INFORMATION, ": Finished preparing request. Handing over to MeasurementSRV...\n");
 
 	TWD_StartMeasurement (pMeasurementMgr->hTWD,
@@ -974,7 +971,6 @@ static TI_STATUS measurementMgrSM_acStartMeasurement(void * pData)
                                NULL, NULL,
                                measurementMgr_MeasurementCompleteCB, 
                                pMeasurementMgr);
-
 	return TI_OK;
 }
 

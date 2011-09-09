@@ -131,6 +131,7 @@ static named_value_t BeaconFilter_use[] =
     { 1,        (PS8)"ACTIVE" },
 };
 
+
 static named_value_t event_type[] = {
     { IPC_EVENT_ASSOCIATED,             (PS8)"Associated" },
     { IPC_EVENT_DISASSOCIATED,          (PS8)"Disassociated"  },
@@ -301,11 +302,11 @@ static named_value_t report_module[] =
     { FILE_ID_131 ,  (PS8)"rate                    " },
     { FILE_ID_132 ,  (PS8)"report                  " },
     { FILE_ID_133 ,  (PS8)"stack                   " },
-    { FILE_ID_134 ,  (PS8)"externalSec             " },
-    { FILE_ID_135 ,  (PS8)"roamingMngr_autoSM      " },
-    { FILE_ID_136 ,  (PS8)"roamingMngr_manualSM    " },
-    { FILE_ID_137 ,  (PS8)"cmdinterpretoid         " },
-    { FILE_ID_138 ,  (PS8)"WlanDrvIf               " }
+	{ FILE_ID_134 ,  (PS8)"externalSec             " },
+	{ FILE_ID_135 ,  (PS8)"roamingMngr_autoSM      " },
+	{ FILE_ID_136 ,  (PS8)"roamingMngr_manualSM    " },
+	{ FILE_ID_137 ,  (PS8)"cmdinterpretoid         " },
+	{ FILE_ID_138 ,  (PS8)"WlanDrvIf               " }
 };
 
 static named_value_t report_severity[] = {
@@ -606,14 +607,14 @@ char* PrintSSID(OS_802_11_SSID* ssid)
     /* It looks like it never happens. Anyway decided to check */
 	if(ssid->SsidLength > MAX_SSID_LEN)
     {
-
+        
         os_error_printf(CU_MSG_ERROR, (PS8)"PrintSSID. ssid->SsidLength=%d exceeds the limit %d\n",
                          ssid->SsidLength, MAX_SSID_LEN);
         /*WLAN_OS_REPORT(("PrintSSID. ssid->SsidLength=%d exceeds the limit %d\n",
                    ssid->SsidLength, MAX_SSID_LEN));*/
         ssid->SsidLength = MAX_SSID_LEN;
     }
-	os_memcpy((PVOID)ssidBuf, (PVOID) ssid->Ssid, ssid->SsidLength);
+	os_memcpy((PVOID)ssidBuf, (PVOID) ssid->Ssid, ssid->SsidLength); 
 	ssidBuf[ssid->SsidLength] = '\0';
 	return ssidBuf;
 }
@@ -1230,7 +1231,7 @@ VOID CuCmd_Connect(THandle hCuCmd, ConParm_t parm[], U16 nParms)
             ssid.Ssid[ssid.SsidLength] = '\0';
             break;
         default:
-            /*
+            /* 
              *  Both SSID & BSSID are set -
              *  Use CLI's SSID & BSSID.
              *  Ignore other parameters.
@@ -2534,7 +2535,7 @@ VOID CuCmd_ClearPeriodicScanConfiguration (THandle hCuCmd, ConParm_t parm[], U16
     CuCmd_t* pCuCmd = (CuCmd_t*)hCuCmd;
     os_memset (&(pCuCmd->tPeriodicAppScanParams), 0, sizeof (TPeriodicScanParams));
 
-    /* Set scan default periodic Scan commands */
+	/* Set scan default preiodic Scan commands */
     CuCmd_set_DefPeriodic_Scan_Params(pCuCmd);
 
     os_error_printf(CU_MSG_INFO2, (PS8)"Periodic application scan parameters restarted.\n");
@@ -3471,29 +3472,29 @@ VOID CuCmd_RemoveClsfrEntry(THandle hCuCmd, ConParm_t parm[], U16 nParms)
 
 VOID CuCmd_SetPsRxDelivery(THandle hCuCmd, ConParm_t parm[], U16 nParms)
 {
-    CuCmd_t* pCuCmd = (CuCmd_t*)hCuCmd;
-    TPsRxStreaming tPsRxStreaming;
+	CuCmd_t* pCuCmd = (CuCmd_t*)hCuCmd;
+	TPsRxStreaming tPsRxStreaming;
 
-    tPsRxStreaming.uTid          = parm[0].value;
-    tPsRxStreaming.uStreamPeriod = parm[1].value;
-    tPsRxStreaming.uTxTimeout    = parm[2].value;
-    tPsRxStreaming.bEnabled      = parm[3].value;
+	tPsRxStreaming.uTid          = parm[0].value;
+	tPsRxStreaming.uStreamPeriod = parm[1].value;
+	tPsRxStreaming.uTxTimeout    = parm[2].value;
+	tPsRxStreaming.bEnabled      = parm[3].value;
 
-    if (CuCommon_SetBuffer(pCuCmd->hCuCommon, QOS_MNGR_PS_RX_STREAMING,
-        &tPsRxStreaming, sizeof(TPsRxStreaming)) == OK)
-    {
-        os_error_printf(CU_MSG_INFO2, (PS8)"Sent PS Rx Delivery to driver...");
-    }
-    else
-    {
-        os_error_printf(CU_MSG_INFO2, (PS8)"Error: could not set PS Rx Delivery in driver...\n");
-    }
-    os_error_printf(CU_MSG_INFO2, 
-        (PS8)"TID = %d \n RxPeriod = %d \n TxTimeout = %d\n Enabled = %d\n", 
-        tPsRxStreaming.uTid,      
-        tPsRxStreaming.uStreamPeriod, 
-        tPsRxStreaming.uTxTimeout,
-        tPsRxStreaming.bEnabled);
+	if (CuCommon_SetBuffer(pCuCmd->hCuCommon, QOS_MNGR_PS_RX_STREAMING,
+		&tPsRxStreaming, sizeof(TPsRxStreaming)) == OK)
+	{
+		os_error_printf(CU_MSG_INFO2, (PS8)"Sent PS Rx Delivery to driver...");
+	}
+	else
+	{
+		os_error_printf(CU_MSG_INFO2, (PS8)"Error: could not set PS Rx Delivery in driver...\n");
+	}
+	os_error_printf(CU_MSG_INFO2, 
+		(PS8)"TID = %d \n RxPeriod = %d \n TxTimeout = %d\n Enabled = %d\n", 
+		tPsRxStreaming.uTid,      
+		tPsRxStreaming.uStreamPeriod, 
+		tPsRxStreaming.uTxTimeout,
+		tPsRxStreaming.bEnabled);
 }
 
 VOID CuCmd_SetBaPolicy(THandle hCuCmd, ConParm_t parm[], U16 nParms)

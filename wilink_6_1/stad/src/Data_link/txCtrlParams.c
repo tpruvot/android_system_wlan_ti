@@ -685,7 +685,7 @@ DESCRIPTION:    Print module internal information.
 void txCtrlParams_printInfo(TI_HANDLE hTxCtrl)
 {
 #ifdef REPORT_LOG
-	txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
+    txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
 
     WLAN_OS_REPORT(("-------------- Tx-Ctrl Module Information --------------\n"));
     WLAN_OS_REPORT(("========================================================\n"));
@@ -739,7 +739,7 @@ DESCRIPTION:    Print Tx statistics debug counters.
 void txCtrlParams_printDebugCounters(TI_HANDLE hTxCtrl)
 {
 #ifdef REPORT_LOG
-	txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
+    txCtrl_t *pTxCtrl = (txCtrl_t *)hTxCtrl;
     TI_UINT32 ac;
 
     WLAN_OS_REPORT(("-------------- Tx-Ctrl Statistics Per AC ---------------\n"));

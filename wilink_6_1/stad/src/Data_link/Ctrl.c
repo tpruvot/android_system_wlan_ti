@@ -251,13 +251,13 @@ TI_STATUS ctrlData_getParamPreamble(TI_HANDLE hCtrlData, EPreamble *preamble)
 *                           ctrlData_getParamBssid                         *
 ****************************************************************************
 * DESCRIPTION:  get a specific parameter related to Bssid
-*
+* 
 * INPUTS:       hCtrlData - the object
 *               paramVal  - type of parameter
-*
-*
+*               
+*       
 * OUTPUT:       bssid
-*
+* 
 * RETURNS:      TI_OK
 *               TI_NOK
 ***************************************************************************/
@@ -268,9 +268,9 @@ TI_STATUS ctrlData_getParamBssid(TI_HANDLE hCtrlData, EInternalParam paramVal, T
     if (paramVal == CTRL_DATA_CURRENT_BSSID_PARAM) {
         MAC_COPY (bssid, pCtrlData->ctrlDataCurrentBSSID);
     }
-    else
-    {
-        TRACE1(pCtrlData->hReport,REPORT_SEVERITY_WARNING,"ctrlData_getParamBssid: invalid parameter %d\n",paramVal);
+    else 
+	{
+		TRACE1(pCtrlData->hReport,REPORT_SEVERITY_WARNING,"ctrlData_getParamBssid: invalid parameter %d\n",paramVal);
     }
 
     return TI_OK;
@@ -294,7 +294,7 @@ TI_STATUS ctrlData_getParamMacAddr(TI_HANDLE hCtrlData, TMacAddr bssid)
 {
     ctrlData_t *pCtrlData = (ctrlData_t *)hCtrlData;
     TFwInfo *pFwInfo = TWD_GetFWInfo (pCtrlData->hTWD);
-    MAC_COPY (bssid, pFwInfo->macAddress);
+    MAC_COPY (bssid, pFwInfo->macAddress); 
 
     return TI_OK;
 }
@@ -723,28 +723,6 @@ static void selectRateTable(TI_HANDLE hCtrlData, TI_UINT32 rateMask)
 
     /* add HT MCS rates */
     StaCap_IsHtEnable (pCtrlData->hStaCap, &b11nEnable);
-
-    {
-	paramInfo_t		TmpParam;
-	ECipherSuite		eCipherSuite = TWD_CIPHER_NONE;
-	TI_STATUS		status;
-
-	/* Privacy - Used later on HT */
-	TmpParam.paramType	= RSN_ENCRYPTION_STATUS_PARAM;
-	status			= rsn_getParam(((siteMgr_t*)pCtrlData->hSiteMgr)->hRsn, &TmpParam);
-	if (status == TI_OK)
-	{
-		eCipherSuite = TmpParam.content.rsnEncryptionStatus;
-
-		if (eCipherSuite == TWD_CIPHER_WEP ||
-		    eCipherSuite == TWD_CIPHER_TKIP ||
-		    eCipherSuite == TWD_CIPHER_WEP104)
-		{
-			b11nEnable = TI_FALSE;
-		}
-	}
-    }
-
     if (b11nEnable == TI_TRUE)
     {
         if ((rate == DRV_RATE_MCS_0) |
@@ -1040,7 +1018,7 @@ static void ctrlData_TrafficThresholdCrossed(TI_HANDLE Context,TI_UINT32 Cookie)
 void ctrlData_printTxParameters(TI_HANDLE hCtrlData)
 {
 #ifdef REPORT_LOG
-	ctrlData_t *pCtrlData = (ctrlData_t *)hCtrlData;
+    ctrlData_t *pCtrlData = (ctrlData_t *)hCtrlData;
 
     WLAN_OS_REPORT(("            Tx Parameters            \n"));
     WLAN_OS_REPORT(("-------------------------------------\n"));

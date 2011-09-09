@@ -141,11 +141,11 @@ void rxTxDebugFunction(TI_HANDLE hRxTxHandle, TI_UINT32 funcType, void *pParam)
 	case RESET_TX_RESULT_COUNTERS:
 		TWD_PrintTxInfo (pTxCtrl->hTWD, TWD_CLEAR_TX_RESULT_INFO);
 		break;
-
+        
 	case RESET_TX_XFER_COUNTERS:
 		TWD_PrintTxInfo (pTxCtrl->hTWD, TWD_CLEAR_TX_XFER_INFO);
 		break;
-
+        
 
 	/* 
 	 *  RX DEBUG FUNCTIONS:
