@@ -53,9 +53,8 @@ COMMON  = $(DK_ROOT)/common
 TXN	= $(DK_ROOT)/Txn
 CUDK	= $(DK_ROOT)/CUDK
 LIB	= ../../lib
-TI_SUPP_LIB_DIR = external/wpa_supplicant_6/wpa_supplicant
 
-# include $(TI_SUPP_LIB_DIR)/.config
+# include $(WPA_SUPPL_DIR)/.config
 include $(WPA_SUPPL_DIR)/.config
 
 # To force sizeof(enum) = 4
@@ -78,12 +77,6 @@ INCLUDES = $(STAD)/Export_Inc \
 	external/openssl/include \
 	$(WPA_SUPPL_DIR_INCLUDE) \
 	$(DK_ROOT)/../lib \
-	$(TI_SUPP_LIB_DIR) \
-	$(TI_SUPP_LIB_DIR)/src \
-	$(TI_SUPP_LIB_DIR)/src/common \
-	$(TI_SUPP_LIB_DIR)/src/drivers \
-	$(TI_SUPP_LIB_DIR)/src/l2_packet \
-	$(TI_SUPP_LIB_DIR)/src/utils
 
 L_CFLAGS += -DCONFIG_DRIVER_CUSTOM -DHOST_COMPILE -D__BYTE_ORDER_LITTLE_ENDIAN
 L_CFLAGS += -DWPA_SUPPLICANT_$(WPA_SUPPLICANT_VERSION)
@@ -109,7 +102,6 @@ endif
 ifdef CONFIG_WPS
 L_CFLAGS += -DCONFIG_WPS 
 CONFIG_IEEE8021X_EAPOL=y
-INCLUDES += $(TI_SUPP_LIB_DIR)/src/wps
 endif
 
 ifdef CONFIG_IEEE8021X_EAPOL

@@ -59,7 +59,7 @@
 #define SITE_MGR_CHANNEL_DEF                    11
 
 #define SITE_MGR_DOT_11_MODE_MIN                DOT11_B_MODE
-#define SITE_MGR_DOT_11_MODE_MAX                DOT11_DUAL_MODE
+#define SITE_MGR_DOT_11_MODE_MAX                DOT11_N_MODE
 #define SITE_MGR_DOT_11_MODE_DEF                DOT11_G_MODE
 
 #define SITE_MGR_BSS_TYPE_DEF                   BSS_INFRASTRUCTURE

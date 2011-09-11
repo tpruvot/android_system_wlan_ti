@@ -59,7 +59,7 @@
 #define SITE_MGR_CHANNEL_DEF                    11
 
 #define SITE_MGR_DOT_11_MODE_MIN                DOT11_B_MODE
-#define SITE_MGR_DOT_11_MODE_MAX                DOT11_DUAL_MODE
+#define SITE_MGR_DOT_11_MODE_MAX                DOT11_N_MODE
 #define SITE_MGR_DOT_11_MODE_DEF                DOT11_G_MODE
 
 #define SITE_MGR_BSS_TYPE_DEF                   BSS_INFRASTRUCTURE
@@ -506,7 +506,7 @@ IP&Port classification table  */
 #define  HT_11N_ENABLED_DEF                         TI_TRUE
                                                     
 /* policies: 0 - disable, 1 - initiator, 2 - receiver, 3 -  initiator& receiver. */
-#define  HT_BA_POLICY_MIN                           0    
+#define  HT_BA_POLICY_MIN                           0
 #define  HT_BA_POLICY_MAX                           3
 #define  HT_BA_POLICY_DEF                           0
 
@@ -1166,9 +1166,9 @@ IP&Port classification table  */
 #define SOFT_GEMINI_TEMP_PARAM_5_DEF 	22
 
 
-#define WIFI_WMM_PS_MIN                         0  
+#define WIFI_WMM_PS_MIN                         0
 #define WIFI_WMM_PS_MAX                         1
-#define WIFI_WMM_PS_DEF                         0 
+#define WIFI_WMM_PS_DEF                         0
 #define SOFT_GEMINI_PARAMS_ALLOW_PA_SD_MIN                  (0)  
 #define SOFT_GEMINI_PARAMS_ALLOW_PA_SD_MAX                  (1)
 #define SOFT_GEMINI_PARAMS_ALLOW_PA_SD_DEF                  (1) 
@@ -1223,9 +1223,9 @@ IP&Port classification table  */
 #define COEX_ACTIVITY_PARAMS_MAX_SERVICE_DEF           (0)
 
 /* FM Coexistence */
-#define FM_COEX_ENABLE_DEF                             TI_TRUE 
-#define FM_COEX_ENABLE_MIN                             TI_FALSE  
-#define FM_COEX_ENABLE_MAX                             TI_TRUE 
+#define FM_COEX_ENABLE_DEF                             TI_TRUE
+#define FM_COEX_ENABLE_MIN                             TI_FALSE
+#define FM_COEX_ENABLE_MAX                             TI_TRUE
 
 #define FM_COEX_SWALLOW_PERIOD_DEF                     5
 #define FM_COEX_SWALLOW_PERIOD_MIN                     0
@@ -1235,7 +1235,7 @@ IP&Port classification table  */
 #define FM_COEX_N_DIVIDER_FREF_SET1_MIN                0
 #define FM_COEX_N_DIVIDER_FREF_SET1_MAX                0xFF
 
-#define FM_COEX_N_DIVIDER_FREF_SET2_DEF                12                  
+#define FM_COEX_N_DIVIDER_FREF_SET2_DEF                12
 #define FM_COEX_N_DIVIDER_FREF_SET2_MIN                0   
 #define FM_COEX_N_DIVIDER_FREF_SET2_MAX                0xFF
 
@@ -1274,9 +1274,9 @@ IP&Port classification table  */
 #define RATE_MNG_PER_ADD_MIN             0
 #define RATE_MNG_PER_ADD_MAX             65536
 
-#define RATE_MNG_PER_TH1_DEF             2048                       
+#define RATE_MNG_PER_TH1_DEF             2048
 #define RATE_MNG_PER_TH1_MIN             0
-#define RATE_MNG_PER_TH1_MAX             65536 
+#define RATE_MNG_PER_TH1_MAX             65536
 
 #define RATE_MNG_PER_TH2_DEF             4096
 #define RATE_MNG_PER_TH2_MIN             0
@@ -1339,7 +1339,7 @@ IP&Port classification table  */
 
 #define SCAN_RATE_MODE_G_MIN                    DRV_RATE_1M
 #define SCAN_RATE_MODE_G_MAX                    DRV_RATE_54M
-#define SCAN_RATE_MODE_G_DEF                    DRV_RATE_2M
+#define SCAN_RATE_MODE_G_DEF                    DRV_RATE_6M
 
 #define SCAN_RATE_MODE_A_MIN                    DRV_RATE_6M
 #define SCAN_RATE_MODE_A_MAX                    DRV_RATE_54M
@@ -1385,10 +1385,8 @@ IP&Port classification table  */
 #define RADIO_TX_TRACE_LOSS_5_DEF_TABLE                     "00,00,00,00,00,00,00"
 
 #define RADIO_RX_FEM_INSERT_LOSS_2_4_MIN                    0
-#define RADIO_RX_FEM_INSERT_LOSS_2_4_DEF                    375  /* 0x15e
- */
+#define RADIO_RX_FEM_INSERT_LOSS_2_4_DEF                    375  /* 0x15e */
 #define RADIO_RX_FEM_INSERT_LOSS_2_4_MAX                    0xffff
-
 
 #define RADIO_DEGRADED_LOW_TO_NORMAL_THR_2_4G_MIN        0
 #define RADIO_DEGRADED_LOW_TO_NORMAL_THR_2_4G_DEF        30      /* 0x1e */
@@ -1574,7 +1572,7 @@ enum PowerMgr_registryDefinitions
     /*
      bit14 - "1" send Prob Request in PBCC
      bit15 - "1" short preamble, "0" long preammle
-     bit0:bit12  Rates 
+     bit0:bit12  Rates
      */
     POWER_MGMNT_NULL_PACKET_RATE_MOD_DEF_VALUE =  ((1<<DRV_RATE_1M) | (1<<DRV_RATE_2M)),
     POWER_MGMNT_NULL_PACKET_RATE_MOD_MIN_VALUE = 0,
@@ -1584,11 +1582,11 @@ enum PowerMgr_registryDefinitions
     POWER_MGMNT_NUM_NULL_PACKET_RETRY_MIN_VALUE = 1,
     POWER_MGMNT_NUM_NULL_PACKET_RETRY_MAX_VALUE = 255,
 
-	POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_DEF_VALUE = 0,
+    POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_DEF_VALUE = 0,
     POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_MIN_VALUE = 0,
     POWER_MGMNT_RE_AUTH_ACTIVE_PRIO_MAX_VALUE = 1,
-    
-	/*BET*/
+
+    /*BET*/
     POWER_MGMNT_BET_ENABLE_MIN = 0,
     POWER_MGMNT_BET_ENABLE_MAX = 1,
     POWER_MGMNT_BET_ENABLE_DEF = 1,

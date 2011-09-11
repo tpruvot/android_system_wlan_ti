@@ -1166,5 +1166,5 @@ EXPORT_SYMBOL(sdioDrv_register_pm);
 MODULE_DESCRIPTION("TI WLAN SDIO driver");
 MODULE_LICENSE("GPL");
 MODULE_ALIAS(SDIO_DRIVER_NAME);
-MODULE_AUTHOR("Texas Instruments Inc");
+//MODULE_AUTHOR("Texas Instruments Inc");
 

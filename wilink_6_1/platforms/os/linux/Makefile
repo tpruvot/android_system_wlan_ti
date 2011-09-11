@@ -122,8 +122,9 @@ WLAN_LOADER = $(WLAN_CUDK_DIR)/output/tiwlan_loader
 # Location and filename of the Linux Wireless Tools
 #
 
-#LINUX_WIRELESS_TOOLS_DIR = $(DK_ROOT)/CUDK/wireless_tools
-#LINUX_WIRELESS_TOOLS = $(LINUX_WIRELESS_TOOLS_DIR)/iwconfig
+LINUX_WIRELESS_TOOLS_DIR = $(DK_ROOT)/CUDK/wireless_tools
+# LINUX_WIRELESS_TOOLS_DIR = /work/cm7/externak/wireless_tools
+LINUX_WIRELESS_TOOLS = $(LINUX_WIRELESS_TOOLS_DIR)/iwconfig
 
 #
 # The location of the supplicant depending on whether or not we rebuild it.
@@ -244,7 +245,7 @@ TAR_FILE = $(HOST_PLATFORM)Binaries.tar
 apps.tar: apps
 ifeq ($(STRIP),y)
 	@echo stripping...
-	cd $(OUTPUT_DIR) && $(CROSS_COMPILE)strip --strip-unneeded $(MODULES_LIST)
+	cd $(OUTPUT_DIR) && $(CROSS_COMPILE)strip -g --strip-unneeded $(MODULES_LIST)
 #	cd $(DK_ROOT)/external_drivers/$(HOST_PLATFORM)/Linux/$(BUS_DRV) && $(CROSS_COMPILE)strip -g $(BUS_DRIVER_MODULE)
 endif
 
