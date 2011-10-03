@@ -1192,7 +1192,7 @@ static void TrafficMonitor_ChangeDownTimerStatus (TI_HANDLE hTrafficMonitor, TI_
     {
         pTrafficMonitor->DownTimerEnabled = TI_FALSE;
         os_wake_unlock(pTrafficMonitor->hOs);
-        WLAN_OS_REPORT(("TrafficMonitor_ChangeDownTimerStatus: Going to power save, clear wake_lock!!\n"));
+        //WLAN_OS_REPORT(("TrafficMonitor_ChangeDownTimerStatus: Going to power save, clear wake_lock!!\n"));
         tmr_StopTimer (pTrafficMonitor->hTrafficMonTimer);
     }
     else if ((downEventsFound > 0) && (pTrafficMonitor->DownTimerEnabled == TI_FALSE))
@@ -1200,7 +1200,7 @@ static void TrafficMonitor_ChangeDownTimerStatus (TI_HANDLE hTrafficMonitor, TI_
         pTrafficMonitor->DownTimerEnabled = TI_TRUE;
         /* Start the timer with user defined percentage of the the minimum interval discovered earlier */
         os_wake_lock(pTrafficMonitor->hOs);
-        WLAN_OS_REPORT(("TrafficMonitor_ChangeDownTimerStatus: Going to active, set wake_lock!!\n"));
+        //WLAN_OS_REPORT(("TrafficMonitor_ChangeDownTimerStatus: Going to active, set wake_lock!!\n"));
         tmr_StartTimer (pTrafficMonitor->hTrafficMonTimer,
                         TimerMonitor_TimeOut,
                         (TI_HANDLE)pTrafficMonitor,
