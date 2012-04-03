@@ -1,4 +1,5 @@
-# execute this script in root of motorola kernel
+# execute this script in root of motorola OSS android tree (with kernel)
+#   or use CyanogenDefy kernel-omap kernel tree in CM7.
 
 # steps required : 
 #   Edit target/board/generic/BoardConfig.mk
@@ -26,9 +27,16 @@
     . build/envsetup.sh
     choosecombo 1 1 generic eng
 
+# or if you have the kernel-omap tree in a CM7 repo :
+
+    . build/envsetup.sh
+    lunch cyanogen_jordan-eng
+
+    make ext_kernel_modules
+
 # cleanup
 cd system/wlan/ti
-find . | grep "\.o" | xargs rm
+find . | grep "\.o$" | xargs rm
 
 # build modules
 cd $PLATFORM_DIR
@@ -38,10 +46,19 @@ cp system/wlan/ti/wilink_6_1/platforms/os/linux/tiwlan_drv.ko ./
 make MOTO_PREBUILT_DIR= tiap_drv
 cp system/wlan/ti/WiLink_AP/platforms/os/linux/tiap_drv.ko ./
 
-
 # Last changes :
 
 Apr 2012 :
+- Update SDIO part
 - added implementation of CONFIG_HAS_EARLYSUSPEND,  DTIM skipping feature
 - Fix Tests frame size warnings
+
+- tiap_drv : update sdio and add missing commands like "set tx power"
+
+# Current Status (March 2012) :
+
+the tiwlan_drv.ko is currently used in CyanogenMod 7/9 Roms
+
+tiap_drv is not ready yet, it is built and loads fine, AP is seen, but the connection cant be established (wpa2 problem ?)
+We still use a patched motorola kernel module (patched to change softap intf name to "tiap0")... but we are near the goal.
 
