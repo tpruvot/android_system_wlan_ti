@@ -54,7 +54,6 @@ TXN	= $(DK_ROOT)/Txn
 CUDK	= $(DK_ROOT)/CUDK
 LIB	= ../../lib
 
-# include $(WPA_SUPPL_DIR)/.config
 include $(WPA_SUPPL_DIR)/.config
 
 # To force sizeof(enum) = 4
@@ -76,7 +75,7 @@ INCLUDES = $(STAD)/Export_Inc \
 	$(CUDK)/os/common/inc \
 	external/openssl/include \
 	$(WPA_SUPPL_DIR_INCLUDE) \
-	$(DK_ROOT)/../lib \
+	$(DK_ROOT)/../lib
 
 L_CFLAGS += -DCONFIG_DRIVER_CUSTOM -DHOST_COMPILE -D__BYTE_ORDER_LITTLE_ENDIAN
 L_CFLAGS += -DWPA_SUPPLICANT_$(WPA_SUPPLICANT_VERSION)
@@ -99,19 +98,20 @@ ifdef CONFIG_ANDROID_LOG
 L_CFLAGS += -DCONFIG_ANDROID_LOG
 endif
 
-ifdef CONFIG_WPS
-L_CFLAGS += -DCONFIG_WPS 
-CONFIG_IEEE8021X_EAPOL=y
-endif
-
 ifdef CONFIG_IEEE8021X_EAPOL
 L_CFLAGS += -DIEEE8021X_EAPOL
+endif
+
+ifdef CONFIG_WPS
+L_CFLAGS += -DCONFIG_WPS
+CONFIG_IEEE8021X_EAPOL=y
 endif
 
 ########################
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libCustomWifi
+LOCAL_MODULE_TAGS := optional
 LOCAL_SHARED_LIBRARIES := libc libcutils
 LOCAL_CFLAGS := $(L_CFLAGS)
 LOCAL_SRC_FILES := $(OBJS)

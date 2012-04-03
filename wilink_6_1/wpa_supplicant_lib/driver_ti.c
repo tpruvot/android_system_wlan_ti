@@ -44,8 +44,6 @@
 
 #define IBSS_MODE    1    // Motorola, a22906, 2010/3/17, IKSHADOW-2190
 
-//END IKMAPFOUR-47
-
 /*-----------------------------------------------------------------------------
 Routine Name: check_and_get_build_channels
 Routine Description: get number of allowed channels according to a build var.
@@ -92,8 +90,10 @@ static int wpa_driver_tista_keymgmt2wext(int keymgmt)
 {
 	switch (keymgmt) {
 	case KEY_MGMT_802_1X:
-	case KEY_MGMT_WPS:
 	case KEY_MGMT_802_1X_NO_WPA:
+#ifdef CONFIG_WPS
+	case KEY_MGMT_WPS:
+#endif
 		return IW_AUTH_KEY_MGMT_802_1X;
 	case KEY_MGMT_PSK:
 		return IW_AUTH_KEY_MGMT_PSK;
@@ -213,10 +213,10 @@ int wpa_driver_tista_parse_custom(void *ctx, const void *custom)
 			/* Dm: wpa_printf(MSG_INFO,"wpa_supplicant - Link Speed = %u", pStaDrv->link_speed ); */
 			break;
 #ifdef CONFIG_WPS
-                case    IPC_EVENT_WPS_SESSION_OVERLAP:
-                        wpa_printf(MSG_INFO, "IPC_EVENT_WPS_SESSION_OVERLAP");
-                        //wpa_supplicant_event(ctx, WPS_EVENT_OVERLAP, NULL);
-                        break;
+		case	IPC_EVENT_WPS_SESSION_OVERLAP:
+			wpa_printf(MSG_INFO, "IPC_EVENT_WPS_SESSION_OVERLAP");
+			//wpa_supplicant_event(ctx, WPS_EVENT_OVERLAP, NULL);
+			break;
 #endif /* CONFIG_WPS */
 		default:
 			wpa_printf(MSG_DEBUG, "Unknown event");
@@ -449,7 +449,7 @@ const u8 *wpa_driver_tista_get_mac_addr( void *priv )
 	}
 	wpa_printf(MSG_DEBUG, "wpa_driver_tista_get_mac_addr success");
 
-	return (const u8 *)&drv->own_addr ;
+	return (const u8 *)&drv->own_addr;
 }
 
 static int wpa_driver_tista_get_rssi(void *priv, int *rssi_data, int *rssi_beacon)
@@ -826,17 +826,15 @@ static int wpa_driver_tista_driver_cmd( void *priv, char *cmd, char *buf, size_t
 		struct wpa_supplicant *wpa_s = (struct wpa_supplicant *)(drv->ctx);
 		struct scan_ssid_t *p_ssid;
 		int rssi, len;
-//131	const u8 *ie;
 
 		wpa_printf(MSG_DEBUG,"rssi-approx command");
 
 		if( !wpa_s )
 			return( ret );
-		cur_res = scan_get_by_bssid( drv, wpa_s->bssid );
+		cur_res = scan_get_by_bssid(drv, wpa_s->bssid);
 		if( cur_res ) {
-//144
 			p_ssid = scan_get_ssid(cur_res);
-			if( p_ssid ) {
+			if ( p_ssid ) {
 				len = (int)(p_ssid->ssid_len);
 				rssi = cur_res->level;
 				if( (len > 0) && (len <= MAX_SSID_LEN) && (len < (int)buf_len)) {
@@ -845,16 +843,6 @@ static int wpa_driver_tista_driver_cmd( void *priv, char *cmd, char *buf, size_t
 					ret += snprintf(&buf[ret], buf_len-len, " rssi %d\n", rssi);
 				}
 			}
-/* 131
-			ie = wpa_scan_get_ie(cur_res, WLAN_EID_SSID);
-			len = (int)(ie?ie[1]:0);
-			rssi = cur_res->level;
-			if( (len > 0) && (len <= MAX_SSID_LEN) && (len < (int)buf_len)) {
-				os_memcpy( (void *)buf, (void *)(ie+2), len );
-				ret = len;
-				ret += snprintf(&buf[ret], buf_len-len, " rssi %d\n", rssi);
-			}
-*/
 		}
 	}
 	else if( os_strcasecmp(cmd, "rssi") == 0 ) {
@@ -867,18 +855,18 @@ static int wpa_driver_tista_driver_cmd( void *priv, char *cmd, char *buf, size_t
 
 		ret = wpa_driver_tista_get_rssi(priv, &rssi_data, &rssi_beacon);
 		if( ret == 0 ) {
-			len = wpa_driver_tista_get_ssid( priv, (u8 *)ssid );
+			len = wpa_driver_tista_get_ssid(priv, (u8 *)ssid);
 			wpa_printf(MSG_DEBUG,"rssi_data %d rssi_beacon %d", rssi_data, rssi_beacon);
 			if( (len > 0) && (len <= MAX_SSID_LEN) ) {
-				os_memcpy( (void *)buf, (void *)ssid, len );
+				os_memcpy((void *)buf, (void *)ssid, len);
 				ret = len;
 				ret += sprintf(&buf[ret], " rssi %d\n", rssi_beacon);
 				wpa_printf(MSG_DEBUG, "buf %s", buf);
 				/* Update cached value */
-				if( !wpa_s )
-					return( ret );
-				cur_res = scan_get_by_bssid( drv, wpa_s->bssid );
-				if( cur_res )
+				if (!wpa_s)
+					return (ret);
+				cur_res = scan_get_by_bssid(drv, wpa_s->bssid);
+				if (cur_res)
 					cur_res->level = rssi_beacon;
 			}
 			else {
@@ -1164,7 +1152,7 @@ static int wpa_driver_tista_set_auth_param(struct wpa_driver_ti_data *drv,
 
 	if (ioctl(drv->ioctl_sock, SIOCSIWAUTH, &iwr) < 0) {
 		perror("ioctl[SIOCSIWAUTH]");
-		fprintf(stderr, "WEXT auth param %d value 0x%x - ",
+		wpa_printf(MSG_ERROR, "WEXT auth param %d value 0x%x - ",
 			idx, value);
 		ret = errno == EOPNOTSUPP ? -2 : -1;
 	}
@@ -1362,7 +1350,7 @@ static int wpa_driver_tista_set_key(void *priv, wpa_alg alg,
 	int ret;
 
 	wpa_printf(MSG_DEBUG, "%s", __func__);
-        TI_CHECK_DRIVER( drv->driver_is_loaded, -1 );
+	TI_CHECK_DRIVER( drv->driver_is_loaded, -1 );
 	ret = wpa_driver_wext_set_key(drv->wext, alg, addr, key_idx, set_tx,
 					seq, seq_len, key, key_len);
 	return ret;
@@ -1394,10 +1382,10 @@ Compare function for sorting scan results. Return >0 if @b is considered better.
 -----------------------------------------------------------------------------*/
 static int wpa_driver_tista_scan_result_compare(const void *a, const void *b)
 {
-    const struct wpa_scan_result *wa = a;
-    const struct wpa_scan_result *wb = b;
+	const struct wpa_scan_result *wa = a;
+	const struct wpa_scan_result *wb = b;
 
-    return( wb->level - wa->level );
+	return( wb->level - wa->level );
 }
 
 static struct wpa_scan_results* wpa_driver_tista_get_scan_results(void *priv)
@@ -1498,12 +1486,12 @@ static int wpa_driver_tista_associate(void *priv,
 	}
 	// END IKSHADOW-2190
 
-	if( params->bssid ) {
-		wpa_printf(MSG_DEBUG, "wpa_driver_tista_associate: BSSID=" MACSTR, 
+	if (params->bssid) {
+		wpa_printf(MSG_DEBUG, "wpa_driver_tista_associate: BSSID=" MACSTR,
 			            MAC2STR(params->bssid));
 		/* if there is bssid -> set it */
-		if( os_memcmp( params->bssid, "\x00\x00\x00\x00\x00\x00", ETH_ALEN ) != 0 ) {
-			wpa_driver_wext_set_bssid( drv->wext, params->bssid );
+		if (os_memcmp(params->bssid, "\x00\x00\x00\x00\x00\x00", ETH_ALEN) != 0) {
+			wpa_driver_wext_set_bssid(drv->wext, params->bssid);
 		}
 	}
 
@@ -1582,9 +1570,9 @@ const struct wpa_driver_ops wpa_driver_custom_ops = {
 	.flush_pmkid = wpa_driver_tista_flush_pmkid,
 	.get_capa = wpa_driver_tista_get_capa,
 	.set_operstate = wpa_driver_tista_set_operstate,
-//#ifdef CONFIG_WPS
-//	.set_wsc_mode = wpa_driver_tista_set_wsc_mode,
-//#endif /* CONFIG_WPS */
+#ifdef CONFIG_WPS
+	.set_wsc_mode = wpa_driver_tista_set_wsc_mode,
+#endif
 	.set_probe_req_ie = wpa_driver_tista_set_probe_req_ie,
 	.driver_cmd = wpa_driver_tista_driver_cmd
 };
