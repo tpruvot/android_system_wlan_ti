@@ -40,13 +40,13 @@
  */
 
 
-/** \file   WlanDrvIf.c 
+/** \file   WlanDrvIf.c
  *  \brief  The OS-Dependent interfaces of the WLAN driver with external applications:
  *          - Configuration utilities (including download, configuration and activation)
  *          - Network Stack (Tx and Rx)
  *          - Interrupts
  *          - Events to external applications
- *  
+ *
  *  \see    WlanDrvIf.h, Wext.c
  */
 #define __FILE_ID__  FILE_ID_138
@@ -95,7 +95,7 @@ static int wlanDrvIf_pm_suspend(void);
 #include "report.h"
 
 /* save driver handle just for module cleanup */
-static TWlanDrvIfObj *pDrvStaticHandle;  
+static TWlanDrvIfObj *pDrvStaticHandle;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT         (0xFFFFFFFF)    /* assume OS never reach that limit */
 
@@ -109,7 +109,7 @@ module_param(g_external_board, int, 0644);
 EXPORT_SYMBOL( g_external_board);
 
 
-/* linux/irq.h declarations */ 
+/* linux/irq.h declarations */
 extern void disable_irq(unsigned int);
 static int xmit_Bridge (struct sk_buff *skb, struct net_device *dev, TIntraBssBridge *pBssBridgeParam);
 //MOTO BEGIN
@@ -141,7 +141,7 @@ static struct net_device_ops tiwlan_ops_dummy = {
 };
 #endif
 
-/** 
+/**
  * \fn     wlanDrvIf_Xmit
  * \brief  Packets transmission
  * 
@@ -182,12 +182,12 @@ static int xmit_Bridge (struct sk_buff *skb, struct net_device *dev, TIntraBssBr
     {
         drv->stats.tx_errors++;
         os_profile (drv, 1, 0);
-        CL_TRACE_END_L1("tiwlan_drv.ko", "OS", "TX", "");
+        CL_TRACE_END_L1("tiap_drv.ko", "OS", "TX", "");
         return 0;
     }
 
     /* Set interface type according to net device interface number */
-    if (drv->tCommon.eIfRole == IF_ROLE_TYPE_AP) 
+    if (drv->tCommon.eIfRole == IF_ROLE_TYPE_AP)
         SET_PKT_TYPE_IF_ROLE_AP(pPktCtrlBlk);
     else
         SET_PKT_TYPE_IF_ROLE_STA(pPktCtrlBlk);
@@ -234,26 +234,26 @@ static int xmit_Bridge (struct sk_buff *skb, struct net_device *dev, TIntraBssBr
     }
     os_profile (drv, 1, 0);
 
-    CL_TRACE_END_L1("tiwlan_drv.ko", "OS", "TX", "");
+    CL_TRACE_END_L1("tiap_drv.ko", "OS", "TX", "");
 
     return 0;
 }
 
 
 /*--------------------------------------------------------------------------------------*/
-/** 
+/**
  * \fn     wlanDrvIf_FreeTxPacket
  * \brief  Free the OS Tx packet
- * 
+ *
  * Free the OS Tx packet after driver processing is finished.
  *
- * \note   
+ * \note
  * \param  hOs          - The OAL object handle
  * \param  pPktCtrlBlk  - The packet CtrlBlk
  * \param  eStatus      - The packet transmission status (OK/NOK)
  * \return void
- * \sa     
- */ 
+ * \sa
+ */
 /*--------------------------------------------------------------------------------------*/
 
 void wlanDrvIf_FreeTxPacket (TI_HANDLE hOs, TTxCtrlBlk *pPktCtrlBlk, TI_STATUS eStatus)
@@ -261,21 +261,21 @@ void wlanDrvIf_FreeTxPacket (TI_HANDLE hOs, TTxCtrlBlk *pPktCtrlBlk, TI_STATUS e
     dev_kfree_skb((struct sk_buff *)pPktCtrlBlk->tTxPktParams.pInputPkt);
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_XmitDummy
  * \brief  Dummy transmission handler
- * 
+ *
  * This function is registered at the network stack interface as the packets-transmission
  *     handler (replacing wlanDrvIf_Xmit) when the driver is not operational.
- * Using this dummy handler is more efficient then checking the driver state for every 
+ * Using this dummy handler is more efficient then checking the driver state for every
  *     packet transmission.
  *
- * \note   
+ * \note
  * \param  skb - The Linux packet buffer structure
  * \param  dev - The driver network-interface handle
- * \return error 
+ * \return error
  * \sa     wlanDrvIf_Xmit
- */ 
+ */
 static int wlanDrvIf_XmitDummy (struct sk_buff *skb, struct net_device *dev)
 {
     /* Just return error. The driver is not running (network stack frees the packet) */
@@ -283,39 +283,39 @@ static int wlanDrvIf_XmitDummy (struct sk_buff *skb, struct net_device *dev)
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_NetGetStat
  * \brief  Provides driver statistics
- * 
+ *
  * Provides driver Tx and Rx statistics to network stack.
  *
- * \note   
+ * \note
  * \param  dev - The driver network-interface handle
- * \return The statistics pointer 
- * \sa     
- */ 
+ * \return The statistics pointer
+ * \sa
+ */
 static struct net_device_stats *wlanDrvIf_NetGetStat (struct net_device *dev)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_NetGetStat()\n");
-    
+
     return &drv->stats;
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_UpdateDriverState
  * \brief  Update the driver state
- * 
+ *
  * The DrvMain uses this function to update the OAL with the driver steady state
  *     that is relevant for the driver users.
- * 
- * \note   
+ *
+ * \note
  * \param  hOs          - The driver object handle
  * \param  eDriverState - The new driver state
  * \return void
- * \sa     
- */ 
+ * \sa
+ */
 void wlanDrvIf_UpdateDriverState (TI_HANDLE hOs, EDriverSteadyState eDriverState)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -336,20 +336,20 @@ void wlanDrvIf_UpdateDriverState (TI_HANDLE hOs, EDriverSteadyState eDriverState
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_HandleInterrupt
  * \brief  The WLAN interrupt handler
- * 
+ *
  * The WLAN driver interrupt handler called in the interrupt context.
  * The actual handling is done in the driver's context after switching to the workqueue.
- * 
- * \note   
+ *
+ * \note
  * \param  irq      - The interrupt type
  * \param  hDrv     - The driver object handle
  * \param  cpu_regs - The CPU registers
  * \return IRQ_HANDLED
- * \sa     
- */ 
+ * \sa
+ */
 irqreturn_t wlanDrvIf_HandleInterrupt (int irq, void *hDrv, struct pt_regs *cpu_regs)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hDrv;
@@ -366,12 +366,12 @@ irqreturn_t wlanDrvIf_HandleInterrupt (int irq, void *hDrv, struct pt_regs *cpu_
  * 
  * A debug option to catch the WLAN events in polling instead of interrupts.
  * A timer calls this function periodically to check the interrupt status register.
- * 
- * \note   
+ *
+ * \note
  * \param  parm - The driver object handle
  * \return void
- * \sa     
- */ 
+ * \sa
+ */
 #ifdef PRIODIC_INTERRUPT
 static void wlanDrvIf_PollIrqHandler (TI_HANDLE parm)
 {
@@ -392,11 +392,11 @@ static void wlanDrvIf_PollIrqHandler (TI_HANDLE parm)
  *     task to continue the handling.
  * See more information in the context engine module (context.c).
  *
- * \note   
+ * \note
  * \param  hDrv - The driver object handle
  * \return void
- * \sa     
- */ 
+ * \sa
+ */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
 static void wlanDrvIf_DriverTask (void *hDrv)
 {
@@ -411,9 +411,8 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
     unsigned int curr1,base1;
     unsigned int curr2,base2;
     static unsigned int maximum_stack = 0;
-    #endif   
+    #endif
 
-   
     os_profile (drv, 0, 0);
 
     #ifdef STACK_PROFILE
@@ -424,13 +423,13 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
     /* Call the driver main task */
     context_DriverTask (drv->tCommon.hContext);
 
-	os_wake_lock_timeout(drv);	//MOTO
-	os_wake_unlock(drv);		//MOTO
+    os_wake_lock_timeout(drv);	//MOTO
+    os_wake_unlock(drv);		//MOTO
 
     #ifdef STACK_PROFILE
     curr2 = check_stack_stop(&base2);
     if (base2 == base1)
-    {   
+    {
        /* if the current measurement is bigger then the maximum store it and print*/
         if ((curr1 - curr2) > maximum_stack)
         {
@@ -447,10 +446,10 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_LoadFiles
  * \brief  Load init files from loader
- * 
+ *
  * This function is called from the loader context right after the driver
  *     is created (in IDLE state).
  * It copies the following files to the driver's memory:
@@ -458,11 +457,11 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
  *     - NVS-File - The NVS data for FW usage
  *     - FW-Image - The FW program image
  *
- * \note   
+ * \note
  * \param  drv - The driver object handle
  * \return void
  * \sa     wlanDrvIf_GetFile
- */ 
+ */
 int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
 {
     if (!pInitFiles)
@@ -477,12 +476,12 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
         return -EINVAL;
     }
 
-    if (pInitFiles->uIniFileLength) 
+    if (pInitFiles->uIniFileLength)
     {
         drv->tCommon.tIniFile.uSize = pInitFiles->uIniFileLength;
         drv->tCommon.tIniFile.pImage = kmalloc (pInitFiles->uIniFileLength, GFP_KERNEL);
-        #ifdef TI_MEM_ALLOC_TRACE        
-          os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__, pInitFiles->uIniFileLength, GFP_KERNEL, pInitFiles->uIniFileLength);
+        #ifdef TI_MEM_ALLOC_TRACE
+        os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__, pInitFiles->uIniFileLength, GFP_KERNEL, pInitFiles->uIniFileLength);
         #endif
         if (!drv->tCommon.tIniFile.pImage)
         {
@@ -498,8 +497,8 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
     {
         drv->tCommon.tNvsImage.uSize = pInitFiles->uNvsFileLength;
         drv->tCommon.tNvsImage.pImage = kmalloc (drv->tCommon.tNvsImage.uSize, GFP_KERNEL);
-        #ifdef TI_MEM_ALLOC_TRACE        
-          os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", 
+        #ifdef TI_MEM_ALLOC_TRACE
+        os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n",
               __FUNCTION__, __LINE__, drv->tCommon.tNvsImage.uSize, GFP_KERNEL, drv->tCommon.tNvsImage.uSize);
         #endif
         if (!drv->tCommon.tNvsImage.pImage)
@@ -509,7 +508,7 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
         }
         memcpy (drv->tCommon.tNvsImage.pImage, &pInitFiles->data[0], drv->tCommon.tNvsImage.uSize );
     }
-    
+
     drv->tCommon.tFwImage.uSize = pInitFiles->uFwFileLength;
     if (!drv->tCommon.tFwImage.uSize)
     {
@@ -517,8 +516,8 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
         return -EINVAL;
     }
     drv->tCommon.tFwImage.pImage = os_memoryAlloc (drv, drv->tCommon.tFwImage.uSize);
-    #ifdef TI_MEM_ALLOC_TRACE        
-      os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", 
+    #ifdef TI_MEM_ALLOC_TRACE
+    os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n",
           __FUNCTION__, __LINE__, drv->tCommon.tFwImage.uSize, GFP_KERNEL, drv->tCommon.tFwImage.uSize);
     #endif
     if (!drv->tCommon.tFwImage.pImage)
@@ -530,19 +529,19 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
             &pInitFiles->data[pInitFiles->uNvsFileLength],
             drv->tCommon.tFwImage.uSize);
 
-    ti_dprintf(TIWLAN_LOG_OTHER, "--------- Eeeprom=%p(%lu), Firmware=%p(%lu), IniFile=%p(%lu)\n", 
-        drv->tCommon.tNvsImage.pImage, drv->tCommon.tNvsImage.uSize, 
+    ti_dprintf(TIWLAN_LOG_OTHER, "--------- Eeeprom=%p(%lu), Firmware=%p(%lu), IniFile=%p(%lu)\n",
+        drv->tCommon.tNvsImage.pImage, drv->tCommon.tNvsImage.uSize,
         drv->tCommon.tFwImage.pImage,  drv->tCommon.tFwImage.uSize,
         drv->tCommon.tIniFile.pImage,  drv->tCommon.tIniFile.uSize);
-    
+
     return 0;
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_GetFile
  * \brief  Provides access to a requested init file
- * 
+ *
  * Provide the requested file information and call the requester callback.
  * Note that in Linux the files were previously loaded to driver memory 
  *     by the loader (see wlanDrvIf_LoadFiles).
@@ -552,7 +551,7 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
  * \param  pFileInfo - The requested file's properties
  * \return TI_OK
  * \sa     wlanDrvIf_LoadFiles
- */ 
+ */
 int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -562,22 +561,22 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         return TI_NOK;
     }
 
-    /* Future option for getting the FW image part by part */ 
+    /* Future option for getting the FW image part by part */
     pFileInfo->hOsFileDesc = NULL;
 
     /* Fill the file's location and size in the file's info structure */
-    switch (pFileInfo->eFileType) 
+    switch (pFileInfo->eFileType)
     {
-    case FILE_TYPE_INI: 
-        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tIniFile.pImage; 
-        pFileInfo->uLength = drv->tCommon.tIniFile.uSize; 
+    case FILE_TYPE_INI:
+        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tIniFile.pImage;
+        pFileInfo->uLength = drv->tCommon.tIniFile.uSize;
         break;
-    case FILE_TYPE_NVS:     
-        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tNvsImage.pImage; 
-        pFileInfo->uLength = drv->tCommon.tNvsImage.uSize; 
+    case FILE_TYPE_NVS:
+        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tNvsImage.pImage;
+        pFileInfo->uLength = drv->tCommon.tNvsImage.uSize;
         break;
     case FILE_TYPE_FW:
-        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tFwImage.pImage; 
+        pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tFwImage.pImage;
         if(pFileInfo->pBuffer == NULL) {
             ti_dprintf(TIWLAN_LOG_ERROR, "wlanDrv_GetFile: ERROR: Null pimage, exiting");
             return TI_NOK;
@@ -599,7 +598,7 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         /* check dec. validity */
         if ( pFileInfo->uChunkBytesLeft >= pFileInfo->uLength )
         {
-            pFileInfo->uChunkBytesLeft      -= pFileInfo->uLength;
+            pFileInfo->uChunkBytesLeft -= pFileInfo->uLength;
         }
         /* invalid Dec. */
         else
@@ -607,7 +606,7 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
             ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_GetFile() No. of Bytes Left < File Length\n");
             return TI_NOK;
         }
-        pFileInfo->pBuffer  += pFileInfo->uLength; 
+        pFileInfo->pBuffer += pFileInfo->uLength;
 
         /* Finished reading all Previous Chunk */
         if ( pFileInfo->uChunkBytesLeft == 0 )
@@ -635,7 +634,7 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         {
             pFileInfo->uAddress += pFileInfo->uLength;
         }
-        
+
         if ( pFileInfo->uChunkBytesLeft < OS_SPECIFIC_RAM_ALLOC_LIMIT )
         {
             pFileInfo->uLength = pFileInfo->uChunkBytesLeft;
@@ -646,7 +645,7 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         }
 
         /* If last chunk to download */
-        if (( pFileInfo->uChunksLeft == 0 ) && 
+        if (( pFileInfo->uChunksLeft == 0 ) &&
             ( pFileInfo->uLength == pFileInfo->uChunkBytesLeft ))
         {
             pFileInfo->bLast = TI_TRUE;
@@ -665,19 +664,19 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_SetMacAddress
  * \brief  Set STA MAC address
- * 
+ *
  * Called by DrvMain from init process.
  * Copies STA MAC address to the network interface structure.
  *
- * \note   
+ * \note
  * \param  hOs      - The driver object handle
  * \param  pMacAddr - The STA MAC address
  * \return TI_OK
  * \sa     wlanDrvIf_LoadFiles
- */ 
+ */
 void wlanDrvIf_SetMacAddress (TI_HANDLE hOs, TI_UINT8 *pMacAddr)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -687,19 +686,19 @@ void wlanDrvIf_SetMacAddress (TI_HANDLE hOs, TI_UINT8 *pMacAddr)
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_Start
  * \brief  Start driver
- * 
+ *
  * Called by network stack upon opening network interface (ifconfig up).
  * Can also be called from user application or CLI for flight mode.
  * Start the driver initialization process up to OPERATIONAL state.
  *
- * \note   
+ * \note
  * \param  dev - The driver network-interface handle
  * \return 0 if succeeded, error if driver not available
  * \sa     wlanDrvIf_Stop
- */ 
+ */
 int wlanDrvIf_Start (struct net_device *dev)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
@@ -714,14 +713,14 @@ int wlanDrvIf_Start (struct net_device *dev)
     }
 
 
-    /* 
-     *  Insert Start command in DrvMain action queue, request driver scheduling 
+    /*
+     *  Insert Start command in DrvMain action queue, request driver scheduling
      *      and wait for action completion (all init process).
      */
     os_wake_lock_timeout_enable(drv);	//MOTO
     drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_START);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-     /* 
+     /*
      *  Finalize network interface setup
      */
     netif_start_queue (dev);
@@ -739,10 +738,10 @@ int wlanDrvIf_Start (struct net_device *dev)
     return 0;
 }
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
-/** 
+/**
  * \fn     wlanDrvIf_Open
  * \brief  Start driver
- * 
+ *
  * Called by network stack upon opening network interface (ifconfig up).
  * Can also be called from user application or CLI for flight mode.
  * Start the driver initialization process up to OPERATIONAL state.
@@ -751,7 +750,7 @@ int wlanDrvIf_Start (struct net_device *dev)
  * \param  dev - The driver network-interface handle
  * \return 0 if succeeded, error if driver not available
  * \sa     wlanDrvIf_Release
- */ 
+ */
 int wlanDrvIf_Open (struct net_device *dev)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
@@ -763,25 +762,25 @@ int wlanDrvIf_Open (struct net_device *dev)
         ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Open() Driver not created!\n");
         return -ENODEV;
     }
-    if (drv->tCommon.eDriverState == DRV_STATE_FAILED) 
+    if (drv->tCommon.eDriverState == DRV_STATE_FAILED)
     {
         ti_dprintf (TIWLAN_LOG_ERROR, "Driver in FAILED state!\n");
         return -EPERM;
     }
-    if (drv->tCommon.eDriverState != DRV_STATE_RUNNING) 
-	{
+    if (drv->tCommon.eDriverState != DRV_STATE_RUNNING)
+    {
         wlanDrvIf_Start(dev);
     }
 //yangm: maybe should not define at here
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
-	drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
+    drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
 #else
-	drv->netdev->netdev_ops = &tiwlan_ops_pri;
+    drv->netdev->netdev_ops = &tiwlan_ops_pri;
 #endif
-        drv->netdev->addr_len = MAC_ADDR_LEN;
-	
-#ifndef AP_MODE_ENABLED 
-	netif_start_queue (dev); /* Temporal, use wlanDrvIf_Enable/DisableTx in STA mode */
+    drv->netdev->addr_len = MAC_ADDR_LEN;
+
+#ifndef AP_MODE_ENABLED
+    netif_start_queue (dev); /* Temporal, use wlanDrvIf_Enable/DisableTx in STA mode */
 #endif
 
     /* register 3430 PM hooks in our SDIO driver */
@@ -792,10 +791,10 @@ int wlanDrvIf_Open (struct net_device *dev)
     return 0;
 }
 #endif   /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)*/
-/** 
+/**
  * \fn     wlanDrvIf_Stop
  * \brief  Stop driver
- * 
+ *
  * Called by network stack upon closing network interface (ifconfig down).
  * Can also be called from user application or CLI for flight mode.
  * Stop the driver and turn off the device.
@@ -804,7 +803,7 @@ int wlanDrvIf_Open (struct net_device *dev)
  * \param  dev - The driver network-interface handle
  * \return 0 (OK)
  * \sa     wlanDrvIf_Start
- */ 
+ */
 int wlanDrvIf_Stop (struct net_device *dev)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
@@ -815,8 +814,8 @@ int wlanDrvIf_Stop (struct net_device *dev)
     /* Disable network interface queue */
     netif_stop_queue (dev);
 #endif
-    /* 
-     *  Insert Stop command in DrvMain action queue, request driver scheduling 
+    /*
+     *  Insert Stop command in DrvMain action queue, request driver scheduling
      *      and wait for Stop process completion.
      */
     os_wake_lock_timeout_enable(drv);	//MOTO
@@ -825,19 +824,19 @@ int wlanDrvIf_Stop (struct net_device *dev)
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
-/** 
+/**
  * \fn     wlanDrvIf_Release
  * \brief  Stop driver
- * 
+ *
  * Called by network stack upon closing network interface (ifconfig down).
  * Can also be called from user application or CLI for flight mode.
  * Stop the driver and turn off the device.
  *
- * \note   
+ * \note
  * \param  dev - The driver network-interface handle
  * \return 0 (OK)
  * \sa     wlanDrvIf_Open
- */ 
+ */
 int wlanDrvIf_Release (struct net_device *dev)
 {
     /* TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev); */
@@ -878,18 +877,18 @@ static int wlanDrvIf_pm_suspend(void)
 }
 #endif
 #endif  /*#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)*/
-/** 
+/**
  * \fn     wlanDrvIf_SetupNetif
  * \brief  Setup driver network interface
- * 
+ *
  * Called in driver creation process.
  * Setup driver network interface.
  *
- * \note   
+ * \note
  * \param  drv - The driver object handle
  * \return 0 - OK, else - failure
- * \sa     
- */ 
+ * \sa
+ */
 static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
 {
    struct net_device *dev;
@@ -918,6 +917,10 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
    dev->validate_addr   = NULL;
 #endif
 
+   NETDEV_SET_PRIVATE(dev,drv);
+   drv->netdev = dev;
+   strcpy (dev->name, TIWLAN_DRV_IF_NAME);
+   netif_carrier_off (dev);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
    dev->open = wlanDrvIf_Start;
    dev->stop = wlanDrvIf_Stop;
@@ -964,19 +967,19 @@ On the latest Kernel there is no more support for the below macro.
    return 0;
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_CommandDone
  * \brief  Free current command semaphore.
- * 
+ *
  * This routine is called whenever a command has finished executing and Free current command semaphore.
  *
- * \note   
+ * \note
  * \param  hOs           - The driver object handle
  * \param  pSignalObject - handle to complete mechanism per OS
  * \param  CmdResp_p     - respond structure (TCmdRespUnion) for OSE OS only 
  * \return 0 - OK, else - failure
  * \sa     wlanDrvIf_Destroy
- */ 
+ */
 void wlanDrvIf_CommandDone (TI_HANDLE hOs, void *pSignalObject, TI_UINT8 *CmdResp_p)
 {
     /* Free semaphore */
@@ -984,20 +987,20 @@ void wlanDrvIf_CommandDone (TI_HANDLE hOs, void *pSignalObject, TI_UINT8 *CmdRes
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_Create
  * \brief  Create the driver instance
- * 
+ *
  * Allocate driver object.
  * Initialize driver OS resources (IRQ, workqueue, events socket)
  * Setup driver network interface.
  * Create and link all driver modules.
  *
- * \note   
+ * \note
  * \param  void
  * \return 0 - OK, else - failure
  * \sa     wlanDrvIf_Destroy
- */ 
+ */
 static int wlanDrvIf_Create (void)
 {
     TWlanDrvIfObj *drv;
@@ -1013,7 +1016,7 @@ static int wlanDrvIf_Create (void)
     tb_init(TB_OPTION_NONE);
 #endif
     pDrvStaticHandle = drv;  /* save for module destroy */
-    #ifdef TI_MEM_ALLOC_TRACE        
+    #ifdef TI_MEM_ALLOC_TRACE
       os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__, sizeof(TWlanDrvIfObj), GFP_KERNEL, sizeof(TWlanDrvIfObj));
     #endif
     memset (drv, 0, sizeof(TWlanDrvIfObj));
@@ -1026,20 +1029,22 @@ static int wlanDrvIf_Create (void)
     /* for STA role, need to allocate another driver and to set STA role */
     drv->tCommon.eIfRole = IF_ROLE_TYPE_AP;
 #endif
+
 //MOTO BEGIN
-       drv->tiwlan_wq = create_freezeable_workqueue(TIWLAN_DRV_NAME);
-       if (!drv->tiwlan_wq) {
-               kfree (drv);
-               ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
-               return TI_NOK;
-       }
-       drv->wl_packet = 0;
-       drv->wl_count = 0;
+    drv->tiwlan_wq = create_singlethread_workqueue (DRIVERWQ_NAME);
+    if (!drv->tiwlan_wq) {
+        kfree (drv);
+        ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
+        return -ENOMEM;
+    }
+    drv->wl_packet = 0;
+    drv->wl_count = 0;
 #ifdef CONFIG_HAS_WAKELOCK
-       wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
-       wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
+    wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
+    wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
 #endif
 //MOTO END
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
     INIT_WORK(&drv->tWork, wlanDrvIf_DriverTask, (void *)drv);
 #else
@@ -1054,7 +1059,6 @@ static int wlanDrvIf_Create (void)
         kfree (drv);
         return rc;
     }
-   
 
     /* Create the events socket interface */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
@@ -1069,10 +1073,10 @@ static int wlanDrvIf_Create (void)
     }
 
     /* Create all driver modules and link their handles */
-    drvMain_Create (drv, 
-                    &drv->tCommon.hDrvMain, 
-                    &drv->tCommon.hCmdHndlr, 
-                    &drv->tCommon.hContext, 
+    drvMain_Create (drv,
+                    &drv->tCommon.hDrvMain,
+                    &drv->tCommon.hCmdHndlr,
+                    &drv->tCommon.hContext,
                     &drv->tCommon.hTxDataQ,
                     &drv->tCommon.hTxMgmtQ,
                     &drv->tCommon.hTxCtrl,
@@ -1104,10 +1108,10 @@ static int wlanDrvIf_Create (void)
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_Destroy
  * \brief  Destroy the driver instance
- * 
+ *
  * Destroy all driver modules.
  * Release driver OS resources (IRQ, workqueue, events socket)
  * Release driver network interface.
@@ -1118,7 +1122,7 @@ static int wlanDrvIf_Create (void)
  * \param  drv - The driver object handle
  * \return void
  * \sa     wlanDrvIf_Create
- */ 
+ */
 static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
 {
     /* Release the driver network interface */
@@ -1133,28 +1137,25 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
     }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21))
-    cancel_work_sync (&drv->tWork); 
+    cancel_work_sync (&drv->tWork);
 #else
     cancel_delayed_work (&drv->tWork);
 #endif
     //TODO: Yang Ming. check with STA code again.
     /*
-    flush_workqueue (drv->pWorkQueue);
-    destroy_workqueue (drv->pWorkQueue);
+    flush_workqueue (drv->tiwlan_wq);
+    destroy_workqueue (drv->tiwlan_wq);
     */
-
     /* Destroy all driver modules */
     if (drv->tCommon.hDrvMain)
     {
         drvMain_Destroy (drv->tCommon.hDrvMain);
     }
-
     /* close the ipc_kernel socket*/
-    if (drv && drv->wl_sock) 
+    if (drv && drv->wl_sock)
     {
         sock_release (drv->wl_sock->sk_socket);
     }
-
     /* Release the driver interrupt (or polling timer) */
 #ifdef PRIODIC_INTERRUPT
     os_timerDestroy (drv, drv->hPollTimer);
@@ -1169,57 +1170,56 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
     if (drv->tiwlan_wq)
         destroy_workqueue(drv->tiwlan_wq);
 #ifdef CONFIG_HAS_WAKELOCK
-	wake_lock_destroy(&drv->wl_wifi);
-	wake_lock_destroy(&drv->wl_rxwake);
+    wake_lock_destroy(&drv->wl_wifi);
+    wake_lock_destroy(&drv->wl_rxwake);
 #endif
 //MOTO END
-    /* 
+    /*
      *  Free init files memory
      */
     if (drv->tCommon.tFwImage.pImage)
     {
         os_memoryFree (drv, drv->tCommon.tFwImage.pImage, drv->tCommon.tFwImage.uSize);
-        #ifdef TI_MEM_ALLOC_TRACE        
-          os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n", 
+        #ifdef TI_MEM_ALLOC_TRACE
+          os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n",
               __FUNCTION__, __LINE__, drv->tCommon.tFwImage.uSize, -drv->tCommon.tFwImage.uSize);
         #endif
     }
     if (drv->tCommon.tNvsImage.pImage)
     {
         kfree (drv->tCommon.tNvsImage.pImage);
-        #ifdef TI_MEM_ALLOC_TRACE        
-          os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n", 
+        #ifdef TI_MEM_ALLOC_TRACE
+        os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n", 
               __FUNCTION__, __LINE__, drv->tCommon.tNvsImage.uSize, -drv->tCommon.tNvsImage.uSize);
         #endif
     }
     if (drv->tCommon.tIniFile.pImage)
     {
         kfree (drv->tCommon.tIniFile.pImage);
-        #ifdef TI_MEM_ALLOC_TRACE        
-          os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n", 
+        #ifdef TI_MEM_ALLOC_TRACE
+        os_printf ("MTT:%s:%d ::kfree(0x%p) : %d\n",
               __FUNCTION__, __LINE__, drv->tCommon.tIniFile.uSize, -drv->tCommon.tIniFile.uSize);
         #endif
     }
-
     /* Free the driver object */
 #ifdef TI_DBG
     tb_destroy();
-#endif  
+#endif
     kfree (drv);
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_ModuleInit  &  wlanDrvIf_ModuleExit
  * \brief  Linux Init/Exit functions
- * 
- * The driver Linux Init/Exit functions (insmod/rmmod) 
  *
- * \note   
+ * The driver Linux Init/Exit functions (insmod/rmmod)
+ *
+ * \note
  * \param  void
  * \return Init: 0 - OK, else - failure.   Exit: void
  * \sa     wlanDrvIf_Create, wlanDrvIf_Destroy
- */ 
+ */
 //MOTO BEGIN
 #ifndef TI_SDIO_STANDALONE
 static int sdc_ctrl = 2;
@@ -1237,6 +1237,8 @@ static int __init wlanDrvIf_ModuleInit (void)
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
     sdioDrv_init(sdc_ctrl);
 #endif
+#else
+    sdioDrv_init();
 #endif
 //MOTO END
 
@@ -1246,28 +1248,31 @@ static int __init wlanDrvIf_ModuleInit (void)
 static void __exit wlanDrvIf_ModuleExit (void)
 {
     wlanDrvIf_Destroy (pDrvStaticHandle);
+
 //MOTO BEGIN
 #ifndef TI_SDIO_STANDALONE
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
     sdioDrv_exit();
 #endif
+#else
+    sdioDrv_exit();
 #endif
 //MOTO END
     printk (KERN_INFO "TI WLAN: driver unloaded\n");
 }
 
 
-/** 
+/**
  * \fn     wlanDrvIf_StopTx
  * \brief  block Tx thread until wlanDrvIf_ResumeTx called .
- * 
+ *
  * This routine is called whenever we need to stop the network stack to send us pakets since one of our Q's is full.
  *
- * \note   
+ * \note
  * \param  hOs           - The driver object handle
-* \return 
+* \return
  * \sa     wlanDrvIf_StopTx
- */ 
+ */
 void wlanDrvIf_StopTx (TI_HANDLE hOs)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -1275,17 +1280,17 @@ void wlanDrvIf_StopTx (TI_HANDLE hOs)
     netif_stop_queue (drv->netdev);
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_ResumeTx
  * \brief  Resume Tx thread .
- * 
+ *
  * This routine is called whenever we need to resume the network stack to send us pakets since our Q's are empty.
  *
- * \note   
+ * \note
  * \param  hOs           - The driver object handle
- * \return 
+ * \return
  * \sa     wlanDrvIf_ResumeTx
- */ 
+ */
 void wlanDrvIf_ResumeTx (TI_HANDLE hOs)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -1293,14 +1298,14 @@ void wlanDrvIf_ResumeTx (TI_HANDLE hOs)
     netif_wake_queue (drv->netdev);
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_EnableTx
  * \brief  Resume Tx thread .
- * 
+ *
  * This routine is called when driver is ready to accept Tx
  * packets from network device
  *
- */ 
+ */
 void wlanDrvIf_EnableTx (TI_HANDLE hOs)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -1309,14 +1314,14 @@ void wlanDrvIf_EnableTx (TI_HANDLE hOs)
     netif_wake_queue (drv->netdev);
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_DisableTx
  * \brief  Resume Tx thread .
- * 
+ *
  * This routine is called when driver wills to stop Tx from
  * network device
  *
- */ 
+ */
 void wlanDrvIf_DisableTx (TI_HANDLE hOs)
 {
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hOs;
@@ -1325,23 +1330,23 @@ void wlanDrvIf_DisableTx (TI_HANDLE hOs)
     netif_carrier_off(drv->netdev);
 }
 
-/** 
+/**
  * \fn     wlanDrvIf_receivePacket
  * \brief  Receive packet from from lower level
- * 
- */ 
+ *
+ */
 TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacket, TI_UINT16 Length, TIntraBssBridge *pBridgeDecision)
 {
    TWlanDrvIfObj  *drv     = (TWlanDrvIfObj *)OsContext;
-   unsigned char  *pdata   = (unsigned char *)((TI_UINT32)pPacket & ~(TI_UINT32)0x3);
+   unsigned char  *pdata   = (unsigned char *)((TI_UINT32)pRxDesc & ~(TI_UINT32)0x3);
    rx_head_t      *rx_head = (rx_head_t *)(pdata -  WSPI_PAD_BYTES - RX_HEAD_LEN_ALIGNED);
    struct sk_buff *skb     = rx_head->skb;
    struct sk_buff *new_skb;
    EIntraBssBridgeDecision eBridge = INTRA_BSS_BRIDGE_NO_BRIDGE;
 
 
-   skb->data = RX_ETH_PKT_DATA(pPacket);
-   skb_put(skb, RX_ETH_PKT_LEN(pPacket));
+   skb->data = pPacket;
+   skb_put(skb, Length);
 
 
    skb->dev       = drv->netdev;
@@ -1349,11 +1354,11 @@ TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacke
    drv->stats.rx_packets++;
    drv->stats.rx_bytes += skb->len;
    /* Intra BSS bridge section */
-   if(pBridgeDecision != NULL) 
+   if(pBridgeDecision != NULL)
    {
        eBridge = pBridgeDecision->eDecision;
    }
-   if(INTRA_BSS_BRIDGE_NO_BRIDGE == eBridge) 
+   if(INTRA_BSS_BRIDGE_NO_BRIDGE == eBridge)
    {
        /* Forward packet to network stack*/
        CL_TRACE_START_L1();
@@ -1365,10 +1370,10 @@ TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacke
        CL_TRACE_END_L1("tiwlan_drv.ko", "OS", "RX", "");
 
    }
-   else if( INTRA_BSS_BRIDGE_UNICAST == eBridge) 
+   else if( INTRA_BSS_BRIDGE_UNICAST == eBridge)
    {
        /* Send packet to Tx */
-       TRACE2(drv->tCommon.hReport, REPORT_SEVERITY_WARNING, " wlanDrvIf_receivePacket() Unicast Bridge data=0x%x len=%d  \n", RX_ETH_PKT_DATA(pPacket), RX_ETH_PKT_LEN(pPacket));
+       TRACE2(drv->tCommon.hReport, REPORT_SEVERITY_WARNING, " wlanDrvIf_receivePacket() Unicast Bridge data=0x%x len=%d \n", RX_ETH_PKT_DATA(pPacket), RX_ETH_PKT_LEN(pPacket));
        xmit_Bridge (skb, pDrvStaticHandle->netdev, pBridgeDecision);
    }
    else /* Broadcast/Multicast packet*/
@@ -1379,7 +1384,7 @@ TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacke
        skb->ip_summed = CHECKSUM_NONE;
        netif_rx_ni(skb);
 
-       if(new_skb) 
+       if(new_skb)
        {
            xmit_Bridge (new_skb, pDrvStaticHandle->netdev, pBridgeDecision);
        }

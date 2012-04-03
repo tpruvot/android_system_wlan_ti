@@ -122,6 +122,7 @@
 #define TIWLN_802_11_CONFIG_TX_CLASS                    CTRL_DATA_CLSFR_CONFIG
 #define TIWLN_802_11_REMOVE_CLSFR_ENTRY                 CTRL_DATA_CLSFR_REMOVE_ENTRY
 #define TIWLN_DCO_ITRIM_PARAMS                          TWD_DCO_ITRIM_PARAMS
+#define TIWLN_AP_GET_LINK_COUNTERS                      ROLE_AP_GET_LINK_COUNTERS
 
 
 /********************/

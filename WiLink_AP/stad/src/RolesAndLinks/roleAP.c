@@ -76,26 +76,29 @@ typedef struct
     TI_HANDLE           hSiteMgr;
     TI_HANDLE           hCtrlData;
     TI_HANDLE           hRegulatoryDomain;
-	TI_HANDLE			hWlanLinks;
-	TI_HANDLE			hApCmd;
+    TI_HANDLE           hWlanLinks;
+    TI_HANDLE           hApCmd;
     TI_HANDLE           hTxDataQ;
     TI_HANDLE           hTxMgmtQ;
     TI_HANDLE           hDrvMain;
     TI_HANDLE           hTxPort;
     TI_HANDLE           hTxCtrl;
     TI_HANDLE           hRxData;
-    
+
     TBssCapabilities    tBssCapabilities;
-	TI_UINT32			aAllocatedLinks[WLANLINKS_MAX_LINKS];
-	TI_UINT32			uNumAllocatedLinks;
-	TI_UINT32			uBrcstHlid;
-	TI_UINT32			uGlobalHlid;
+    TI_UINT32           aAllocatedLinks[WLANLINKS_MAX_LINKS];
+    TI_UINT32           uNumAllocatedLinks;
+    TI_UINT32           uBrcstHlid;
+    TI_UINT32           uGlobalHlid;
     TI_UINT8            cBssIndex;
     EKeyType            keyType;
     TI_UINT8            DefaultKeyIndex;
     TSecurityKeys       tTwdKey[MAX_WEP_KEY];
-	ERoleApState		eState;
-	TRoleApStats		tRoleApStats;
+    ERoleApState        eState;
+    TRoleApStats        tRoleApStats;
+    TApWpsIe            tWpsIe;
+    TI_UINT32           uTxPower;
+
 } TRoleAP;
 
 
@@ -308,7 +311,7 @@ TI_STATUS roleAP_setParam(TI_HANDLE hRoleAP, paramInfo_t *pParam)
             break;
 
     default:
-			TRACE1(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "\n *** In roleAP_setParam,  bad param= %X\n", pParam->paramType);    
+            TRACE1(pRoleAP->hReport,REPORT_SEVERITY_ERROR , " *** In roleAP_setParam, bad param=%X\n", pParam->paramType);    
             break;
     }
 
@@ -317,19 +320,65 @@ TI_STATUS roleAP_setParam(TI_HANDLE hRoleAP, paramInfo_t *pParam)
     return status;
 }
 
-/** 
- * \fn     roleAP_getParam 
- * \brief  roleAP object getParam API 
- * 
- * Module's object set param API 
+/**
+ * \fn     roleAP_getParam
+ * \brief  roleAP object getParam API
+ *
+ * Module's object set param API
  */
 TI_STATUS roleAP_getParam(TI_HANDLE hRoleAP, paramInfo_t *pParam)
 {
+    TRoleAP     *pRoleAP = (TRoleAP *)hRoleAP;
+    /* check handle validity */
+    if (pParam == NULL) {
+        TRACE0(pRoleAP->hReport, REPORT_SEVERITY_ERROR, " roleAP_getParam(): pParam is NULL!\n");
+        return TI_NOK;
+    }
+
+    switch (pParam->paramType)
+    {
+        case ROLE_AP_GET_LINK_COUNTERS:
+	{
+            TI_UINT32 uHlid;
+            TWlanLinkPeerDescr tPeerDescr;
+            TLinkDataCounters *pLinkCounters = (TLinkDataCounters*)pParam->content.linkDataCounters;
+
+            /* Get Rx Link Counters*/
+            pParam->paramType = RX_DATA_LINK_COUNTERS;
+            rxData_getParam(pRoleAP->hRxData, pParam);
+
+            /* Get Tx Link Counters*/
+            pParam->paramType = TX_CTRL_GET_DATA_LINK_COUNTER;
+            txCtrlParams_getParam(pRoleAP->hTxCtrl, pParam);
+
+            /* Get Link MAC Address*/
+            for (uHlid = 0; uHlid < WLANLINKS_MAX_LINKS; uHlid++)
+            {
+                 pLinkCounters[uHlid].validLink = TI_FALSE;
+
+                 if (pRoleAP->aAllocatedLinks[uHlid] != WLANLINKS_INVALID_HLID)
+                 {
+                     if ((wlanLinks_GetPeerDescr(pRoleAP->hWlanLinks, uHlid, &tPeerDescr) != TI_OK) ||
+                         (wlanLinks_GetLinkType(pRoleAP->hWlanLinks, uHlid, &(pLinkCounters[uHlid].linkType)) != TI_OK))
+                         continue;
+                     pLinkCounters[uHlid].validLink = TI_TRUE;
+                     if (pLinkCounters[uHlid].linkType == WLANLINK_TYPE_BRCST)
+                         os_memorySet(pRoleAP->hOs, pLinkCounters[uHlid].aMacAddr, 0xFF, sizeof(TMacAddr));
+                     else
+                         os_memoryCopy(pRoleAP->hOs, pLinkCounters[uHlid].aMacAddr, tPeerDescr.aMacAddr, sizeof(TMacAddr));
+                 }
+            }
+            break;
+        }
+        default:
+            TRACE1(pRoleAP->hReport,REPORT_SEVERITY_ERROR, " *** In roleAP_getParam, bad param=%X\n", pParam->paramType);
+    }
+
     return TI_OK;
 }
 
 
-/** 
+/**
  * \fn     roleAP_start 
  * \brief  RolesMgr start command API
  * 
@@ -564,16 +613,16 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
     TRoleAP          *pRoleAP = (TRoleAP *)hRoleAP;
     TApGeneralParam  *pGenParams;
     TApChannelParams *pChannelParams;
-    TApSsidParam     *pSsidParams;    
+    TApSsidParam     *pSsidParams;
+    TApWpsIe         *pWpsIe;
     TI_STATUS status = TI_OK;
     TSecurityKeys    *pTwdKey;
     TTwdParamInfo    tTwdParam;
     TApConnPhaseParam	*pConnPhaseParam;
     TTwdConnPhaseParam	tTwdConnPhaseParam;
     TI_STATUS  tRes = TI_NOK;
-    
 
-    switch (cmd) 
+    switch (cmd)
     {
     case ROLE_AP_SET_CHANNEL:
          pChannelParams =  (TApChannelParams*)pBuffer;
@@ -584,72 +633,69 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         pGenParams = (TApGeneralParam*)pBuffer;
         pRoleAP->tBssCapabilities.uDtimPeriod = (TI_UINT8)pGenParams->lValue;
         break;
-        
+
     case ROLE_AP_SET_BEACON_INT:
         pGenParams = (TApGeneralParam*)pBuffer;
         pRoleAP->tBssCapabilities.uBeaconInterval = (TI_UINT16)pGenParams->lValue;
         break;
 
     case ROLE_AP_USE_CTS_PROT:
-		{
-			TTwdParamInfo    *pTwdParam = os_memoryAlloc(pRoleAP->hOs, sizeof(TTwdParamInfo));;
+    {
+        TTwdParamInfo    *pTwdParam = os_memoryAlloc(pRoleAP->hOs, sizeof(TTwdParamInfo));;
 
-			if (!pTwdParam)
-			{
-				TRACE1(pRoleAP->hReport, REPORT_SEVERITY_FATAL_ERROR, "%s: Memory allocation failed\n",__FUNCTION__);
-				return TI_NOK;
-			}
+        if (!pTwdParam)
+        {
+            TRACE1(pRoleAP->hReport, REPORT_SEVERITY_FATAL_ERROR, "%s: Memory allocation failed\n",__FUNCTION__);
+            return TI_NOK;
+        }
         pGenParams = (TApGeneralParam*)pBuffer;
         pRoleAP->tBssCapabilities.bUseProtection = (TI_BOOL)pGenParams->lValue;
-            pTwdParam->paramType = TWD_CTS_TO_SELF_PARAM_ID;
-			pTwdParam->content.halCtrlCtsToSelf = (pRoleAP->tBssCapabilities.bUseProtection) ? CTS_TO_SELF_ENABLE : CTS_TO_SELF_DISABLE;
+        pTwdParam->paramType = TWD_CTS_TO_SELF_PARAM_ID;
+        pTwdParam->content.halCtrlCtsToSelf = (pRoleAP->tBssCapabilities.bUseProtection) ? CTS_TO_SELF_ENABLE : CTS_TO_SELF_DISABLE;
 
-			TRACE2(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_USE_CTS_PROT: protection=%u\n", __FUNCTION__, pTwdParam->content.halCtrlCtsToSelf);    
+        TRACE2(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_USE_CTS_PROT: protection=%u\n", __FUNCTION__, pTwdParam->content.halCtrlCtsToSelf);
 
-			TWD_SetParam (pRoleAP->hTWD, pTwdParam);
+        TWD_SetParam (pRoleAP->hTWD, pTwdParam);
 
-			os_memoryFree(pRoleAP->hOs, pTwdParam, sizeof(TTwdParamInfo));
-		}
+        os_memoryFree(pRoleAP->hOs, pTwdParam, sizeof(TTwdParamInfo));
         break;
-
+    }
     case ROLE_AP_SET_RTS:
         pGenParams = (TApGeneralParam*)pBuffer;
         pRoleAP->tBssCapabilities.uRtsThreshold = (TI_UINT16)pGenParams->lValue;
         break;
 
     case ROLE_AP_SET_AP_SHORT_PREAMBLE:
-		{
-			EPreamble ePreamble;
+    {
+        EPreamble ePreamble;
 
-			pGenParams = (TApGeneralParam*)pBuffer;
-			pRoleAP->tBssCapabilities.bUseShortPreamble = (TI_BOOL)pGenParams->lValue;
+        pGenParams = (TApGeneralParam*)pBuffer;
+        pRoleAP->tBssCapabilities.bUseShortPreamble = (TI_BOOL)pGenParams->lValue;
 
-			ePreamble = (pRoleAP->tBssCapabilities.bUseShortPreamble) ? PREAMBLE_SHORT : PREAMBLE_LONG;
+        ePreamble = (pRoleAP->tBssCapabilities.bUseShortPreamble) ? PREAMBLE_SHORT : PREAMBLE_LONG;
 
-			TWD_CfgPreamble (pRoleAP->hTWD, ePreamble);
-		}
+        TWD_CfgPreamble (pRoleAP->hTWD, ePreamble);
         break;
-
+    }
     case ROLE_AP_SET_PRIVACY:
          pGenParams = (TApGeneralParam*)pBuffer;
          pRoleAP->tBssCapabilities.bPrivacyEnabled = (TI_BOOL)pGenParams->lValue;
          break;
 
     case ROLE_AP_USE_SHORT_SLOT_TIME:
-		{
-			ESlotTime eSlotTime;
+    {
+        ESlotTime eSlotTime;
 
         pGenParams = (TApGeneralParam*)pBuffer;
         pRoleAP->tBssCapabilities.bUseShortSlotTime = (TI_BOOL)pGenParams->lValue;
 
-			eSlotTime = (pRoleAP->tBssCapabilities.bUseShortSlotTime) ? PHY_SLOT_TIME_SHORT : PHY_SLOT_TIME_LONG;
+        eSlotTime = (pRoleAP->tBssCapabilities.bUseShortSlotTime) ? PHY_SLOT_TIME_SHORT : PHY_SLOT_TIME_LONG;
 
-			TRACE3(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_USE_SHORT_SLOT_TIME: timeSlot=%u cmd=%x\n", __FUNCTION__, eSlotTime, cmd);    
+        TRACE3(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_USE_SHORT_SLOT_TIME: timeSlot=%u cmd=%x\n", __FUNCTION__, eSlotTime, cmd);
 
-			TWD_CfgSlotTime(pRoleAP->hTWD, eSlotTime);
-		}
+        TWD_CfgSlotTime(pRoleAP->hTWD, eSlotTime);
         break;
-
+    }
     case ROLE_AP_SET_RATE:
         SetApRates(hRoleAP, pBuffer);
         break;
@@ -659,50 +705,45 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         break;
 
     case ROLE_AP_SET_TX_PARAM:
-        {
-            TApTxParams *pTxParams = (TApTxParams*)pBuffer;
-            TAcQosParams tAcQosParams;
+    {
+        TApTxParams *pTxParams = (TApTxParams*)pBuffer;
+        TAcQosParams tAcQosParams;
 
-            tAcQosParams.ac = (TI_UINT8)pTxParams->cQueueId; /* [LiorC] check if need to be converted */
-            tAcQosParams.aifsn = (TI_UINT8)pTxParams->cAifs;
-            tAcQosParams.cwMin = (TI_UINT8)pTxParams->sCwmin;
-            tAcQosParams.cwMax = (TI_UINT16)pTxParams->sCwmax;
-            tAcQosParams.txopLimit = (TI_UINT16)pTxParams->sTxop;
+        tAcQosParams.ac = (TI_UINT8)pTxParams->cQueueId; /* [LiorC] check if need to be converted */
+        tAcQosParams.aifsn = (TI_UINT8)pTxParams->cAifs;
+        tAcQosParams.cwMin = (TI_UINT8)pTxParams->sCwmin;
+        tAcQosParams.cwMax = (TI_UINT16)pTxParams->sCwmax;
+        tAcQosParams.txopLimit = (TI_UINT16)pTxParams->sTxop;
 
-            TWD_CfgAcParams(pRoleAP->hTWD, &tAcQosParams, NULL, NULL);
-        }
-        
+        TWD_CfgAcParams(pRoleAP->hTWD, &tAcQosParams, NULL, NULL);
         break;
-
+    }
     case ROLE_AP_ADD_BEACON_PARAM:
-		TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_ADD_BEACON_PARAM\n", __FUNCTION__);    
+        TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , "%s: ROLE_AP_ADD_BEACON_PARAM\n", __FUNCTION__);
 
         os_memoryCopy(pRoleAP->hOs, &pRoleAP->tBssCapabilities.tAPBeaconParams, (TApBeaconParams*)pBuffer, sizeof(TApBeaconParams));
 
-		if (pRoleAP->eState == ROLEAP_STATE_STARTED)
-		{
-			/* Templates are to be updated in FW when AP Role is in started state. 
-			 * RoleAp_Start takes care to download templates from BssCapabilities in stoped state 
-			 */
-			setBeaconProbeRspTempl(pRoleAP);
-		}
-
-        break;
-
-    case ROLE_AP_SET_SSID:
-         pSsidParams = (TApSsidParam*)pBuffer;
-         pRoleAP->tBssCapabilities.tSsid.len = pSsidParams->iSsidLen;
-         os_memoryCopy(pRoleAP->hOs,pRoleAP->tBssCapabilities.tSsid.str,pSsidParams->cSsid,pSsidParams->iSsidLen);
-         break;
-
-    case ROLE_AP_SET_SSID_TYPE:
-        {
-            TApGeneralParam *pSsidTypeParam = (TApGeneralParam *)pBuffer;
-            pRoleAP->tBssCapabilities.eSsidType = (pSsidTypeParam->lValue == AP_SSID_TYPE_PUBLIC) ? 
-                                                   SSID_TYPE_PUBLIC : SSID_TYPE_HIDDEN;
+        if (pRoleAP->eState == ROLEAP_STATE_STARTED) {
+            /* Templates are to be updated in FW when AP Role is in started state.
+             * RoleAp_Start takes care to download templates from BssCapabilities in stoped state
+             */
+            setBeaconProbeRspTempl(pRoleAP);
         }
         break;
 
+    case ROLE_AP_SET_SSID:
+        pSsidParams = (TApSsidParam*)pBuffer;
+        pRoleAP->tBssCapabilities.tSsid.len = pSsidParams->iSsidLen;
+        os_memoryCopy(pRoleAP->hOs,pRoleAP->tBssCapabilities.tSsid.str,pSsidParams->cSsid,pSsidParams->iSsidLen);
+        break;
+
+    case ROLE_AP_SET_SSID_TYPE:
+    {
+        TApGeneralParam *pSsidTypeParam = (TApGeneralParam *)pBuffer;
+        pRoleAP->tBssCapabilities.eSsidType = (pSsidTypeParam->lValue == AP_SSID_TYPE_PUBLIC) ?
+                                               SSID_TYPE_PUBLIC : SSID_TYPE_HIDDEN;
+        break;
+    }
     case ROLE_AP_SET_INACTIVE_INT:
         /* [LiorC] To be implemented later in hostapd */
         break;
@@ -716,11 +757,14 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         break;
 
     case ROLE_AP_COMMIT_CMD:
-        {
-         TApGeneralParam *pGenParam = (TApGeneralParam *)pBuffer;
-         pRoleAP->tBssCapabilities.uInactivity = pGenParam->lValue;
-         roleAP_start(hRoleAP, pRoleAP->tBssCapabilities.uBssIndex);
-        }
+    {
+        TApGeneralParam *pGenParam = (TApGeneralParam *)pBuffer;
+        pRoleAP->tBssCapabilities.uInactivity = pGenParam->lValue;
+        roleAP_start(hRoleAP, pRoleAP->tBssCapabilities.uBssIndex);
+        break;
+    }
+    case ROLE_AP_ENABLE:
+        status = roleAP_enable(hRoleAP);
         break;
 
     case ROLE_AP_STOP:
@@ -752,15 +796,31 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         }
         break;
 
-	case ROLE_AP_DEAUTH_STATION:
-		status = SaveDeauthReason(hRoleAP, (TApGeneralParam *)pBuffer);
+    case ROLE_AP_DEAUTH_STATION:
+        status = SaveDeauthReason(hRoleAP, (TApGeneralParam *)pBuffer);
+        break;
+
+    case ROLE_AP_REMOVE_ALL_STATION:
+    case ROLE_AP_SET_STA_SHORT_PREAMBLE:
+        /* Not supported for now */
+        break;
+
+    case ROLE_AP_SET_PROBE_WPS_IE:
+        pWpsIe = (TApWpsIe*)pBuffer;
+        pRoleAP->tWpsIe.iIeLen = pWpsIe->iIeLen;
+        os_memoryCopy(pRoleAP->hOs,pRoleAP->tWpsIe.cIe,pWpsIe->cIe,pWpsIe->iIeLen);
+        break;
+
+    case ROLE_AP_SET_TX_POWER:
+        pGenParams = (TApGeneralParam *)pBuffer;
+        pRoleAP->uTxPower = pGenParams->lValue;
         break;
 
     case TWD_ADD_KEY_PARAMS:
-         pTwdKey = (TSecurityKeys*)pBuffer;
-         pRoleAP->keyType = pTwdKey->keyType;
+        pTwdKey = (TSecurityKeys*)pBuffer;
+        pRoleAP->keyType = pTwdKey->keyType;
 
-		 TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , " RoleAp: TWD_ADD_KEY_PARAMS key type %d \n",pRoleAP->keyType);    
+        TRACE1(pRoleAP->hReport,REPORT_SEVERITY_INIT , " RoleAp: TWD_ADD_KEY_PARAMS key type %d \n",pRoleAP->keyType);
 
         // in case of wep or broadcst key keep the keys in roleAp and set the FW after BssConfig.
         if ((pTwdKey->lidKeyType == BROADCAST_LID_TYPE)|| (pTwdKey->keyType == KEY_WEP))
@@ -773,7 +833,6 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
          if (pRoleAP->keyType == KEY_TKIP)
            TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_TRUE);
         }
-     
         break;
 
     case TWD_DEL_KEY_PARAMS:
@@ -785,40 +844,29 @@ TI_STATUS RoleAp_setApCmd(TI_HANDLE hRoleAP, TI_UINT32 cmd, void *pBuffer)
         tTwdParam.content.configureCmdCBParams.hCb = NULL;
         tRes = TWD_SetParam (pRoleAP->hTWD, &tTwdParam);
         if (tRes != TI_OK)
-			TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_DEL_KEY_PARAMS :Error in TWD_SetParam status %d \n", tRes);    
-	
+            TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_DEL_KEY_PARAMS :Error in TWD_SetParam status %d \n", tRes);
         if (pRoleAP->keyType == KEY_TKIP)
           TxMgmtQ_SetEncryptFlag(pRoleAP->hTxMgmtQ,pTwdKey->hlid,TI_FALSE);
 
         break;
 
     case TWD_SET_DEFAULT_KEY_PARAMS:
-         pGenParams = (TApGeneralParam*)pBuffer;
-         pRoleAP->DefaultKeyIndex = pGenParams->lValue;  
-                 
-         break;
-    
-    case ROLE_AP_REMOVE_ALL_STATION:
-    case ROLE_AP_SET_STA_SHORT_PREAMBLE:
-        /* Not supported for now */
+        pGenParams = (TApGeneralParam*)pBuffer;
+        pRoleAP->DefaultKeyIndex = pGenParams->lValue;
         break;
 
-	case ROLE_AP_ENABLE:
-		status = roleAP_enable(hRoleAP);
-        break;
-   
-     case TWD_SET_CONNECTION_PHASE:
-	pConnPhaseParam = (TApConnPhaseParam *)pBuffer;
-	tTwdConnPhaseParam.uMode = pConnPhaseParam->mode;
-	os_memoryCopy(pRoleAP->hOs, tTwdConnPhaseParam.aMacAddr, pConnPhaseParam->macAddr, AP_MAC_ADDR);
+    case TWD_SET_CONNECTION_PHASE:
+        pConnPhaseParam = (TApConnPhaseParam *)pBuffer;
+        tTwdConnPhaseParam.uMode = pConnPhaseParam->mode;
+        os_memoryCopy(pRoleAP->hOs, tTwdConnPhaseParam.aMacAddr, pConnPhaseParam->macAddr, AP_MAC_ADDR);
 
         tRes = TWD_SetConnectionPhase(pRoleAP->hTWD, &tTwdConnPhaseParam, NULL, NULL);
         if (tRes != TI_OK)
-	TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_SET_CONNECTION_PHASE :Error in TWD_SetConnectionPhase status %d \n", tRes);    
+            TRACE1(pRoleAP->hReport,REPORT_SEVERITY_WARNING , "RoleAp TWD_SET_CONNECTION_PHASE :Error in TWD_SetConnectionPhase status %d \n", tRes);
         break;
-    
-     default:
-		TRACE2(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "\n !!! In %s,  bad command type = 0x%X\n", __FUNCTION__,cmd);    
+
+    default:
+        TRACE2(pRoleAP->hReport,REPORT_SEVERITY_ERROR , " In %s, bad command type = 0x%X !!!\n", __FUNCTION__, cmd);
         status = TI_NOK;
         break;
     }

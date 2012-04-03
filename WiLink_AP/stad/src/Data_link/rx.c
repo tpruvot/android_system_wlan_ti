@@ -1048,7 +1048,7 @@ void rxData_receivePacketFromWlan (TI_HANDLE hRxData, void *pBuffer, TRxAttr* pR
             else
             {
                 pRxData->rxDataLinkCounters[uHlid].discardBeaconRoleAp++;
-                WLAN_OS_REPORT(("rxData_receivePacketFromWlan: TAG_CLASS_BCN_PRBRSP in AP role should be filtered !!!!!\n"));
+                // WLAN_OS_REPORT(("rxData_receivePacketFromWlan: TAG_CLASS_BCN_PRBRSP in AP role should be filtered !!!!!\n"));
                 rxData_discardPacket (hRxData, pBuffer, pRxAttr);
                 return;
             }

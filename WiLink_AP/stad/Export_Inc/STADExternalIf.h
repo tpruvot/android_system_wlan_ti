@@ -62,20 +62,19 @@
 /* defines */
 /***********/
 
-#define NUM_OF_CONFIG_PARAMS_IN_SG  	    2
-#define NUM_OF_STATUS_PARAMS_IN_SG  		11
-#define NUM_OF_COEX_ACTIVITY_PARAMS_IN_SG 	6
-#define NUM_OF_RATE_MNGT_PARAMS_MAX			14
-#define SET_SSID_WITHOUT_SUPPL      		0x8000
+#define WLANLINKS_MAX_LINKS                     7
 
-#define TX_RETRY_HISTOGRAM_SIZE 			16
+#define NUM_OF_CONFIG_PARAMS_IN_SG              2
+#define NUM_OF_STATUS_PARAMS_IN_SG              11
+#define NUM_OF_COEX_ACTIVITY_PARAMS_IN_SG       6
+#define NUM_OF_RATE_MNGT_PARAMS_MAX             14
+#define SET_SSID_WITHOUT_SUPPL                  0x8000
 
-#define RX_DATA_FILTER_MAX_MASK_SIZE        8
-#define RX_DATA_FILTER_MAX_PATTERN_SIZE     64
-
-#define KEEP_ALIVE_TEMPLATE_MAX_LENGTH      64
-
-#define KEEP_ALIVE_MAX_USER_MESSAGES     	2
+#define TX_RETRY_HISTOGRAM_SIZE                 16
+#define RX_DATA_FILTER_MAX_MASK_SIZE            8
+#define RX_DATA_FILTER_MAX_PATTERN_SIZE         64
+#define KEEP_ALIVE_TEMPLATE_MAX_LENGTH          64
+#define KEEP_ALIVE_MAX_USER_MESSAGES            2
 
 
 /*********************/
@@ -126,18 +125,24 @@ typedef enum
 
 /** \enum EDraftNumber
  * \brief Draft Number
- * 
+ *
  * \par Description
  * Site Manager / Exteranl Rate use draft number
- * 
+ *
  * \sa
  */
 typedef enum
 {
-    DRAFT_5_AND_EARLIER = 5,	/**< */ 
-    DRAFT_6_AND_LATER   = 6		/**< */ 
-
+    DRAFT_5_AND_EARLIER = 5,
+    DRAFT_6_AND_LATER   = 6
 } EDraftNumber;
+
+typedef enum
+{
+    WLANLINK_TYPE_SPECIFIC,
+    WLANLINK_TYPE_BRCST,
+    WLANLINK_TYPE_GLOBAL,
+}EWlanLinkType;
 
 /********************/
 /* Structures types */
@@ -190,6 +195,26 @@ typedef struct
 {
     TTxDataCounters  txCounters[MAX_NUM_OF_AC];	/**< Table which holds Tx statistics of each Tx-queue */
 } TIWLN_TX_STATISTICS;
+
+/** \struct TIWLN_TX_STATISTICS
+ * \brief TI WLAN TX Statistics
+ *
+ * \par Description
+ * All Tx statistics of all Tx Queues Tx-queue
+ *
+ * \sa
+ */
+typedef struct
+{
+    TI_BOOL         validLink;
+    EWlanLinkType   linkType;
+    TMacAddr        aMacAddr;
+    TI_UINT32       recvPktsFromWlan;
+    TI_UINT32       recvBytesFromWlan;
+    TI_UINT32       sentPkts;
+    TI_UINT32       sentBytes;
+    TI_UINT32       sentPktsError;
+} TLinkDataCounters;
 
 /** \struct TDfsChannelRange
  * \brief DFS Channel Range

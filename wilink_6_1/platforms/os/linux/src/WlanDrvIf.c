@@ -879,17 +879,17 @@ static int wlanDrvIf_Create (void)
 
     drv->tCommon.eDriverState = DRV_STATE_IDLE;
 
-       drv->tiwlan_wq = create_freezeable_workqueue(DRIVERWQ_NAME);
-       if (!drv->tiwlan_wq) {
-               ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
+    drv->tiwlan_wq = create_freezeable_workqueue(DRIVERWQ_NAME);
+    if (!drv->tiwlan_wq) {
+        ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Create(): Failed to create workQ!\n");
         rc = -EINVAL;
         goto drv_create_end_1;
-       }
-       drv->wl_packet = 0;
-       drv->wl_count = 0;
+    }
+    drv->wl_packet = 0;
+    drv->wl_count = 0;
 #ifdef CONFIG_HAS_WAKELOCK
-       wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
-       wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
+    wake_lock_init(&drv->wl_wifi, WAKE_LOCK_SUSPEND, "wifi_wake");
+    wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)

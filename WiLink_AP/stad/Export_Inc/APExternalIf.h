@@ -53,6 +53,8 @@
 #define AP_MAX_HEAD_BUFF     256
 #define AP_MAX_TAIL_BUFF     512
 #define AP_MAX_SSID_LEN      32
+#define AP_MAX_WPS_IE_LEN    256
+
 /* Private eth type for menegmant packet */
 #define AP_MGMT_ETH_TYPE            0x8899
 #define AP_CONTROL_WORD_LEN         2
@@ -65,6 +67,8 @@
 #define AP_MAX_CHAN_NUM             50
 #define AP_NUM_OF_CHANNELS_24       14
 #define AP_NUM_OF_CHANNELS_5        180
+
+#define AP_MAX_TX_POWER             250
 
 #define SIOCIWAPPRIV     SIOCIWFIRSTPRIV + 2
 
@@ -156,8 +160,10 @@ typedef enum
   ROLE_AP_SET_BSS_BRIDGE                  =   SET_BIT | AP_ROLEAP_PARAMS | 0x1C,
   ROLE_AP_SET_SSID_TYPE                   =   SET_BIT | AP_ROLEAP_PARAMS | 0x1D,
   ROLE_AP_GET_HW                          =   GET_BIT | AP_ROLEAP_PARAMS | 0x1E,
-  ROLE_AP_ENABLE	                      =   SET_BIT | AP_ROLEAP_PARAMS | 0x1F,
-  ROLE_AP_STOP		                      =   SET_BIT | AP_ROLEAP_PARAMS | 0x20
+  ROLE_AP_ENABLE                          =   SET_BIT | AP_ROLEAP_PARAMS | 0x1F,
+  ROLE_AP_STOP                            =   SET_BIT | AP_ROLEAP_PARAMS | 0x20,
+  ROLE_AP_SET_PROBE_WPS_IE                =   SET_BIT | AP_ROLEAP_PARAMS | 0x21,
+  ROLE_AP_SET_TX_POWER                    =   SET_BIT | AP_ROLEAP_PARAMS | 0x22,
 } EApExternalCmd;
 
 
@@ -251,6 +257,12 @@ typedef struct
  unsigned short sBeaconIntval;
  int iDtimIntval;
 }TApBeaconParams;
+
+typedef struct
+{
+ char cIe[AP_MAX_WPS_IE_LEN];
+ int iIeLen;
+} TApWpsIe;
 
 /* ROLE_AP_SET_COUNTRY */
 typedef struct

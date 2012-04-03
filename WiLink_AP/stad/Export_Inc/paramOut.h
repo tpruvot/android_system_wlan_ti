@@ -654,6 +654,9 @@ typedef struct{
         TI_UINT8                       		txDataEncryptionFieldSize;
 		TI_UINT16                           txGenericEthertype;
 
+        /* Link Info section*/
+        TLinkDataCounters                               linkDataCounters[WLANLINKS_MAX_LINKS];
+
         /* Ctrl Data section */
         TI_BOOL                    			ctrlDataPowerSaveEnable;
         TI_BOOL                    			ctrlDataPowerSaveForce;
