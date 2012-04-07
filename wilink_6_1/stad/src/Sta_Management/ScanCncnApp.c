@@ -77,7 +77,11 @@ TI_STATUS scanCncnApp_SetParam (TI_HANDLE hScanCncn, paramInfo_t *pParam)
         {
             TRACE1(pScanCncn->hReport, REPORT_SEVERITY_ERROR , "scanCncnApp_SetParam: trying to start app one-shot scan when client %d is currently running!\n", pScanCncn->eCurrentRunningAppScanClient);
             /* Scan was not started successfully, send a scan complete event to the user */
-            return TI_NOK;
+            // Motorola, dpn473, 03-03-2011, IKSTABLEFOUR-7529, PNO driver HUNG fix
+            if (pScanCncn->eCurrentRunningAppScanClient == SCAN_SCC_APP_PERIODIC)
+                return TI_OK;
+            else
+                return TI_NOK;
         }
 
         /* set one-shot scan as running app scan client */
