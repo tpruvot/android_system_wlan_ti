@@ -227,6 +227,8 @@ TI_STATUS roleAP_SetDefaults (TI_HANDLE hRoleAP)
 {
     TRoleAP *pRoleAP = (TRoleAP *)hRoleAP;
 
+    //pRoleAP->uBeaconTxTimeout = tRoleApInitParams->ubeaconTxTimeout;
+    pRoleAP->uTxPower = DEF_TX_POWER;
 
     rxData_IntraBssBridge_Enable(pRoleAP->hRxData);
 
@@ -421,32 +423,35 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
                                                                                pRoleAP->tBssCapabilities.uChannel,
                                                                                (ERadioBand)pRoleAP->tBssCapabilities.uBand,
                                                                                TI_TRUE);
+    if (pRoleAP->uTxPower > 0)
+        pTwdParam->content.halCtrlTxPowerDbm = TI_MIN(pRoleAP->uTxPower, pTwdParam->content.halCtrlTxPowerDbm);
+
     tRes = TWD_SetParam(pRoleAP->hTWD, pTwdParam);
-	if (tRes != TI_OK)
-	{
+    if (tRes != TI_OK)
+    {
         TRACE1(pRoleAP->hReport, REPORT_SEVERITY_ERROR, "%s: TWD_SetParam failed\n",__FUNCTION__);
-		return tRes;
-	}
+        return tRes;
+    }
 
     /* Configures default Rate Policy */
-	ConfigureRatePolicies(hRoleAP);
+    ConfigureRatePolicies(hRoleAP);
 
-	/* Configure the FW with frame templates */
-	ConfigureFrameTemplates(hRoleAP);
+    /* Configure the FW with frame templates */
+    ConfigureFrameTemplates(hRoleAP);
 
 
     params.maxTxRetry = AP_MAX_TX_RETRY;
     TWD_CfgMaxTxRetry (pRoleAP->hTWD, &params);
 
-	/*Register for events*/
-	TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_EVENT_STA_REMOVE_COMPLETE, roleAP_RemoveStaCompleteCB, pRoleAP);
-	TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_EVENT_STA_REMOVE_COMPLETE);
+    /*Register for events*/
+    TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_EVENT_STA_REMOVE_COMPLETE, roleAP_RemoveStaCompleteCB, pRoleAP);
+    TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_EVENT_STA_REMOVE_COMPLETE);
 
-	TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_INACTIVE_STA_EVENT_ID, InactiveStaEventCB, pRoleAP);
-	TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_INACTIVE_STA_EVENT_ID);
+    TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_INACTIVE_STA_EVENT_ID, InactiveStaEventCB, pRoleAP);
+    TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_INACTIVE_STA_EVENT_ID);
 
-	TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY, maxTxRetryStaEventCB, pRoleAP);
-	TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY);
+    TWD_RegisterEvent(pRoleAP->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY, maxTxRetryStaEventCB, pRoleAP);
+    TWD_EnableEvent  (pRoleAP->hTWD, TWD_OWN_EVENT_MAX_TX_RETRY);
 
     if (pRoleAP->keyType != KEY_NULL)
       TxDataQ_SetEncryptFlag(pRoleAP->hTxDataQ, pRoleAP->uBrcstHlid, TI_TRUE);
@@ -457,13 +462,13 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
     os_memoryFree(pRoleAP->hOs, pTwdParam, sizeof(TTwdParamInfo));
 
     tRes = BssStart(hRoleAP, uBssIdx);
-	if (tRes != TI_OK)
-	{
+    if (tRes != TI_OK)
+    {
         TRACE1(pRoleAP->hReport, REPORT_SEVERITY_ERROR, "%s: BssStart failed\n",__FUNCTION__);
-		return tRes;
-	}
+        return tRes;
+    }
 
-           
+
     for (i=0;i<MAX_WEP_KEY;i++)
     {
         if (pRoleAP->tTwdKey[i].keyType != KEY_NULL)
@@ -474,29 +479,28 @@ TI_STATUS roleAP_start(TI_HANDLE hRoleAP, TI_UINT8 uBssIdx)
 
     if (pRoleAP->keyType == KEY_WEP)
     {
-     tTwdParam.paramType = TWD_RSN_DEFAULT_KEY_ID_PARAM_ID;
-     tTwdParam.content.configureCmdCBParams.pCb = &pRoleAP->DefaultKeyIndex;
-     tTwdParam.content.configureCmdCBParams.fCb = NULL;
-     tTwdParam.content.configureCmdCBParams.hCb = NULL;
-     tRes = TWD_SetParam (pRoleAP->hTWD, &tTwdParam); 
-     if (tRes != TI_OK)
-		TRACE2(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "%s: TWD_RSN_KEY_ADD_PARAM_ID : TWD_SetParam status %d \n", __FUNCTION__, tRes);
-   
+        tTwdParam.paramType = TWD_RSN_DEFAULT_KEY_ID_PARAM_ID;
+        tTwdParam.content.configureCmdCBParams.pCb = &pRoleAP->DefaultKeyIndex;
+        tTwdParam.content.configureCmdCBParams.fCb = NULL;
+        tTwdParam.content.configureCmdCBParams.hCb = NULL;
+        tRes = TWD_SetParam (pRoleAP->hTWD, &tTwdParam);
+        if (tRes != TI_OK)
+            TRACE2(pRoleAP->hReport,REPORT_SEVERITY_ERROR , "%s: TWD_RSN_KEY_ADD_PARAM_ID : TWD_SetParam status %d \n", __FUNCTION__, tRes);
     }
 
     /* Set bssid to TxCtrl module for header conversion */
     txCtrlParams_setBssId(pRoleAP->hTxCtrl, &pRoleAP->tBssCapabilities.tBssid);
 
     /* Synchronize start call back with completion of commands in TWD Command Queue */
-    tRes = TWD_NopCmd (pRoleAP->hTWD, BssStartCompleteCb, hRoleAP); 
+    tRes = TWD_NopCmd (pRoleAP->hTWD, BssStartCompleteCb, hRoleAP);
 
     return tRes;
 }
 
 
 
-/** 
- * \fn     roleAP_RemoveStaCompleteCB 
+/**
+ * \fn     roleAP_RemoveStaCompleteCB
  * \brief  FW Remove STA Complete event callback
  * 
  * Start roleAP object - send stop BSS to FW
