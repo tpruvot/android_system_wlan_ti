@@ -1350,7 +1350,6 @@ typedef enum
 																															* GET Bit: OFF	\n
 																															* SET Bit: ON	\n
 																															*/
-
     TX_CTRL_GENERIC_ETHERTYPE         			=	SET_BIT | GET_BIT | TX_CTRL_MODULE_PARAM | 0x10,						/**< TX Control Get/Set Generic Ethertype (TX Control Module Get/Set Command): \n  
 																															* Used for setting the Generic Ethertype for authentication packets\n
 																															* Done Sync with no memory allocation\n 
@@ -1403,8 +1402,6 @@ typedef enum
 																															* GET Bit: ON	\n
 																															* SET Bit: OFF	\n
 																															*/
-    
-
 	/* measurement section */
     MEASUREMENT_ENABLE_DISABLE_PARAM			=	SET_BIT |           MEASUREMENT_MODULE_PARAM | 0x01,	/**< Measurement Enable/Disable Parameter (Measurement Module Set Command): \n  
 																											* Used for Enabling/Disabling Measurement Management Module\n
@@ -1490,7 +1487,7 @@ typedef enum
 /* ********************************************************************************************/
 /*                AP Role Section - currently only for debug */
 /* ********************************************************************************************/
-    ROLE_AP_BSS_START_PARAM                         =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x01,
+    ROLE_AP_BSS_START_PARAM                         =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x01,	 
     ROLE_AP_BSS_STOP_PARAM                          =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x02,
     ROLE_AP_SET_SSID_TYPE_PARAM                     =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x03,
     ROLE_AP_SET_CHANNEL_PARAM                       =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x04,
@@ -1498,19 +1495,15 @@ typedef enum
     ROLE_AP_SET_DTIM_PERIOD_PARAM                   =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x06,
     ROLE_AP_SET_SSID_PARAM                          =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x07,
     ROLE_AP_SET_GENERIC_CMD_TO_FW_PARAM             =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x08,
-    ROLE_AP_PRINT_DB                                =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x09,
-    ROLE_AP_GET_LINK_COUNTERS                       =   GET_BIT | ROLE_AP_MODULE_PARAM | 0x0A,
+    ROLE_AP_PRINT_DB				                =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x09,
 
-    /* Whether FW should pass incoming beacons to driver */
-    ROLE_AP_WANTS_BEACONS_PARAM                     =   SET_BIT | ROLE_AP_MODULE_PARAM | 0x0B,
-
-    /* The suspend-state the AP is in (TI_TRUE - suspended; TI_FALSE - not suspended) */
-    ROLE_AP_SUSPEND_STATE_PARAM                     =   GET_BIT | ASYNC_PARAM | ROLE_AP_MODULE_PARAM | 0x0C,
+	ROLE_AP_GET_LINK_COUNTERS               		=   GET_BIT | ROLE_AP_MODULE_PARAM | 0x0A,
 
 
 /* ********************************************************************************************/
 
-    LAST_CMD = 0x00 /**< Last External Parameter - Dummy, Should always stay Last */
+
+	LAST_CMD									=	0x00	/**< Last External Parameter - Dummy, Should always stay Last	*/													
 
 }   EExternalParam;
 
@@ -1518,4 +1511,4 @@ typedef enum
 /*************/
 
 #endif  /* _CMD_INTERFACE_CODES_H_ */
-
+        

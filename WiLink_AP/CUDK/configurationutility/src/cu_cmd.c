@@ -2173,6 +2173,50 @@ VOID CuCmd_ShowTxStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms)
     }       
 }
 
+VOID CuCmd_ShowLinkStatistics(THandle hCuCmd, ConParm_t parm[], U16 nParms)
+{
+	TLinkDataCounters	linkDataCounters[WLANLINKS_MAX_LINKS];
+	U32 				linkId;
+    CuCmd_t 			*pCuCmd = (CuCmd_t*)hCuCmd;
+    
+
+    if(OK != CuCommon_GetTxRxLinkStatistics(pCuCmd->hCuCommon, linkDataCounters))
+		return;
+
+    for (linkId = 0; linkId < WLANLINKS_MAX_LINKS; linkId++)
+    {
+		PU8 pMac = linkDataCounters[linkId].aMacAddr;
+		if (!linkDataCounters[linkId].validLink)
+			continue;
+        
+		os_error_printf(CU_MSG_INFO2, (PS8)"\n**************************************************\n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Link %02x.%02x.%02x.%02x.%02x.%02x Statistics:\n", pMac[0], pMac[1], pMac[2], pMac[3], pMac[4], pMac[5]);
+		os_error_printf(CU_MSG_INFO2, (PS8)"**************************************************\n");
+
+		switch (linkDataCounters[linkId].linkType)
+		{
+			case WLANLINK_TYPE_SPECIFIC:
+				os_error_printf(CU_MSG_INFO2, (PS8)"Unicast Link\n\n");
+				break;
+			case WLANLINK_TYPE_BRCST:
+				os_error_printf(CU_MSG_INFO2, (PS8)"Broadcast Link\n\n");
+				break;
+			case WLANLINK_TYPE_GLOBAL:
+				os_error_printf(CU_MSG_INFO2, (PS8)"Global Link\n\n");
+				break;
+			default:
+				os_error_printf(CU_MSG_INFO2, (PS8)"Unknown Link Type\n\n");
+				break;
+		}
+        
+        os_error_printf(CU_MSG_INFO2, (PS8)"  Rx Pkts from WLAN			: %d\n", linkDataCounters[linkId].recvPktsFromWlan);
+		os_error_printf(CU_MSG_INFO2, (PS8)"  Rx Bytes from WLAN			: %d\n", linkDataCounters[linkId].recvBytesFromWlan);
+		os_error_printf(CU_MSG_INFO2, (PS8)"  Tx Num Pkts Sent			: %d\n", linkDataCounters[linkId].sentPkts);
+		os_error_printf(CU_MSG_INFO2, (PS8)"  Tx Num Bytes Sent			: %d\n", linkDataCounters[linkId].sentBytes);
+		os_error_printf(CU_MSG_INFO2, (PS8)"  Tx Num Pkts Error			: %d\n", linkDataCounters[linkId].sentPktsError);
+	}       
+}
+
 VOID CuCmd_ShowAdvancedParams(THandle hCuCmd, ConParm_t parm[], U16 nParms)
 {
     CuCmd_t* pCuCmd = (CuCmd_t*)hCuCmd;
@@ -3656,7 +3700,22 @@ VOID CuCmd_ConfigBtCoe(THandle hCuCmd, ConParm_t parm[], U16 nParms)
 		os_error_printf(CU_MSG_INFO2, (PS8)"Param 38 - coexA2DPAutoEnlargePassiveScanWindowPercent \n");
 		os_error_printf(CU_MSG_INFO2, (PS8)"Param 39 - coexPassiveScanBtTime (msec) \n");
 		os_error_printf(CU_MSG_INFO2, (PS8)"Param 40 - coexPassiveScanWlanTime (msec)\n");
-		os_error_printf(CU_MSG_INFO2, (PS8)"Param 41 - coexTempParam5 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 41 - CoexHv3MaxServed \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 42 - coexDhcpTime (msec)\n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 43 - coexA2dpAutoScanEnlargedScanWinodowPercent (%)\n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 44 - coexTempParam1 \n");
+        os_error_printf(CU_MSG_INFO2, (PS8)"Param 45 - coexTempParam2 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 46 - coexTempParam3 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 47 - coexTempParam4 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 48 - coexTempParam5 \n");
+        os_error_printf(CU_MSG_INFO2, (PS8)"Param 49 - coexAPBeaconMissTx \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 50 - coexRxWindowLength (msec)\n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 51 - coexAPConnectionProtectionTime (msec)\n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 52 - coexTempParam6 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 53 - coexTempParam7 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 54 - coexTempParam8 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 55 - coexTempParam9 \n");
+		os_error_printf(CU_MSG_INFO2, (PS8)"Param 56 - coexTempParam10 \n");
 
 		return;
     }
@@ -6590,8 +6649,10 @@ VOID CuCmd_ApRoleSendCmdToHostapd(THandle hCuCmd, ConParm_t parm[], U16 nParms)
             os_memcpy((PVOID)&cmd.u.tCmdSta, (PVOID)parm[1].value, os_strlen((PS8)parm[1].value));
             break;
         case HOSTAPD_CLI_CMD_WPS_PIN:
-            os_memcpy((PVOID)cmd.u.tCmdWPSPin.uuid, (PVOID)parm[1].value, os_strlen((PS8)parm[1].value));
-            os_memcpy((PVOID)cmd.u.tCmdWPSPin.pin, (PVOID)parm[2].value, os_strlen((PS8)parm[2].value));
+            cmd.u.tCmdWPSPin.uuidLen = os_strlen((PS8)parm[2].value);
+            os_memcpy((PVOID)cmd.u.tCmdWPSPin.uuid, (PVOID)parm[2].value, cmd.u.tCmdWPSPin.uuidLen);
+            cmd.u.tCmdWPSPin.pinLen = os_strlen((PS8)parm[1].value);
+            os_memcpy((PVOID)cmd.u.tCmdWPSPin.pin, (PVOID)parm[1].value, cmd.u.tCmdWPSPin.pinLen);
             break;
         default:
             os_error_printf(CU_MSG_INFO2, (PS8)"Unrecognized command! \n");

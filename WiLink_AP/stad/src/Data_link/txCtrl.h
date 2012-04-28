@@ -89,6 +89,7 @@ typedef struct
 typedef struct 
 {
     TI_UINT32  dbgNumPktsSent[WLANLINKS_MAX_LINKS];       /* Pkts sent by data-link or mgmt-link. */
+	TI_UINT32  dbgNumBytesSent[WLANLINKS_MAX_LINKS];       /* Bytes sent by data-link or mgmt-link. */
     TI_UINT32  dbgNumPktsBackpressure[WLANLINKS_MAX_LINKS];/* Pkts for which backpressure was set by HW-Q */
     TI_UINT32  dbgNumPktsAcBackpressure[WLANLINKS_MAX_LINKS];/* Pkts for which AC backpressure was set by HW-Q */
     TI_UINT32  dbgNumPktsBusy[WLANLINKS_MAX_LINKS];      /* Pkts for which busy was received from HW-Q */
@@ -175,10 +176,9 @@ typedef struct
     TI_UINT32           mediumTime[MAX_NUM_OF_AC];
     TI_UINT32           totalUsedTime[MAX_NUM_OF_AC];
 
-#ifdef TI_DBG
-    txDataDbgCounters_t dbgCounters;    /* debug counters */
+
+    txDataDbgCounters_t 	dbgCounters;    /* debug counters */
     txDataDbgLinkCounters_t dbgLinkCounters;    /* debug counters per link */
-#endif
 
 } txCtrl_t;
 

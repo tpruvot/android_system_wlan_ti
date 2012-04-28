@@ -1089,6 +1089,23 @@ static TI_STATUS __cfg_rx_intr_pacing (TI_HANDLE hCmdBld)
                                hCmdBld);
 }
 
+#ifdef TNETW1283
+static TI_STATUS __cfg_gen_fw_cmd (TI_HANDLE hCmdBld)
+{
+    return cmdBld_CfgIeGenFwCmd (hCmdBld, 
+                                     DB_WLAN(hCmdBld).GenFwCmd,
+                                     (void *)cmdBld_ConfigSeq, 
+                                     hCmdBld);
+}
+
+static TI_STATUS __cfg_host_if_cfg_bitmap (TI_HANDLE hCmdBld)
+{
+    return cmdBld_CfgIeHostIfCfgBitmap (hCmdBld, 
+                                     DB_WLAN(hCmdBld).HostIfCfgBitmap,
+                                     (void *)cmdBld_ConfigSeq, 
+                                     hCmdBld);
+}
+#endif
 
 #ifdef TI_TEST
 static TI_STATUS __cfg_coex_activity_table (TI_HANDLE hCmdBld)
@@ -1138,7 +1155,7 @@ static TI_STATUS __cfg_cca_threshold (TI_HANDLE hCmdBld)
         return TI_NOK;
 
     return cmdBld_CfgIeCcaThreshold (hCmdBld, 
-                                     DB_WLAN(hCmdBld).EnergyDetection, 
+                                     DB_WLAN(hCmdBld).ch14TelecCca, 
                                      (void *)cmdBld_ConfigSeq, 
                                      hCmdBld);
 }
@@ -1815,7 +1832,7 @@ static TI_STATUS __cmd_start_join (TI_HANDLE hCmdBld)
          * Call the hardware to start/join the bss 
          */
         return cmdBld_CmdStartJoin (hCmdBld, 
-                                    DB_BSS(hCmdBld).ReqBssType, 
+                                    (ScanBssType_e)DB_BSS(hCmdBld).ReqBssType, 
                                     (void *)cmdBld_DummyCb, 
                                     hCmdBld);
     }
@@ -1884,7 +1901,7 @@ static TI_STATUS __cfg_preamble_join (TI_HANDLE hCmdBld)
     if (DB_WLAN(hCmdBld).bJoin)
     {
         /* Preamble type must be set after doing join */
-        return cmdBld_CfgPreamble (hCmdBld, DB_WLAN(hCmdBld).preamble, (void *)cmdBld_ConfigSeq, hCmdBld);              
+        return cmdBld_CfgPreamble (hCmdBld, (Preamble_e) DB_WLAN(hCmdBld).preamble, (void *)cmdBld_ConfigSeq, hCmdBld);              
     }
 
     return TI_NOK;
@@ -2194,7 +2211,7 @@ static TI_STATUS __cfg_rate_management (TI_HANDLE hCmdBld)
     if (CMD_BLD_IS_INIT_SEQUENCE_CMD_INVALID(hCmdBld, __CFG_RATE_MANAGEMENT))
         return TI_NOK;
 
-    DB_RM(hCmdBld).rateMngParams.paramIndex = 0xFF;
+	DB_RM(hCmdBld).rateMngParams.paramIndex = (rateAdaptParam_e) 0xFF;
 
 	return cmdBld_CfgIeRateMngDbg(hCmdBld,
 						   &DB_RM(hCmdBld).rateMngParams,
@@ -2234,6 +2251,10 @@ static const TCmdCfgFunc aCmdIniSeq [] =
     __cmd_beacon,
 	__cmd_deauth_sta,
     __cmd_keep_alive_tmpl,
+#ifdef TNETW1283
+    __cfg_gen_fw_cmd,       
+    __cfg_host_if_cfg_bitmap,       /* !!!! Host interface configuration must be before __cfg_mem */
+#endif
     __cfg_mem,
     __cfg_rx_msdu_life_time,
     __cfg_rx,

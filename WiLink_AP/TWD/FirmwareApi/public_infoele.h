@@ -1,31 +1,35 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * public_infoele.h
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /**********************************************************************************************************************
 
@@ -130,7 +134,8 @@ typedef enum
     ACX_HOST_IF_CFG_BITMAP      = 0x0071,
    
     ACX_MAX_TX_FAILURE          = 0x0072,
-    ACX_UPDATE_INCONNECTION_STA_LIST = 0x0073,
+	ACX_UPDATE_INCONNECTION_STA_LIST = 0x0073,
+
     DOT11_RX_MSDU_LIFE_TIME     = 0x1004,
     DOT11_CUR_TX_PWR            = 0x100D,
     DOT11_RX_DOT11_MODE         = 0x1012,
@@ -1395,6 +1400,7 @@ typedef struct
 #define HOST_IF_CFG_BITMAP_NO_CHANGE          0x00000000
 #define HOST_IF_CFG_BITMAP_RX_FIFO_ENABLE     0x00000001
 #define HOST_IF_CFG_BITMAP_TX_EXTRA_BLKS_SWAP 0x00000002
+#define HOST_IF_CFG_BITMAP_RX_AGGR_WA_ENABLE  0x00000004
 
 typedef struct 
 {
@@ -1690,6 +1696,14 @@ typedef enum
 	SOFT_GEMINI_TEMP_PARAM_3,
 	SOFT_GEMINI_TEMP_PARAM_4,
 	SOFT_GEMINI_TEMP_PARAM_5,
+    SOFT_GEMINI_AP_BEACON_MISS_TX,
+	SOFT_GEMINI_RX_WINDOW_LENGTH,
+	SOFT_GEMINI_AP_CONNECTION_PROTECTION_TIME,
+	SOFT_GEMINI_TEMP_PARAM_6,
+	SOFT_GEMINI_TEMP_PARAM_7,
+	SOFT_GEMINI_TEMP_PARAM_8,
+	SOFT_GEMINI_TEMP_PARAM_9,
+	SOFT_GEMINI_TEMP_PARAM_10,
 	SOFT_GEMINI_PARAMS_MAX
 } softGeminiParams;
 
@@ -1697,7 +1711,7 @@ typedef struct
 {	
   uint32   coexParams[SOFT_GEMINI_PARAMS_MAX];
   uint8    paramIdx;       /* the param index which the FW should update, if it equals to 0xFF - update all */ 
-  uint8       padding[3];
+  uint8    padding[3];
 } TSoftGeminiParams;
 
 
@@ -1986,7 +2000,7 @@ typedef filter_enum filter_e;
 
 /* limitation */
 #define MAX_DATA_FILTERS 4
-#define MAX_DATA_FILTER_SIZE 90
+#define MAX_DATA_FILTER_SIZE 98
 
 typedef struct 
 {
@@ -2015,6 +2029,7 @@ typedef struct
     uint8       enable;     /* 1 - enable, 0 - disable the data data filtering feature */
     filter_e    action;     /* default action that should be implemented for packets that wont
                                match any of the filters, or in case no filter is configured */
+    uint8   padding[2];     /* alignment to 32bits boundary   */        
 } DataFilterDefault_t;
 
 
@@ -2545,10 +2560,13 @@ typedef struct
 
 typedef struct
 {
-    INFO_ELE_HDR
-    Bool_e enable;
-    uint32 moderation_timeout_usec;
+	INFO_ELE_HDR
+
+    Bool_e  enable                  ;
+    uint32  moderation_timeout_usec ;
+
 }ACXDCOItrimParams_t ;
+
 
 /******************************************************************************
 
@@ -2565,11 +2583,12 @@ typedef struct
 {
     INFO_ELE_HDR
     uint8   mac_address[6];
-	Bool_e  enable;
-	uint8   padding;
+    uint8   padding[2];
 } ACXInConnectionSTA_t;
 
 /******************************************************************************/
+
+
 
 #endif /* PUBLIC_INFOELE_H */
 

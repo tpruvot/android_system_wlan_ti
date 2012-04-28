@@ -644,7 +644,7 @@ typedef struct{
         TI_BOOL                    			rxDataFilterEnableDisable;
         TRxDataFilterRequest    			rxDataFilterRequest;
 		TI_UINT16                           rxGenericEthertype;
-
+        
         /* Tx Data section */
         portStatus_e            			txDataPortStatus;
         TTxDataCounters        				*pTxDataCounters;
@@ -654,9 +654,9 @@ typedef struct{
         TI_UINT8                       		txDataEncryptionFieldSize;
 		TI_UINT16                           txGenericEthertype;
 
-        /* Link Info section*/
-        TLinkDataCounters                               linkDataCounters[WLANLINKS_MAX_LINKS];
-
+		/* Link Info section*/
+		TLinkDataCounters					linkDataCounters[WLANLINKS_MAX_LINKS];
+        
         /* Ctrl Data section */
         TI_BOOL                    			ctrlDataPowerSaveEnable;
         TI_BOOL                    			ctrlDataPowerSaveForce;
@@ -1174,6 +1174,11 @@ typedef struct
 	TI_UINT8                uActiveRoleType;
 }TRolesMgrInitParams;
 
+typedef struct
+{
+	TI_UINT8                ubeaconTxTimeout;	/* in msec */
+}TRoleApInitParams;
+
 
 
 /* This table is forwarded to the driver upon creation by the OS abstraction layer. */
@@ -1214,6 +1219,7 @@ typedef struct
     TRoamScanMngrInitParams         tRoamScanMngrInitParams;
 
     TRolesMgrInitParams             tRolesMgrInitParams;
+	TRoleApInitParams				tRoleApInitParams;
 
 } TInitTable;
 

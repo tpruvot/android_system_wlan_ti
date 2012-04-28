@@ -1,5 +1,4 @@
 
-CROSS_COMPILE=/home/e13513/scratch_NOBACKUP/arm-2008q3/bin/arm-none-linux-gnueabi-
 STATIC_LIB ?= y
 
 DEBUG ?= y

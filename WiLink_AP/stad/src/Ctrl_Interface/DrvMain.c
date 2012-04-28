@@ -972,7 +972,7 @@ static TI_STATUS drvMain_SetDefaults (TI_HANDLE hDrvMain, TI_UINT8 *pBuf, TI_UIN
     /* Note: The siteMgr_SetDefaults includes many settings that relate to other modules so keep it last!! */ 
     siteMgr_SetDefaults (pDrvMain->tStadHandles.hSiteMgr, &pInitTable->siteMgrInitParams);
 
-    roleAP_SetDefaults(pDrvMain->tStadHandles.hRoleAP);
+    roleAP_SetDefaults(pDrvMain->tStadHandles.hRoleAP, &pInitTable->tRoleApInitParams);
     rolesMgr_SetDefaults(pDrvMain->tStadHandles.hRolesMgr, &pInitTable->tRolesMgrInitParams);
 
 
@@ -1288,7 +1288,6 @@ static void drvMain_ClearQueuedEvents (TDrvMain *pDrvMain)
 TI_STATUS drvMain_InsertAction (TI_HANDLE hDrvMain, EActionType eAction)
 {
     TDrvMain *pDrvMain = (TDrvMain *) hDrvMain;
-
     if (pDrvMain->eAction == eAction)
     {            
         TRACE0(pDrvMain->tStadHandles.hReport, REPORT_SEVERITY_CONSOLE, "Action is identical to last action!\n");
@@ -1322,10 +1321,9 @@ TI_STATUS drvMain_InsertAction (TI_HANDLE hDrvMain, EActionType eAction)
 
     /* Free signalling object */
     os_SignalObjectFree (pDrvMain->tStadHandles.hOs, pDrvMain->hSignalObj);
-
     if (pDrvMain->eSmState == SM_STATE_FAILED)
     return TI_NOK;
-
+    
     return TI_OK;
 }
 

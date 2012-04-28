@@ -639,8 +639,12 @@ TI_STATUS TWD_Debug (TI_HANDLE hTWD, TI_UINT32 funcType, void *pParam)
     switch (funcType)
     {
     case TWD_PRINT_SYS_INFO:
-        WLAN_OS_REPORT(("PLATFORM = TNETW125x\n"));
-        WLAN_OS_REPORT(("ACCESS MODE = SLAVE\n"));
+#ifdef TNETW1283
+		WLAN_OS_REPORT(("PLATFORM = TNETW1283\n"));
+#endif
+#ifdef TNETW1273
+		WLAN_OS_REPORT(("PLATFORM = TNETW1273\n"));
+#endif
         break;
 
     case TWD_SET_GENERIC_ADDR:
@@ -654,7 +658,7 @@ TI_STATUS TWD_Debug (TI_HANDLE hTWD, TI_UINT32 funcType, void *pParam)
         break;
 
     case TWD_READ_MEM:
-        WLAN_OS_REPORT(("TWD_Debug, TWD_READ_MEM, Addr: 0x%X\n", pMemDebug->addr));             
+        WLAN_OS_REPORT(("TWD_Debug, TWD_READ_MEM, Addr: 0x%X\n", pMemDebug->addr));
 
         /* check paramemters validity */
         if (pMemDebug == NULL)

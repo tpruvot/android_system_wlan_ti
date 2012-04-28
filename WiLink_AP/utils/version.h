@@ -43,10 +43,10 @@
 #ifndef _VERSION_H_                                                                                                             
 #define _VERSION_H_                                                                                                             
 
-#define SW_VERSION_STR      "WiLink_Driver_AP_6.2.0.0.22"
+#define SW_VERSION_STR      "WiLink_Driver_AP_6.2.0.0.31"
 
-#define SW_RELEASE_MONTH    02
-#define SW_RELEASE_DAY      25
+#define SW_RELEASE_MONTH    09
+#define SW_RELEASE_DAY      15
 #define SW_RELEASE_YEAR     2010
 
 

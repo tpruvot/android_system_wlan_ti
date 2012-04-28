@@ -46,7 +46,11 @@
 
 
 
+#ifdef TNETW1283
+#define PMENA_GPIO                      157
+#else
 #define PMENA_GPIO                      101
+#endif
 #define IRQ_GPIO                        162
 
 #define PMENA_GPIO_MCS8                 106 

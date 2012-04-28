@@ -297,6 +297,21 @@ S32 CuCommon_GetTxStatistics(THandle hCuCommon, TIWLN_TX_STATISTICS* pTxCounters
     return OK;      
 }
 
+S32 CuCommon_GetTxRxLinkStatistics(THandle hCuCommon, TLinkDataCounters *pLinkCounters)
+{
+    CuCommon_t* pCuCommon = (CuCommon_t*)hCuCommon; 
+    S32 res;
+
+    res = IPC_STA_Private_Send(pCuCommon->hIpcSta, ROLE_AP_GET_LINK_COUNTERS,
+							   pLinkCounters, sizeof(TLinkDataCounters)*WLANLINKS_MAX_LINKS,
+							   pLinkCounters, sizeof(TLinkDataCounters)*WLANLINKS_MAX_LINKS);
+
+    if(res == EOALERR_IPC_STA_ERROR_SENDING_WEXT)
+        return ECUERR_CU_COMMON_ERROR;
+    
+    return OK;      
+}
+
 S32 CuCommon_Radio_Test(THandle hCuCommon,TTestCmd* data)
 {
     CuCommon_t* pCuCommon = (CuCommon_t*)hCuCommon;

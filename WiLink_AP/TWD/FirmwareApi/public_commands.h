@@ -1645,6 +1645,7 @@ typedef struct
     uint8                       globalHLID;             /* The host LID for the BSS's global queue */
     uint8                       broadcastHLID; 			/* The host LID for the BSS's broadcast queue */
     uint8                       dtimInterval;			/* DTIM count */
+    uint8                       beaconExpiry;			/* expiry time for beacon in ms */
 } BssStartCmd_t;
 
 /******************************************************************************

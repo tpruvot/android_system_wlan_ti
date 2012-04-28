@@ -1,31 +1,35 @@
-/***************************************************************************
-**+----------------------------------------------------------------------+**
-**|                                ****                                  |**
-**|                                ****                                  |**
-**|                                ******o***                            |**
-**|                          ********_///_****                           |**
-**|                           ***** /_//_/ ****                          |**
-**|                            ** ** (__/ ****                           |**
-**|                                *********                             |**
-**|                                 ****                                 |**
-**|                                  ***                                 |**
-**|                                                                      |**
-**|     Copyright (c) 1998 - 2009 Texas Instruments Incorporated         |**
-**|                        ALL RIGHTS RESERVED                           |**
-**|                                                                      |**
-**| Permission is hereby granted to licensees of Texas Instruments       |**
-**| Incorporated (TI) products to use this computer program for the sole |**
-**| purpose of implementing a licensee product based on TI products.     |**
-**| No other rights to reproduce, use, or disseminate this computer      |**
-**| program, whether in part or in whole, are granted.                   |**
-**|                                                                      |**
-**| TI makes no representation or warranties with respect to the         |**
-**| performance of this computer program, and specifically disclaims     |**
-**| any responsibility for any damages, special or consequential,        |**
-**| connected with the use of this program.                              |**
-**|                                                                      |**
-**+----------------------------------------------------------------------+**
-***************************************************************************/
+/*
+ * APExternalIf.h
+ *
+ * Copyright(c) 1998 - 2010 Texas Instruments. All rights reserved.      
+ * All rights reserved.                                                  
+ *                                                                       
+ * Redistribution and use in source and binary forms, with or without    
+ * modification, are permitted provided that the following conditions    
+ * are met:                                                              
+ *                                                                       
+ *  * Redistributions of source code must retain the above copyright     
+ *    notice, this list of conditions and the following disclaimer.      
+ *  * Redistributions in binary form must reproduce the above copyright  
+ *    notice, this list of conditions and the following disclaimer in    
+ *    the documentation and/or other materials provided with the         
+ *    distribution.                                                      
+ *  * Neither the name Texas Instruments nor the names of its            
+ *    contributors may be used to endorse or promote products derived    
+ *    from this software without specific prior written permission.      
+ *                                                                       
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS   
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT     
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT  
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT      
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT   
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 
 /****************************************************************************/
@@ -54,7 +58,6 @@
 #define AP_MAX_TAIL_BUFF     512
 #define AP_MAX_SSID_LEN      32
 #define AP_MAX_WPS_IE_LEN    256
-
 /* Private eth type for menegmant packet */
 #define AP_MGMT_ETH_TYPE            0x8899
 #define AP_CONTROL_WORD_LEN         2
@@ -129,7 +132,7 @@ typedef enum
   TWD_ADD_KEY_PARAMS                	  =   SET_BIT | AP_TWD_PARAMS | 0x01,
   TWD_DEL_KEY_PARAMS                	  =   SET_BIT | AP_TWD_PARAMS | 0x02,
   TWD_SET_DEFAULT_KEY_PARAMS         	  =   SET_BIT | AP_TWD_PARAMS | 0x03,
-  TWD_SET_CONNECTION_PHASE		  =   SET_BIT | AP_TWD_PARAMS | 0x04,
+  TWD_SET_CONNECTION_PHASE		       	  =   SET_BIT | AP_TWD_PARAMS | 0x04,
   ROLE_AP_ADD_STATION_PARAM               =   SET_BIT | AP_ROLEAP_PARAMS | 0x01,
   ROLE_AP_CHANGE_STATION_PARAM            =   SET_BIT | AP_ROLEAP_PARAMS | 0x02,
   ROLE_AP_GET_STATION_PARAM               =   GET_BIT | AP_ROLEAP_PARAMS | 0x03,
@@ -160,10 +163,10 @@ typedef enum
   ROLE_AP_SET_BSS_BRIDGE                  =   SET_BIT | AP_ROLEAP_PARAMS | 0x1C,
   ROLE_AP_SET_SSID_TYPE                   =   SET_BIT | AP_ROLEAP_PARAMS | 0x1D,
   ROLE_AP_GET_HW                          =   GET_BIT | AP_ROLEAP_PARAMS | 0x1E,
-  ROLE_AP_ENABLE                          =   SET_BIT | AP_ROLEAP_PARAMS | 0x1F,
-  ROLE_AP_STOP                            =   SET_BIT | AP_ROLEAP_PARAMS | 0x20,
+  ROLE_AP_ENABLE	                      =   SET_BIT | AP_ROLEAP_PARAMS | 0x1F,
+  ROLE_AP_STOP		                      =   SET_BIT | AP_ROLEAP_PARAMS | 0x20,
   ROLE_AP_SET_PROBE_WPS_IE                =   SET_BIT | AP_ROLEAP_PARAMS | 0x21,
-  ROLE_AP_SET_TX_POWER                    =   SET_BIT | AP_ROLEAP_PARAMS | 0x22,
+  ROLE_AP_SET_TX_POWER                    =   SET_BIT | AP_ROLEAP_PARAMS | 0x22
 } EApExternalCmd;
 
 
@@ -260,8 +263,8 @@ typedef struct
 
 typedef struct
 {
- char cIe[AP_MAX_WPS_IE_LEN];
- int iIeLen;
+	char cIe[AP_MAX_WPS_IE_LEN];
+	int iIeLen;
 } TApWpsIe;
 
 /* ROLE_AP_SET_COUNTRY */
@@ -330,11 +333,12 @@ typedef struct
 typedef struct
 {
  char           cCountry[3];
- char           ChanGstr[AP_NUM_OF_CHANNELS_24];
- char           ChanAstr[AP_NUM_OF_CHANNELS_5];
+ char           Chan24str[AP_NUM_OF_CHANNELS_24];
+ char           Chan5str[AP_NUM_OF_CHANNELS_5];
  unsigned char  mode;
  unsigned char  numOfAChan;
  unsigned char  numOfGChan;
+ unsigned char  numOfBChan;
  unsigned char  MaxtxPower;
 }TApChanHwInfo;
 

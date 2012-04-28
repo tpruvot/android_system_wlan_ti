@@ -61,6 +61,7 @@ typedef struct
 typedef struct 
 {
     TI_UINT32      recvFromWlan;
+	TI_UINT32      recvBytesFromWlan;
     TI_UINT32      discardWrongHlid;
     TI_UINT32      discardHlidClose;
     TI_UINT32      sendToHostapd;
@@ -120,6 +121,9 @@ typedef struct
     TI_HANDLE           RxEventDistributor;
 	TI_HANDLE           hThroughputTimer;
 	TI_HANDLE			hPowerMgr;
+#ifdef AP_MODE_ENABLED
+    TI_HANDLE			hRoleAp;
+#endif
     TI_BOOL             rxThroughputTimerEnable;
 	TI_BOOL             rxDataExcludeUnencrypted;
     TI_BOOL             rxDataExludeBroadcastUnencrypted;
@@ -148,7 +152,7 @@ typedef struct
 	TI_UINT32			reAuthActiveTimeout;
 
 	/* Info per link */
-	TRxLinkInfo           aRxLinkInfo[WLANLINKS_MAX_LINKS];   /* information per link */
+	TRxLinkInfo          aRxLinkInfo[WLANLINKS_MAX_LINKS];   /* information per link */
 	rxDataLinkCounters_t rxDataLinkCounters[WLANLINKS_MAX_LINKS]; /* counters per link */
 
 

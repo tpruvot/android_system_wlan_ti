@@ -705,7 +705,13 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     pWlanParams->uHostFastWakeupSupport     = pInitParams->tGeneral.uHostFastWakeupSupport;
     CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(pTWD->hCmdBld, __CFG_PM_CONFIG)
 
-
+#ifdef TNETW1283
+    pWlanParams->TcxoRefClk       = pInitParams->tGeneral.TcxoRefClk;
+    pWlanParams->TcxoSettlingTime = pInitParams->tGeneral.TcxoSettlingTime;
+    pWlanParams->TcxoValidOnWakeup= pInitParams->tGeneral.TcxoValidOnWakeup;
+    pWlanParams->TcxoLdoVoltage   = pInitParams->tGeneral.TcxoLdoVoltage;
+    pWlanParams->NewPllAlgo       = pInitParams->tGeneral.NewPllAlgo;
+#endif
     /* No used */
     pWlanParams->FragmentThreshold          = pInitParams->tGeneral.halCtrlFragThreshold;
     CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(pTWD->hCmdBld, __CFG_FRAGMENT_THRESHOLD)
@@ -713,7 +719,10 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     pWlanParams->ListenInterval             = (TI_UINT8)pInitParams->tGeneral.halCtrlListenInterval;
     pWlanParams->RateFallback               = pInitParams->tGeneral.halCtrlRateFallbackRetry;        
     pWlanParams->MacClock                   = pInitParams->tGeneral.halCtrlMacClock;     
-    pWlanParams->ArmClock                   = pInitParams->tGeneral.halCtrlArmClock;     
+    pWlanParams->ArmClock                   = pInitParams->tGeneral.halCtrlArmClock;
+
+	pWlanParams->ch14TelecCca = pInitParams->tGeneral.halCtrlCh14TelecCca;
+
 
     /* Data interrupts pacing */
     pWlanParams->TxCompletePacingThreshold  = pInitParams->tGeneral.TxCompletePacingThreshold; 
@@ -728,8 +737,11 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     /* Number of Rx mem-blocks to allocate in FW */
     pDmaParams->NumRxBlocks                 = pInitParams->tGeneral.uRxMemBlksNum;
     CMD_BLD_MARK_INIT_SEQUENCE_CMD_AS_VALID(pTWD->hCmdBld, __CFG_MEM)
-
-
+    /* GenFwCmd */
+    for (uIndex=0; uIndex<GEN_FW_CMD_SIZE; uIndex++)
+        pWlanParams->GenFwCmd[uIndex]      = pInitParams->tGeneral.GenFwCmd[uIndex];     
+    /* HostIfCfgBitmap */
+    pWlanParams->HostIfCfgBitmap        = pInitParams->tGeneral.HostIfCfgBitmap;      
 #ifndef AP_MODE_ENABLED
     /* Configure ARP IP */
     pWlanParams->arpFilterType    = pInitParams->tArpIpFilter.filterType;
@@ -802,17 +814,23 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     rxXfer_SetDefaults (pTWD->hRxXfer, pInitParams);
     txXfer_SetDefaults (pTWD->hTxXfer, pInitParams);
     txHwQueue_Config (pTWD->hTxHwQueue, pInitParams);
+    /* Configure the rxXfer module */
+    rxXfer_Config (pTWD->hRxXfer, pInitParams);
     MacServices_config (pTWD->hMacServices, pInitParams);   
 
     /* 
      * 802.11n
      */
     pWlanParams->tTwdHtCapabilities.b11nEnable =            pInitParams->tGeneral.b11nEnable;
+    
     /* Configure HT capabilities setting */
-    pWlanParams->tTwdHtCapabilities.uChannelWidth =         CHANNEL_WIDTH_20MHZ;                  
-    pWlanParams->tTwdHtCapabilities.uRxSTBC =               RXSTBC_SUPPORTED_ONE_SPATIAL_STREAM;
-    pWlanParams->tTwdHtCapabilities.uMaxAMSDU =             MAX_MSDU_3839_OCTETS;                         
-    pWlanParams->tTwdHtCapabilities.uMaxAMPDU =             MAX_MPDU_8191_OCTETS;
+    pWlanParams->tTwdHtCapabilities.uChannelWidth = CHANNEL_WIDTH_20MHZ;                  
+    pWlanParams->tTwdHtCapabilities.uRxSTBC       = RXSTBC_NOT_SUPPORTED;
+    pWlanParams->tTwdHtCapabilities.uMaxAMSDU     = MAX_MSDU_3839_OCTETS;                         
+    pWlanParams->tTwdHtCapabilities.uMaxAMPDU     = pInitParams->tGeneral.uMaxAMPDU;
+
+
+
     pWlanParams->tTwdHtCapabilities.uAMPDUSpacing =         AMPDU_SPC_8_MICROSECONDS;
     pWlanParams->tTwdHtCapabilities.aRxMCS[0] =             (MCS_SUPPORT_MCS_0 |
                                                              MCS_SUPPORT_MCS_1 |
@@ -834,7 +852,8 @@ TI_STATUS TWD_SetDefaults (TI_HANDLE hTWD, TTwdInitParams *pInitParams)
     os_memoryZero (pTWD->hOs, pWlanParams->tTwdHtCapabilities.aTxMCS + 1, RX_TX_MCS_BITMASK_SIZE - 1);
     pWlanParams->tTwdHtCapabilities.uRxMaxDataRate =         MCS_HIGHEST_SUPPORTED_RECEPTION_DATA_RATE_IN_MBIT_S;          
     pWlanParams->tTwdHtCapabilities.uPCOTransTime =          PCO_TRANS_TIME_NO_TRANSITION;
-    pWlanParams->tTwdHtCapabilities.uHTCapabilitiesBitMask = (CAP_BIT_MASK_SHORT_GI_FOR_20MHZ_PACKETS);
+    pWlanParams->tTwdHtCapabilities.uHTCapabilitiesBitMask = (CAP_BIT_MASK_GREENFIELD_FRAME_FORMAT |
+                                                              CAP_BIT_MASK_SHORT_GI_FOR_20MHZ_PACKETS);
     pWlanParams->tTwdHtCapabilities.uMCSFeedback =           MCS_FEEDBACK_NO; 
 
     os_memoryCopy(pTWD->hOs, (void*)pRadioParams, (void*)&pInitParams->tIniFileRadioParams, sizeof(IniFileRadioParam));

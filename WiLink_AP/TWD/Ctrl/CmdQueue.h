@@ -47,7 +47,7 @@
 /*****************************************************************************
  **         Defines                                                         **
  *****************************************************************************/
-#define CMDQUEUE_QUEUE_DEPTH          30
+#define CMDQUEUE_QUEUE_DEPTH          40
 #define CMDQUEUE_HISTORY_DEPTH        5
 #define CMDQUEUE_INFO_ELEM_HEADER_LEN 4
 

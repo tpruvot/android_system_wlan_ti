@@ -44,11 +44,18 @@
 #include <linux/completion.h>
 #include <linux/netdevice.h>
 #include <linux/workqueue.h>
+#ifdef HOST_PLATFORM_OMAP2430
+#include <asm/arch/gpio.h>
+#else
+#ifdef LINUX_2_6_22
+#include <asm/arch/gpio.h>
+#else
 #include <mach/gpio.h>
+#endif
+#endif
 #ifdef CONFIG_HAS_WAKELOCK		//MOTO
 #include <linux/wakelock.h>
 #endif
-
 #include "tidef.h"
 #include "WlanDrvCommon.h"
 #include "paramOut.h"
@@ -72,7 +79,6 @@
 
 
 #define ti_nodprintf(log, fmt, args...)
-
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 #define NETDEV_SET_PRIVATE(dev, drv)    dev->priv = drv
@@ -107,8 +113,9 @@ typedef struct
     TWlanDrvIfCommon         tCommon;   /* The driver object common part */
 
     int                      irq;       /* The OS IRQ handle */
-    unsigned long            irq_flags; /* The IRQ flags */		//MOTO
-    struct workqueue_struct *tiwlan_wq; /* Work Queue */	//MOTO
+    unsigned long            irq_flags; /* The IRQ flags */
+     struct workqueue_struct *tiwlan_wq; /* Work Queue */	//MOTO
+    struct workqueue_struct *pWorkQueue;/* The OS work queue */
     struct work_struct       tWork;     /* The OS work handle. */
     spinlock_t               lock;      /* The OS spinlock handle. */
     unsigned long            flags;     /* For saving the cpu flags during spinlock */

@@ -132,6 +132,26 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
      * 4) If the byte read in step 2 is different than the written byte repeat the sequence
      */
 
+#ifdef TNETW1283
+#ifdef SDIO_HIGH_SPEED
+    PERR("sdioAdapt_ConnectBus: Set HIGH_SPEED bit on register 0x13\n");
+    /* CCCR 13 bit EHS(1) */
+    iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, 0x13, &uByte, 1, 1);
+    PERR2("After r 0x%x, iStatus=%d \n", uByte, iStatus );
+    if (iStatus) { return iStatus; }
+    
+    uByte |= 0x2; /* set bit #1 EHS */
+    iStatus = sdioDrv_WriteSyncBytes (TXN_FUNC_ID_CTRL, 0x13, &uByte, 1, 1);
+    PERR2("After w 0x%x, iStatus=%d \n", uByte, iStatus );
+    if (iStatus) { return iStatus; }
+
+    iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, 0x13, &uByte, 1, 1);
+    PERR2("After r 0x%x, iStatus=%d \n", uByte, iStatus );
+    if (iStatus) { return iStatus; }
+    
+    PERR1("After CCCR 0x13, uByte=%d \n", (int)uByte );
+#endif
+#endif
     /* set device side bus width to 4 bit (for 1 bit write 0x80 instead of 0x82) */
     do
     {
@@ -142,9 +162,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_BUS_INTERFACE_CONTOROL, &uByte, 1, 1);
         if (iStatus) { return iStatus; }
         
+#ifdef TNETW1283
+        PERR1("Skip  w 0xC8, iStatus=%d \n", iStatus );
+#else
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
+        PERR1("After w 0xC8, after HIGH_SPEED iStatus=%d \n", iStatus );
         if (iStatus) { return iStatus; }
-
+#endif
         uCount++;
 
     } while ((uByte != SDIO_BITS_CODE) && (uCount < MAX_RETRIES));
@@ -162,9 +186,12 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_IO_ENABLE, &uByte, 1, 1);
         if (iStatus) { return iStatus; }
         
+#ifdef TNETW1283
+        PERR1("Skip  w 0xC8, after CCCR_IO_ENABLE iStatus=%d \n", iStatus );
+#else
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
         if (iStatus) { return iStatus; }
-
+#endif
         uCount++;
 
     } while ((uByte != 4) && (uCount < MAX_RETRIES));
@@ -183,9 +210,12 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
         iStatus = sdioDrv_ReadSyncBytes (TXN_FUNC_ID_CTRL, CCCR_INT_ENABLE, &uByte, 1, 1);
         if (iStatus) { return iStatus; }
         
+#ifdef TNETW1283
+        PERR1("Skip  w 0xC8, after CCCR_INT_ENABLE iStatus=%d \n", iStatus );
+#else
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
         if (iStatus) { return iStatus; }
-
+#endif
         uCount++;
 
     } while ((uByte != 3) && (uCount < MAX_RETRIES));
@@ -205,9 +235,13 @@ int sdioAdapt_ConnectBus (void *        fCbFunc,
         iStatus = sdioDrv_ReadSync (TXN_FUNC_ID_CTRL, FN0_FBR2_REG_108, &uLong, 2, 1, 1);
         if (iStatus) { return iStatus; }
         
+#ifdef TNETW1283
+        PERR1("Skip  w 0xC8, after FN0_FBR2_REG_108 iStatus=%d \n", iStatus );
+#else
         iStatus = sdioDrv_WriteSync (TXN_FUNC_ID_CTRL, 0xC8, &uLong, 2, 1, 1);
+        PERR1("After w 0xC8, uLong=%d \n", (int)uLong );
         if (iStatus) { return iStatus; }
-
+#endif
         uCount++;
 
     } while (((uLong & FN0_FBR2_REG_108_BIT_MASK) != uBlkSize) && (uCount < MAX_RETRIES));

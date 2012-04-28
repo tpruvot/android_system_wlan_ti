@@ -748,8 +748,8 @@ int os_RequestSchedule (TI_HANDLE OsContext)
    CL_TRACE_START_L3();
    CL_TRACE_END_L3("tiwlan_drv.ko", "OS", "TASK", "");
 
-   if ( !queue_work (drv->tiwlan_wq, &drv->tWork)) {
-		/* printk("%s: Fail\n",__func__); */
+   if (!queue_work (drv->pWorkQueue, &drv->tWork))
+   {
        iRes = TI_NOK;
    }
 

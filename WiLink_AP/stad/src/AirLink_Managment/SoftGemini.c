@@ -244,10 +244,8 @@ TI_STATUS SoftGemini_SetDefaults (TI_HANDLE hSoftGemini, SoftGeminiInitParams_t 
 
 	pSoftGemini->SoftGeminiParam.paramIdx = 0xFF; /* signals to FW to config all the paramters */
 
-#ifndef AP_MODE_ENABLED  
     /* Send the configuration to the FW */
 	status = SoftGemini_setParamsToFW(hSoftGemini, &pSoftGemini->SoftGeminiParam);
-#endif
 
 	/*******************************/
     /* register Indication interrupts  */
@@ -574,6 +572,14 @@ void SoftGemini_printParams(TI_HANDLE hSoftGemini)
 	WLAN_OS_REPORT(("[46]: coexTempParam3 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_3]));
 	WLAN_OS_REPORT(("[47]: coexTempParam4 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_4]));
 	WLAN_OS_REPORT(("[48]: coexTempParam5 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_5]));
+    WLAN_OS_REPORT(("[49]: coexAPBeaconMissTx = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_AP_BEACON_MISS_TX]));
+	WLAN_OS_REPORT(("[50]: coexRxWindowLength = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_RX_WINDOW_LENGTH]));
+	WLAN_OS_REPORT(("[51]: coexAPConnectionProtectionTime = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_AP_CONNECTION_PROTECTION_TIME]));
+	WLAN_OS_REPORT(("[52]: coexTempParam6 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_6]));
+	WLAN_OS_REPORT(("[53]: coexTempParam7 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_7]));
+	WLAN_OS_REPORT(("[54]: coexTempParam8 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_8]));
+	WLAN_OS_REPORT(("[55]: coexTempParam9 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_9]));
+	WLAN_OS_REPORT(("[56]: coexTempParam10 = %d \n", SoftGeminiParam->coexParams[SOFT_GEMINI_TEMP_PARAM_10]));
 	WLAN_OS_REPORT(("Enable mode : %s\n", SoftGemini_ConvertModeToString(pSoftGemini->SoftGeminiEnable))); 
 	WLAN_OS_REPORT(("Driver Enabled : %s\n",(pSoftGemini->bDriverEnabled ? "YES" : "NO"))); 
 	WLAN_OS_REPORT(("Protective mode : %s\n", (pSoftGemini->bProtectiveMode ? "ON" : "OFF"))); 

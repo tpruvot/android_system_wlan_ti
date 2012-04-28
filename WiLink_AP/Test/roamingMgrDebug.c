@@ -60,13 +60,9 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
 					   TI_UINT32	funcType, 
 					   void		*pParam)
 {
-	paramInfo_t *pparam;
+	paramInfo_t			param;
 
-	pparam = (paramInfo_t *)os_memoryAlloc(((roamingMngr_t*)hRoamingMngr)->hOs, sizeof(paramInfo_t));
-	if (!pparam) {
-		return;
-	}
-
+	
 	switch (funcType)
 	{
 	case ROAMING_MGR_DEBUG_HELP_MENU:
@@ -74,71 +70,71 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
 		break;
 
 	case PRINT_ROAMING_STATISTICS:
-		pparam->paramType = ROAMING_MNGR_PRINT_STATISTICS;
-		roamingMngr_getParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_PRINT_STATISTICS;
+		roamingMngr_getParam(hRoamingMngr, &param);
 		break;
 
 	case RESET_ROAMING_STATISTICS:
-		pparam->paramType = ROAMING_MNGR_RESET_STATISTICS;
-		roamingMngr_getParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_RESET_STATISTICS;
+		roamingMngr_getParam(hRoamingMngr, &param);
 		break;
 
 	case PRINT_ROAMING_CURRENT_STATUS:
-		pparam->paramType = ROAMING_MNGR_PRINT_CURRENT_STATUS;
-		roamingMngr_getParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_PRINT_CURRENT_STATUS;
+		roamingMngr_getParam(hRoamingMngr, &param);
 		break;
 
 	case PRINT_ROAMING_CANDIDATE_TABLE:
-		pparam->paramType = ROAMING_MNGR_PRINT_CANDIDATE_TABLE;
-		roamingMngr_getParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_PRINT_CANDIDATE_TABLE;
+		roamingMngr_getParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_LOW_QUALITY_EVENT:
-		pparam->paramType = ROAMING_MNGR_TRIGGER_EVENT;
-		pparam->content.roamingTriggerType = ROAMING_TRIGGER_LOW_QUALITY;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_TRIGGER_EVENT;
+		param.content.roamingTriggerType = ROAMING_TRIGGER_LOW_QUALITY;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
-	case TRIGGER_ROAMING_BSS_LOSS_EVENT:
-		pparam->paramType = ROAMING_MNGR_TRIGGER_EVENT;
-		pparam->content.roamingTriggerType = ROAMING_TRIGGER_BSS_LOSS;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+    case TRIGGER_ROAMING_BSS_LOSS_EVENT:
+		param.paramType = ROAMING_MNGR_TRIGGER_EVENT;
+		param.content.roamingTriggerType = ROAMING_TRIGGER_BSS_LOSS;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_SWITCH_CHANNEL_EVENT:
-		pparam->paramType = ROAMING_MNGR_TRIGGER_EVENT;
-		pparam->content.roamingTriggerType = ROAMING_TRIGGER_SWITCH_CHANNEL;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_TRIGGER_EVENT;
+		param.content.roamingTriggerType = ROAMING_TRIGGER_SWITCH_CHANNEL;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_AP_DISCONNECT_EVENT:
-		pparam->paramType = ROAMING_MNGR_TRIGGER_EVENT;
-		pparam->content.roamingTriggerType = ROAMING_TRIGGER_AP_DISCONNECT;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_TRIGGER_EVENT;
+		param.content.roamingTriggerType = ROAMING_TRIGGER_AP_DISCONNECT;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_CONNECT_EVENT:
-		pparam->paramType = ROAMING_MNGR_CONN_STATUS;
-		pparam->content.roamingConnStatus = CONN_STATUS_CONNECTED;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_CONN_STATUS;
+		param.content.roamingConnStatus = CONN_STATUS_CONNECTED;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_NOT_CONNECTED_EVENT:
-		pparam->paramType = ROAMING_MNGR_CONN_STATUS;
-		pparam->content.roamingConnStatus = CONN_STATUS_NOT_CONNECTED;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_CONN_STATUS;
+		param.content.roamingConnStatus = CONN_STATUS_NOT_CONNECTED;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_HANDOVER_SUCCESS_EVENT:
-		pparam->paramType = ROAMING_MNGR_CONN_STATUS;
-		pparam->content.roamingConnStatus = CONN_STATUS_HANDOVER_SUCCESS;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_CONN_STATUS;
+		param.content.roamingConnStatus = CONN_STATUS_HANDOVER_SUCCESS;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
 	case TRIGGER_ROAMING_HANDOVER_FAILURE_EVENT:
-		pparam->paramType = ROAMING_MNGR_CONN_STATUS;
-		pparam->content.roamingConnStatus = CONN_STATUS_HANDOVER_FAILURE;
-		roamingMngr_setParam(hRoamingMngr, pparam);
+		param.paramType = ROAMING_MNGR_CONN_STATUS;
+		param.content.roamingConnStatus = CONN_STATUS_HANDOVER_FAILURE;
+		roamingMngr_setParam(hRoamingMngr, &param);
 		break;
 
     case ROAMING_REGISTER_BSS_LOSS_EVENT: /* 1613 */
@@ -147,34 +143,29 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
     case ROAMING_START_IMMEDIATE_SCAN: /* 1614 */
         {
             int i=0,j =0;
-            channelList_t *pchannels;
+            channelList_t channels;
+            channels.numOfChannels = 14;
 
-            pchannels = (channelList_t *)os_memoryAlloc(((roamingMngr_t*)hRoamingMngr)->hOs, sizeof(channelList_t));
-            if (!pchannels) {
-                return;
-            }
-            pchannels->numOfChannels = 14;
 
-            for ( i = 0; i < pchannels->numOfChannels; i++ )
+            for ( i = 0; i < channels.numOfChannels; i++ )
             {
                 for ( j = 0; j < 6; j++ )
                 {
-                    pchannels->channelEntry[i].normalChannelEntry.bssId[j] = 0xff;
+                    channels.channelEntry[i].normalChannelEntry.bssId[j] = 0xff;
                 }
 
-                pchannels->channelEntry[i].normalChannelEntry.earlyTerminationEvent = SCAN_ET_COND_DISABLE;
-                pchannels->channelEntry[i].normalChannelEntry.ETMaxNumOfAPframes = 0;
-                pchannels->channelEntry[i].normalChannelEntry.maxChannelDwellTime = 60000;
-                pchannels->channelEntry[i].normalChannelEntry.minChannelDwellTime = 30000;
-                pchannels->channelEntry[i].normalChannelEntry.txPowerDbm = DEF_TX_POWER;
-                pchannels->channelEntry[i].normalChannelEntry.channel = i + 1;
+                channels.channelEntry[i].normalChannelEntry.earlyTerminationEvent = SCAN_ET_COND_DISABLE;
+                channels.channelEntry[i].normalChannelEntry.ETMaxNumOfAPframes = 0;
+                channels.channelEntry[i].normalChannelEntry.maxChannelDwellTime = 60000;
+                channels.channelEntry[i].normalChannelEntry.minChannelDwellTime = 30000;
+                channels.channelEntry[i].normalChannelEntry.txPowerDbm = DEF_TX_POWER;
+                channels.channelEntry[i].normalChannelEntry.channel = i + 1;
             }
 
             /* upon this call the scanMngr_reportImmediateScanResults() should be invoked and the BssList should be printed */
-            roamingMngr_startImmediateScan(hRoamingMngr, pchannels);
-            os_memoryFree(((roamingMngr_t*)hRoamingMngr)->hOs, pchannels, sizeof(channelList_t));
+            roamingMngr_startImmediateScan(hRoamingMngr, &channels); 
         }
-
+       
         break;
     case ROAMING_CONNECT: /* 1615 */
         {
@@ -182,7 +173,7 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
             bssList_t *bssList;
             roamingMngr_t *pRoamingMngr = (roamingMngr_t*)hRoamingMngr;
 
-            bssList = scanMngr_getBSSList(((roamingMngr_t*)hRoamingMngr)->hScanMngr);
+            bssList = scanMngr_getBSSList(((roamingMngr_t*)hRoamingMngr)->hScanMngr); 
 
             WLAN_OS_REPORT(("Roaming connect: BSS LIST num of entries=%d \n", bssList->numOfEntries));
             PrintBssListGotAfterImemediateScan(((roamingMngr_t*)hRoamingMngr)->hScanMngr);
@@ -198,12 +189,12 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
             targetAP.newAP.bufferLength =0;
             targetAP.newAP.pBuffer = 0;
             /* ----------------------------- */
-
+            
             os_memoryCopy(pRoamingMngr->hOs, &(pRoamingMngr->targetAP), &targetAP , sizeof(TargetAp_t));
-
+            
             roamingMngr_connect(hRoamingMngr, &(pRoamingMngr->targetAP));
         }
-
+        
         break;
 
     case ROAMING_START_CONT_SCAN_BY_APP: /* 1616 */
@@ -230,7 +221,7 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
 
             scanMngr_startContinuousScanByApp(pRoamingMngr->hScanMngr, &channels);
         }
-
+        
         break;
 
     case ROAMING_STOP_CONT_SCAN_BY_APP:
@@ -246,10 +237,10 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
             int i=0;
             roamingMngr_t *pRoamingMngr = (roamingMngr_t*)hRoamingMngr;
             TScanPolicy scanPolicy;
-            pparam->paramType = SCAN_MNGR_SET_CONFIGURATION;
-            pparam->content.pScanPolicy = &scanPolicy;
+            param.paramType = SCAN_MNGR_SET_CONFIGURATION;
+            param.content.pScanPolicy = &scanPolicy;
 
-            // init default scan policy
+            // init default scan policy 
             scanPolicy.normalScanInterval = 10000;
             scanPolicy.deterioratingScanInterval = 5000;
             scanPolicy.maxTrackFailures = 3;
@@ -291,27 +282,25 @@ void roamingMgrDebugFunction(TI_HANDLE hRoamingMngr,
             scanPolicy.bandScanPolicy[ 0 ].immediateScanMethod.method.basicMethodParams.probReqParams.numOfProbeReqs = 3;
             scanPolicy.bandScanPolicy[ 0 ].immediateScanMethod.method.basicMethodParams.probReqParams.txPowerDbm = DEF_TX_POWER;
              /* we should noe store the scanPolicy now */
-            scanMngr_setParam(pRoamingMngr->hScanMngr, pparam);
+            scanMngr_setParam(pRoamingMngr->hScanMngr, &param);
 
 
             /* Enable roaming! */
-            pparam->paramType = ROAMING_MNGR_APPLICATION_CONFIGURATION;
-            pparam->content.roamingConfigBuffer.roamingMngrConfig.enableDisable = ROAMING_ENABLED;
-            roamingMngr_setParam(hRoamingMngr,pparam);
+            param.paramType = ROAMING_MNGR_APPLICATION_CONFIGURATION;
+            param.content.roamingConfigBuffer.roamingMngrConfig.enableDisable = ROAMING_ENABLED;
+            roamingMngr_setParam(hRoamingMngr,&param);
         }
-
+        
         break;
 
     case ROAMING_PRINT_MANUAL_MODE: /* 1617 */
         WLAN_OS_REPORT(("\n ROAMING MANUAL MODE IS: %d \n",((roamingMngr_t*)hRoamingMngr)->RoamingOperationalMode));
         break;
-
+        
 	default:
 		WLAN_OS_REPORT(("Invalid function type in Debug  Function Command, funcType= %d\n\n", funcType));
 		break;
 	}
-
-	os_memoryFree(((roamingMngr_t*)hRoamingMngr)->hOs, pparam, sizeof(paramInfo_t));
 } 
 
 
@@ -352,17 +341,17 @@ void PrintBssListGotAfterImemediateScan(TI_HANDLE hScanMgr)
 
     WLAN_OS_REPORT(("------ PRINTING BSS FOUND AFTER IMMEDIATE SCAN - MANUAL MODE----------\n"));
 
-    bssList = scanMngr_getBSSList(hScanMgr);
+    bssList = scanMngr_getBSSList(hScanMgr); 
 
-    for (i=0 ; i< bssList->numOfEntries ; i++)
+    for (i=0 ; i< bssList->numOfEntries ; i++) 
     {
         pBssEntry = &(bssList->BSSList[i]);
-
+            
         WLAN_OS_REPORT( ("BSSID: %02x:%02x:%02x:%02x:%02x:%02x, band: %d\n", pBssEntry->BSSID[ 0 ],
                          pBssEntry->BSSID[ 1 ], pBssEntry->BSSID[ 2 ],
                          pBssEntry->BSSID[ 3 ], pBssEntry->BSSID[ 4 ],
                          pBssEntry->BSSID[ 5 ], pBssEntry->band));
-       WLAN_OS_REPORT( ("channel: %d, beacon interval: %d, average RSSI: %d dBm\n",
+       WLAN_OS_REPORT( ("channel: %d, beacon interval: %d, average RSSI: %d dBm\n", 
                                       pBssEntry->channel, pBssEntry->beaconInterval, pBssEntry->RSSI));
 
     }

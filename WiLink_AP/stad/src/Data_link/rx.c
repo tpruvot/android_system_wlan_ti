@@ -65,7 +65,9 @@
 #include "APExternalIf.h"
 #include "txDataQueue_Api.h"
 #include "WlanDrvIf.h"
-
+#ifdef AP_MODE_ENABLED
+#include "roleAP.h"
+#endif
 
 #define EAPOL_PACKET                    0x888E
 #define IAPP_PACKET                     0x0000
@@ -191,6 +193,9 @@ void rxData_init (TStadHandlesList *pStadHandles)
     pRxData->hTimer     = pStadHandles->hTimer;
     pRxData->hPowerMgr  = pStadHandles->hPowerMgr;
     pRxData->hTxDataQueue = pStadHandles->hTxDataQ;
+#ifdef AP_MODE_ENABLED
+    pRxData->hRoleAp      = pStadHandles->hRoleAP;
+#endif
     
     pRxData->rxDataExcludeUnencrypted = DEF_EXCLUDE_UNENCYPTED; 
     pRxData->rxDataExludeBroadcastUnencrypted = DEF_EXCLUDE_UNENCYPTED;
@@ -454,6 +459,17 @@ TI_STATUS rxData_getParam(TI_HANDLE hRxData, paramInfo_t *pParamInfo)
         case RX_DATA_RATE_PARAM:
             pParamInfo->content.siteMgrCurrentRxRate = pRxData->uLastDataPktRate;
             break;
+
+		case RX_DATA_LINK_COUNTERS:
+			{
+				TI_UINT32 uHlid;
+                for (uHlid = 0; uHlid < WLANLINKS_MAX_LINKS; uHlid++)
+				{
+					pParamInfo->content.linkDataCounters[uHlid].recvPktsFromWlan = pRxData->rxDataLinkCounters[uHlid].recvFromWlan;
+					pParamInfo->content.linkDataCounters[uHlid].recvBytesFromWlan = pRxData->rxDataLinkCounters[uHlid].recvBytesFromWlan;
+				}
+			}
+			break;
 
         default:
             TRACE0(pRxData->hReport, REPORT_SEVERITY_ERROR, " rxData_getParam() : PARAMETER NOT SUPPORTED \n");
@@ -1012,7 +1028,6 @@ void rxData_receivePacketFromWlan (TI_HANDLE hRxData, void *pBuffer, TRxAttr* pR
         rxData_discardPacket (hRxData, pBuffer, pRxAttr);
         return;
     }
-    pRxData->rxDataLinkCounters[uHlid].recvFromWlan++;
     if (pRxData->aRxLinkInfo[uHlid].eState == RX_CONN_STATE_CLOSE)
     {
         pRxData->rxDataLinkCounters[uHlid].discardHlidClose++;
@@ -1020,6 +1035,10 @@ void rxData_receivePacketFromWlan (TI_HANDLE hRxData, void *pBuffer, TRxAttr* pR
         rxData_discardPacket (hRxData, pBuffer, pRxAttr);
         return;
     }
+
+	pRxData->rxDataLinkCounters[uHlid].recvFromWlan++;
+	pRxData->rxDataLinkCounters[uHlid].recvBytesFromWlan += RX_BUF_LEN(pBuffer);
+
     /* set role type */
     eLinkRole = pRxData->aRxLinkInfo[uHlid].eRole;
 
@@ -1039,19 +1058,9 @@ void rxData_receivePacketFromWlan (TI_HANDLE hRxData, void *pBuffer, TRxAttr* pR
          */  
         if (eLinkRole == WLANLINK_ROLE_AP)
         {
-            if ((pRxAttr->ePacketType == TAG_CLASS_MANAGEMENT)) 
-            {
-                pRxData->rxDataLinkCounters[uHlid].sendToHostapd++;
-                /* ROLE_AP - management packets are sent to the hostapd */
-                rxData_mgmtPacketDisptcher(hRxData, pBuffer, pRxAttr);
-            }
-            else
-            {
-                pRxData->rxDataLinkCounters[uHlid].discardBeaconRoleAp++;
-                // WLAN_OS_REPORT(("rxData_receivePacketFromWlan: TAG_CLASS_BCN_PRBRSP in AP role should be filtered !!!!!\n"));
-                rxData_discardPacket (hRxData, pBuffer, pRxAttr);
-                return;
-            }
+			pRxData->rxDataLinkCounters[uHlid].sendToHostapd++;
+			/* ROLE_AP - management packets are sent to the hostapd */
+			rxData_mgmtPacketDisptcher(hRxData, pBuffer, pRxAttr);
         }
         else
         {
@@ -1222,42 +1231,12 @@ static TI_STATUS rxData_mgmtPacketDisptcher (TI_HANDLE hRxData, void *pBuffer, T
     rxData_t *pRxData = (rxData_t *)hRxData;
     dot11_header_t *pDot11Header = (dot11_header_t *)(RX_BUF_DATA(pBuffer));
     TEthernetHeader * pEthHeader;
-    void *pDataBuf;
     int uDataLen = RX_BUF_LEN(pBuffer);
-    int uRawLen = sizeof(RxIfDescriptor_t) + WLAN_SNAP_HDR_LEN + ETHERNET_HDR_LEN + AP_CONTROL_WORD_LEN + uDataLen;
     TI_UINT16 uHostApdControl;
 
 
-    /* 
-     * Allocate a new buffer in order to add Ethernet header on top of WLAN header
-     */
-    rxData_RequestForBuffer (hRxData, &pDataBuf,  uRawLen + 24 + 24, 0, TAG_CLASS_MANAGEMENT);
-    if (NULL == pDataBuf)
-    {
-        TRACE1(pRxData->hReport, REPORT_SEVERITY_ERROR, "rxData_mgmtPacketDisptcher: cannot alloc MGMT packet. length %d \n",uDataLen);
-        rxData_discardPacket (hRxData, pBuffer, pRxAttr);
-        return TI_NOK;
-    }
-
-    /*
-     * Build packet 
-     * ------------
-     *  - RxInfo            - copy from original packet
-     *  - Padding           - to keep address, length - see RX_ETH_PKT_DATA
-     *  - Ethernet header   - New header DA=bssid, SA=station, Type=new dedicate value for hostapd
-     *  - Control           - 2 bytes for control word
-     *  - WLAN header       - copy from original packet
-     *  - MGMT data         - copy from original packet
-     */
-    
-    /* Copy the RxIfDescriptor and update length */
-    os_memoryCopy (pRxData->hOs, pDataBuf, pBuffer, sizeof(RxIfDescriptor_t));
-    ((RxIfDescriptor_t *)pDataBuf)->length = (uRawLen) >> 2;
-    ((RxIfDescriptor_t *)pDataBuf)->extraBytes = 4 - ((uRawLen) & 0x3);
-
-    /* Build Ethernet header for WLAN MGMT packet - Addr1,2,3 = Dst,Src,Bss */
-    pEthHeader = (TEthernetHeader *)((TI_UINT8 *)(RX_BUF_DATA(pDataBuf)) + WLAN_SNAP_HDR_LEN + PADDING_ETH_PACKET_SIZE);
-    pDot11Header = (dot11_header_t *)(RX_BUF_DATA(pBuffer));
+    /* We override part of RxIfDescriptor_t with Ethernet header */
+    pEthHeader = (TEthernetHeader*)((TI_UINT8*)pDot11Header - ETHERNET_HDR_LEN - AP_CONTROL_WORD_LEN);
     MAC_COPY (pEthHeader->dst, pDot11Header->address3);  /* destination is the bssid */
     MAC_COPY (pEthHeader->src, pDot11Header->address2);  /* source is the station address */
     pEthHeader->type = WLANTOHS((TI_UINT16)(AP_MGMT_ETH_TYPE));
@@ -1265,16 +1244,8 @@ static TI_STATUS rxData_mgmtPacketDisptcher (TI_HANDLE hRxData, void *pBuffer, T
     /* prepare control field */
     uHostApdControl = AP_CTRL_HDR_RX;  /* TODO[ilanb]:, add MIC FAIL if set, ... */
     os_memoryCopy (pRxData->hOs, (((TI_UINT8*)pEthHeader) + ETHERNET_HDR_LEN), (TI_UINT8 *)&uHostApdControl, AP_CONTROL_WORD_LEN);
-
-    /* copy the packet payload */
-    os_memoryCopy (pRxData->hOs, (((TI_UINT8*)pEthHeader) + ETHERNET_HDR_LEN + AP_CONTROL_WORD_LEN), RX_BUF_DATA(pBuffer), uDataLen);
-
-    /* Update buffer setting, save the ETH packet address and len */
-    RX_ETH_PKT_DATA(pDataBuf) = pEthHeader;
-    RX_ETH_PKT_LEN(pDataBuf) = ETHERNET_HDR_LEN + AP_CONTROL_WORD_LEN + uDataLen;
-
     /* Deliver packet to os */
-    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pDataBuf, pDataBuf, (TI_UINT16)RX_ETH_PKT_LEN(pDataBuf), NULL);
+    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pBuffer, pEthHeader, (TI_UINT16)(ETHERNET_HDR_LEN + AP_CONTROL_WORD_LEN + uDataLen), NULL);
 
     return TI_OK;
 }
@@ -1355,7 +1326,7 @@ TI_STATUS rxData_mgmtPacketComplete (TI_HANDLE hRxData, void *pBuf1, TI_UINT32 u
     RX_ETH_PKT_LEN(pDataBuf) = ETHERNET_HDR_LEN + AP_CONTROL_WORD_LEN + uDataLen;
 
     /* Deliver packet to os */
-    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pDataBuf, pDataBuf, (TI_UINT16)RX_ETH_PKT_LEN(pDataBuf), NULL);
+    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pDataBuf, pEthHeader, (TI_UINT16)RX_ETH_PKT_LEN(pDataBuf), NULL);
 
     return TI_OK;
 }
@@ -1464,7 +1435,7 @@ static void rxData_rcvPacketEapol(TI_HANDLE hRxData, void *pBuffer, TRxAttr* pRx
     TRACE0(pRxData->hReport, REPORT_SEVERITY_INFORMATION, " rxData_rcvPacketEapol() : Received an EAPOL frame tranferred to OS\n");
 
     EvHandlerSendEvent (pRxData->hEvHandler, IPC_EVENT_EAPOL, NULL, 0);
-    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pBuffer, pBuffer, (TI_UINT16)RX_ETH_PKT_LEN(pBuffer), NULL);
+    wlanDrvIf_receivePacket (pRxData->hOs, (struct RxIfDescriptor_t*)pBuffer, RX_ETH_PKT_DATA(pBuffer), (TI_UINT16)RX_ETH_PKT_LEN(pBuffer), NULL);
 
 }
 
@@ -1592,7 +1563,7 @@ static void rxData_rcvPacketData(TI_HANDLE hRxData, void *pBuffer, TRxAttr* pRxA
 
     rxData_DistributorRxEvent (pRxData, EventMask, RX_ETH_PKT_LEN(pBuffer));
     /* deliver packet to os */
-    wlanDrvIf_receivePacket(pRxData->hOs, (struct RxIfDescriptor_t*)pBuffer, pBuffer, (TI_UINT16)RX_ETH_PKT_LEN(pBuffer), pBssBridgeParam);
+    wlanDrvIf_receivePacket(pRxData->hOs, (struct RxIfDescriptor_t*)pBuffer, RX_ETH_PKT_DATA(pBuffer), (TI_UINT16)RX_ETH_PKT_LEN(pBuffer), pBssBridgeParam);
 }
 
 
@@ -1933,7 +1904,7 @@ static void rxData_ReceivePacket (TI_HANDLE   hRxData,
         TRxAttr             RxAttr; 
         ERate               appRate;
         dot11_header_t      *pHdr;
-
+       
         /*
          * First thing we do is getting the dot11_header, and than we check the status, since the header is
          * needed for RX_MIC_FAILURE_ERROR 
@@ -1960,9 +1931,16 @@ static void rxData_ReceivePacket (TI_HANDLE   hRxData,
             }
             case RX_DESC_STATUS_MIC_FAIL:
             {
+                   
+#ifdef AP_MODE_ENABLED
+                TMacAddr* pMac = &pHdr->address2; /* hold the first mac address */
+                roleAP_reportMicFailure(pRxData->hRoleAp,(TI_UINT8*)pMac);
+                return;
+#else  
                 TI_UINT8 uKeyType; 
-                paramInfo_t Param;
+                paramInfo_t Param;           
                 TMacAddr* pMac = &pHdr->address1; /* hold the first mac address */
+
                 /* Get BSS type */
                 Param.paramType = SITE_MGR_CURRENT_BSS_TYPE_PARAM;
                 siteMgr_getParam (pRxData->hSiteMgr, &Param);
@@ -1984,7 +1962,9 @@ static void rxData_ReceivePacket (TI_HANDLE   hRxData,
                 rsn_reportMicFailure (pRxData->hRsn, &uKeyType, sizeof(uKeyType));
                 RxBufFree(pRxData->hOs, pBuffer); 
                 return;
+#endif
             }
+
     
             case RX_DESC_STATUS_DRIVER_RX_Q_FAIL:
             {
@@ -2119,13 +2099,35 @@ void rxData_resetCounters(TI_HANDLE hRxData)
 * 
 * RETURNS:      void
 ***************************************************************************/
-
 void rxData_resetDbgCounters(TI_HANDLE hRxData)
 {
     rxData_t *pRxData = (rxData_t *)hRxData;
 
     os_memoryZero(pRxData->hOs, &pRxData->rxDataDbgCounters, sizeof(rxDataDbgCounters_t));
+	os_memoryZero(pRxData->hOs, &pRxData->rxDataLinkCounters, sizeof(rxDataLinkCounters_t)* WLANLINKS_MAX_LINKS);
 }
+
+/***************************************************************************
+*                        rxData_resetLinkCounters                          *
+****************************************************************************
+* DESCRIPTION:  This function reset the Rx Link counters
+*
+* INPUTS:       hRxData - the object
+*				uHlid   - Link Id to reset			
+*
+* OUTPUT:       
+* 
+* RETURNS:      void
+***************************************************************************/
+void rxData_resetLinkCounters(TI_HANDLE hRxData, TI_UINT32 uHlid)
+{
+    rxData_t *pRxData = (rxData_t *)hRxData;
+
+    if (uHlid < WLANLINKS_MAX_LINKS)
+		os_memoryZero(pRxData->hOs, &(pRxData->rxDataLinkCounters[uHlid]), sizeof(rxDataLinkCounters_t));
+
+}
+
 
 
 /***************************************************************************
@@ -2160,6 +2162,7 @@ void rxData_printRxCounters (TI_HANDLE hRxData)
             rxDataLinkCounters_t *pCnt = &pRxData->rxDataLinkCounters[uHlid];
             WLAN_OS_REPORT(("---------Link=%01d: eState=%d, eRole=%d \n", uHlid, pRxData->aRxLinkInfo[uHlid].eState, pRxData->aRxLinkInfo[uHlid].eRole));
             WLAN_OS_REPORT(("    recvFromWlan         = %d\n", pCnt->recvFromWlan));
+			WLAN_OS_REPORT(("    recvBytesFromWlan    = %d\n", pCnt->recvBytesFromWlan));
             WLAN_OS_REPORT(("    sendToHostapd        = %d\n", pCnt->sendToHostapd));
             WLAN_OS_REPORT(("    sendToMlme           = %d\n", pCnt->sendToMlme));
             WLAN_OS_REPORT(("    sendToDataDispatcher = %d\n", pCnt->sendToDataDispatcher));
