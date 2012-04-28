@@ -53,12 +53,18 @@ Apr 2012 :
 - added implementation of CONFIG_HAS_EARLYSUSPEND,  DTIM skipping feature
 - Fix Tests frame size warnings
 
-- tiap_drv : update sdio and add missing commands like "set tx power"
+- tiap_drv : update sdio driver code
 
-# Current Status (March 2012) :
+# March 2012 :
 
 the tiwlan_drv.ko is currently used in CyanogenMod 7/9 Roms
 
-tiap_drv is not ready yet, it is built and loads fine, AP is seen, but the connection cant be established (wpa2 problem ?)
-We still use a patched motorola kernel module (patched to change softap intf name to "tiap0")... but we are near the goal.
+# Current Status (April 2012) :
+
+tiap_drv is now working, but "reverted" to milestone 2 latest oss sources
+some patches were reapplied, but TI sources are really badly commited and
+its a hell to cherry pick with the indentation and trailing spaces...
+
+todo :
+   add missing commands like "set tx power" causing dmesg errors (warnings)
 
