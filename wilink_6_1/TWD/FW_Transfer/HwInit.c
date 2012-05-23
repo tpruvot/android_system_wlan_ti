@@ -31,7 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+//#define DUMP_NVS_IMAGE_TO_DMESG
 
 /*******************************************************************************/
 /*                                                                             */
@@ -681,7 +681,7 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
             clkVal = 0x5;
         }
 
-        WLAN_OS_REPORT(("CHIP VERSION... set 1273 chip top registers\n"));
+        WLAN_OS_REPORT(("CHIP VERSION... set 1273 chip top registers, clk=%d\n", clkVal));
 
         /* set the reference clock freq' to be used (pll_selinpfref field) */
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, PLL_PARAMETERS, clkVal,
@@ -827,19 +827,36 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
             /* NVS file exists (EEPROM-less support) */
             pHwInit->uEEPROMCurLen = pHwInit->uEEPROMLen;
 
-            TRACE3(pHwInit->hReport, REPORT_SEVERITY_INIT , "EEPROM Image addr=0x%x, buf=0x%x, EEPROM Len=0x0x%x\n",
+            TRACE3(pHwInit->hReport, REPORT_SEVERITY_INIT , "EEPROM Image addr=0x%x, buf=0x%x, EEPROM len=%u.\n",
                    pHwInit->uFwAddress, pHwInit->pEEPROMBuf, pHwInit->uEEPROMLen);
 
-            WLAN_OS_REPORT(("NVS found, EEPROM Image addr=0x%x, buf=0x%x, EEPROM Len=0x0x%x\n",
+            WLAN_OS_REPORT(("NVS found, EEPROM Image addr=0x%x, buf=0x%x, EEPROM len=%u.\n",
                            pHwInit->uFwAddress, pHwInit->pEEPROMBuf, pHwInit->uEEPROMLen));
-        }
-        else
-        {
-            WLAN_OS_REPORT (("No Nvs, Setting default MAC address\n"));
+
+#ifdef DUMP_NVS_IMAGE_TO_DMESG
+            /* Dump nvs image content */
+            if (pHwInit->uEEPROMLen > 16) {
+                TI_UINT32 i;
+                TI_UINT8* pFwChr = pHwInit->pEEPROMBuf;
+                for (i=0; i <= (pHwInit->uEEPROMLen - 16); i += 16) {
+                    WLAN_OS_REPORT((
+                        "%03x: %02x.%02x.%02x.%02x %02x.%02x.%02x.%02x %02x.%02x.%02x.%02x %02x.%02x.%02x.%02x\n", i,
+                        pFwChr[i   ], pFwChr[i+ 1], pFwChr[i+ 2], pFwChr[i+ 3],
+                        pFwChr[i+ 4], pFwChr[i+ 5], pFwChr[i+ 6], pFwChr[i+ 7],
+                        pFwChr[i+ 8], pFwChr[i+ 9], pFwChr[i+10], pFwChr[i+11],
+                        pFwChr[i+12], pFwChr[i+13], pFwChr[i+14], pFwChr[i+15]
+                    ));
+                }
+            }
+#endif
+        } else {
+            WLAN_OS_REPORT(("No Nvs, Setting default MAC address\n"));
+
             pHwInit->uEEPROMCurLen = DEF_NVS_SIZE;
             pHwInit->pEEPROMBuf = (TI_UINT8*)(&pHwInit->aDefaultNVS[0]);
-            WLAN_OS_REPORT (("pHwInit->uEEPROMCurLen: %x\n", pHwInit->uEEPROMCurLen));
-            WLAN_OS_REPORT (("ERROR: If you are not calibating the device, you will soon get errors !!!\n"));
+
+            WLAN_OS_REPORT(("pHwInit->uEEPROMCurLen: %x\n", pHwInit->uEEPROMCurLen));
+            WLAN_OS_REPORT(("ERROR: If you are not calibrating the device, you will soon get errors !!!\n"));
         }
 
         pHwInit->pEEPROMCurPtr = pHwInit->pEEPROMBuf;
