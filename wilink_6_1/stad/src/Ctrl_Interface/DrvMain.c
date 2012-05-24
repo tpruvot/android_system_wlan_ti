@@ -1461,7 +1461,7 @@ TI_UINT8 drvMain_GetBeaconInterval(TI_HANDLE hDrvMain)
         } else {
             param.paramType = SITE_MGR_BEACON_INTERVAL_PARAM;
             siteMgr_getParam(pDrvMain->tStadHandles.hSiteMgr, &param);
-            printk("drvMain_GetBeaconInterval: SITE_MGR_BEACON_INTERVAL_PARAM = %d\n", param.content.beaconInterval);
+            pr_debug("drvMain_GetBeaconInterval: SITE_MGR_BEACON_INTERVAL_PARAM = %d\n", param.content.beaconInterval);
         }
     }
 
@@ -1490,7 +1490,7 @@ TI_UINT8 drvMain_GetDtimListenInterval(TI_HANDLE hDrvMain)
         } else {
             param.paramType = SITE_MGR_DTIM_PERIOD_PARAM;
             siteMgr_getParam(pDrvMain->tStadHandles.hSiteMgr, &param);
-            printk("drvMain_GetDtimListenInterval: SITE_MGR_DTIM_PERIOD_PARAM = %d\n", param.content.siteMgrDtimPeriod);
+            pr_debug("drvMain_GetDtimListenInterval: SITE_MGR_DTIM_PERIOD_PARAM = %d\n", param.content.siteMgrDtimPeriod);
         }
     }
     return param.content.siteMgrDtimPeriod;

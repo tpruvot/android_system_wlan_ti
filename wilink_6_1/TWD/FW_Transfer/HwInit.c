@@ -649,9 +649,9 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
     TI_STATUS   status = 0;
     TTxnStruct  *pTxn;
     TI_UINT32   uData;
-    TTwd        *pTWD        = (TTwd *) pHwInit->hTWD;
-    IniFileGeneralParam  *pGenParams = &DB_GEN(pTWD->hCmdBld);
     TI_UINT32   clkVal = 0x3;
+    TTwd       *pTWD = (TTwd *) pHwInit->hTWD;
+    IniFileGeneralParam *pGenParams = &DB_GEN(pTWD->hCmdBld);
 
     switch (pHwInit->uInitStage)
     {
@@ -681,7 +681,8 @@ static TI_STATUS hwInit_BootSm (TI_HANDLE hHwInit)
             clkVal = 0x5;
         }
 
-        WLAN_OS_REPORT(("CHIP VERSION... set 1273 chip top registers, clk=%d\n", clkVal));
+        WLAN_OS_REPORT(("CHIP VERSION... set 1273 chip top registers, ref clk=%s MHz\n",
+                       clkVal == 0x5 ? "26/52":"19.2/38.4"));
 
         /* set the reference clock freq' to be used (pll_selinpfref field) */
         BUILD_HW_INIT_TXN_DATA(pHwInit, pTxn, PLL_PARAMETERS, clkVal,

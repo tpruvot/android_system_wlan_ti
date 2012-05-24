@@ -31,6 +31,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* define to use the old suspend method (shutdown / re-probe) */
+//#define TIWLAN_HARD_SUSPEND
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/version.h>
@@ -43,12 +46,14 @@
 #include <linux/platform_device.h>
 #include <linux/errno.h>
 #include <linux/clk.h>
+#include <linux/gpio.h>
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
 #include <plat/hardware.h>
 #include <plat/board.h>
 #include <plat/clock.h>
 #include <plat/dma.h>
 #include <plat/io.h>
+#include <plat/gpio.h>
 #include <plat/resource.h>
 #define IO_ADDRESS(pa) OMAP2_L4_IO_ADDRESS(pa)
 #else
@@ -57,6 +62,7 @@
 #include <mach/clock.h>
 #include <mach/dma.h>
 #include <mach/io.h>
+#include <mach/gpio.h>
 #include <mach/resource.h>
 #endif
 typedef void * TI_HANDLE;
@@ -64,7 +70,8 @@ typedef void * TI_HANDLE;
 #include "SdioDrvDbg.h"
 #include "SdioDrv.h"
 
-/* #define TI_SDIO_DEBUG */
+//#define TI_SDIO_DEBUG
+#define GPIO_SIGNAL_MMC_DET 163
 
 /*
  * HSMMC Address and DMA Settings
@@ -264,6 +271,8 @@ static struct platform_device dummy_pdev = {
 };
 #endif
 
+/* moto devices: see board-mapphone-hsmmc.c for platform_data */
+
 #define SDIO_DRIVER_NAME            "TIWLAN_SDIO"
 #define SDIO_WQ_NAME                "sdio_wq"
 
@@ -402,7 +411,7 @@ irqreturn_t sdiodrv_irq(int irq, void *drv)
 	status = queue_work (g_drv.pWorkQueue, &g_drv.sdiodrv_work);
 	if (!status)
 	{
-		printk("\n***Error sdiodrv_irq:  failed to enqueue work,status = %d\n", status);
+		PERR("***Error sdiodrv_irq:  failed to enqueue work,status = %d\n", status);
 	}
 
 	return IRQ_HANDLED;
@@ -420,7 +429,7 @@ void sdiodrv_dma_read_cb(int lch, u16 ch_status, void *data)
 
 	if (! status )
 	{
-		printk("\n***Error sdiodrv_dma_read_cb:  failed to enqueue work ,status = %d\n", status);
+		PERR("***Error sdiodrv_dma_read_cb:  failed to enqueue work ,status = %d\n", status);
 	}
 
 	sdiodrv_dma_shutdown();
@@ -433,7 +442,7 @@ void sdiodrv_dma_write_cb(int lch, u16 ch_status, void *data)
 
 int sdiodrv_dma_init(void)
 {
-	int rc;
+	int rc = 0;
 
 	rc = omap_request_dma(TIWLAN_MMC_DMA_TX, "SDIO WRITE", sdiodrv_dma_write_cb, &g_drv, &g_drv.dma_tx_channel);
 	if (rc != 0) {
@@ -448,14 +457,14 @@ int sdiodrv_dma_init(void)
 	}
 
 	omap_set_dma_src_params(g_drv.dma_rx_channel,
-							0,			// src_port is only for OMAP1
-							OMAP_DMA_AMODE_CONSTANT,
-							(TIWLAN_MMC_CONTROLLER_BASE_ADDR) + OMAP_HSMMC_DATA, 0, 0);
+		0,			// src_port is only for OMAP1
+		OMAP_DMA_AMODE_CONSTANT,
+		(TIWLAN_MMC_CONTROLLER_BASE_ADDR) + OMAP_HSMMC_DATA, 0, 0);
 
 	omap_set_dma_dest_params(g_drv.dma_tx_channel,
-							0,			// dest_port is only for OMAP1
-							OMAP_DMA_AMODE_CONSTANT,
-							(TIWLAN_MMC_CONTROLLER_BASE_ADDR) + OMAP_HSMMC_DATA, 0, 0);
+		0,			// dest_port is only for OMAP1
+		OMAP_DMA_AMODE_CONSTANT,
+		(TIWLAN_MMC_CONTROLLER_BASE_ADDR) + OMAP_HSMMC_DATA, 0, 0);
 
 	return 0;
 
@@ -467,8 +476,8 @@ out:
 
 static void sdiodrv_dma_shutdown(void)
 {
-  omap_free_dma(g_drv.dma_tx_channel);
-  omap_free_dma(g_drv.dma_rx_channel);
+	omap_free_dma(g_drv.dma_tx_channel);
+	omap_free_dma(g_drv.dma_rx_channel);
 } /* sdiodrv_dma_shutdown() */
 
 static u32 sdiodrv_poll_status(u32 reg_offset, u32 stat, unsigned int msecs)
@@ -487,29 +496,30 @@ static u32 sdiodrv_poll_status(u32 reg_offset, u32 stat, unsigned int msecs)
 
 void dumpreg(void)
 {
-	printk(KERN_ERR "\n MMCHS_SYSCONFIG   for mmc3 = %x  ", omap_readl( 0x480AD010 ));
-	printk(KERN_ERR "\n MMCHS_SYSSTATUS   for mmc3 = %x  ", omap_readl( 0x480AD014 ));
-	printk(KERN_ERR "\n MMCHS_CSRE	      for mmc3 = %x  ", omap_readl( 0x480AD024 ));
-	printk(KERN_ERR "\n MMCHS_SYSTEST     for mmc3 = %x  ", omap_readl( 0x480AD028 ));
-	printk(KERN_ERR "\n MMCHS_CON         for mmc3 = %x  ", omap_readl( 0x480AD02C ));
-	printk(KERN_ERR "\n MMCHS_PWCNT       for mmc3 = %x  ", omap_readl( 0x480AD030 ));
-	printk(KERN_ERR "\n MMCHS_BLK         for mmc3 = %x  ", omap_readl( 0x480AD104 ));
-	printk(KERN_ERR "\n MMCHS_ARG         for mmc3 = %x  ", omap_readl( 0x480AD108 ));
-	printk(KERN_ERR "\n MMCHS_CMD         for mmc3 = %x  ", omap_readl( 0x480AD10C ));
-	printk(KERN_ERR "\n MMCHS_RSP10       for mmc3 = %x  ", omap_readl( 0x480AD110 ));
-	printk(KERN_ERR "\n MMCHS_RSP32       for mmc3 = %x  ", omap_readl( 0x480AD114 ));
-	printk(KERN_ERR "\n MMCHS_RSP54       for mmc3 = %x  ", omap_readl( 0x480AD118 ));
-	printk(KERN_ERR "\n MMCHS_RSP76       for mmc3 = %x  ", omap_readl( 0x480AD11C ));
-	printk(KERN_ERR "\n MMCHS_DATA        for mmc3 = %x  ", omap_readl( 0x480AD120 ));
-	printk(KERN_ERR "\n MMCHS_PSTATE      for mmc3 = %x  ", omap_readl( 0x480AD124 ));
-	printk(KERN_ERR "\n MMCHS_HCTL        for mmc3 = %x  ", omap_readl( 0x480AD128 ));
-	printk(KERN_ERR "\n MMCHS_SYSCTL      for mmc3 = %x  ", omap_readl( 0x480AD12C ));
-	printk(KERN_ERR "\n MMCHS_STAT        for mmc3 = %x  ", omap_readl( 0x480AD130 ));
-	printk(KERN_ERR "\n MMCHS_IE          for mmc3 = %x  ", omap_readl( 0x480AD134 ));
-	printk(KERN_ERR "\n MMCHS_ISE         for mmc3 = %x  ", omap_readl( 0x480AD138 ));
-	printk(KERN_ERR "\n MMCHS_AC12        for mmc3 = %x  ", omap_readl( 0x480AD13C ));
-	printk(KERN_ERR "\n MMCHS_CAPA        for mmc3 = %x  ", omap_readl( 0x480AD140 ));
-	printk(KERN_ERR "\n MMCHS_CUR_CAPA    for mmc3 = %x  ", omap_readl( 0x480AD148 ));
+	PERR("dumpreg() values are hexadecimal:\n");
+	PERR(" MMCHS_SYSCONFIG   for mmc3 = %x\n", omap_readl( 0x480AD010 ));
+	PERR(" MMCHS_SYSSTATUS   for mmc3 = %x\n", omap_readl( 0x480AD014 ));
+	PERR(" MMCHS_CSRE        for mmc3 = %x\n", omap_readl( 0x480AD024 ));
+	PERR(" MMCHS_SYSTEST     for mmc3 = %x\n", omap_readl( 0x480AD028 ));
+	PERR(" MMCHS_CON         for mmc3 = %x\n", omap_readl( 0x480AD02C ));
+	PERR(" MMCHS_PWCNT       for mmc3 = %x\n", omap_readl( 0x480AD030 ));
+	PERR(" MMCHS_BLK         for mmc3 = %x\n", omap_readl( 0x480AD104 ));
+	PERR(" MMCHS_ARG         for mmc3 = %x\n", omap_readl( 0x480AD108 ));
+	PERR(" MMCHS_CMD         for mmc3 = %x\n", omap_readl( 0x480AD10C ));
+	PERR(" MMCHS_RSP10       for mmc3 = %x\n", omap_readl( 0x480AD110 ));
+	PERR(" MMCHS_RSP32       for mmc3 = %x\n", omap_readl( 0x480AD114 ));
+	PERR(" MMCHS_RSP54       for mmc3 = %x\n", omap_readl( 0x480AD118 ));
+	PERR(" MMCHS_RSP76       for mmc3 = %x\n", omap_readl( 0x480AD11C ));
+	PERR(" MMCHS_DATA        for mmc3 = %x\n", omap_readl( 0x480AD120 ));
+	PERR(" MMCHS_PSTATE      for mmc3 = %x\n", omap_readl( 0x480AD124 ));
+	PERR(" MMCHS_HCTL        for mmc3 = %x\n", omap_readl( 0x480AD128 ));
+	PERR(" MMCHS_SYSCTL      for mmc3 = %x\n", omap_readl( 0x480AD12C ));
+	PERR(" MMCHS_STAT        for mmc3 = %x\n", omap_readl( 0x480AD130 ));
+	PERR(" MMCHS_IE          for mmc3 = %x\n", omap_readl( 0x480AD134 ));
+	PERR(" MMCHS_ISE         for mmc3 = %x\n", omap_readl( 0x480AD138 ));
+	PERR(" MMCHS_AC12        for mmc3 = %x\n", omap_readl( 0x480AD13C ));
+	PERR(" MMCHS_CAPA        for mmc3 = %x\n", omap_readl( 0x480AD140 ));
+	PERR(" MMCHS_CUR_CAPA    for mmc3 = %x\n", omap_readl( 0x480AD148 ));
 }
 
 //cmd flow p. 3609 obc
@@ -628,14 +638,13 @@ int sdioDrv_InitHw(void)
 	unsigned long clock_rate = 24000000;
 #endif
 
-	printk(KERN_INFO "TIWLAN SDIO sdioDrv_InitHw()!!");
+	pr_info("TIWLAN: Init 'sdio' Hardware\n");
 
-        rc = sdioDrv_clk_enable();
+	rc = sdioDrv_clk_enable();
 	if (rc) {
 		PERR("sdioDrv_InitHw : sdioDrv_clk_enable FAILED !!!\n");
 		goto err;
 	}
-
 	OMAP3430_mmc_reset();
 
 	//obc - init sequence p. 3600,3617
@@ -653,14 +662,15 @@ int sdioDrv_InitHw(void)
 
 	//p. 3601 suggests moving to the end
 	OMAP3430_mmc_set_clock(clock_rate, &g_drv);
-	printk("SDIO clock Configuration is now set to %dMhz\n",(int)clock_rate/1000000);
+	pr_info("TIWLAN: SDIO clock configuration is now set to %dMhz, iclk=%luMHz fclk=%luMHz\n",
+		(int)clock_rate/1000000, clk_get_rate(g_drv.iclk)/1000000, clk_get_rate(g_drv.fclk)/1000000);
 
 	/* Bus width */
 #ifdef SDIO_1_BIT /* see also in SdioAdapter.c */
-	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 1);
+	pr_info("TIWLAN: %s() setting %d data lines\n", __func__, 1);
 	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) & (ONE_BIT));
 #else
-	PDEBUG("%s() setting %d data lines\n",__FUNCTION__, 4);
+	pr_info("TIWLAN: %s() setting %d data lines\n", __func__, 4);
 	OMAP_HSMMC_WRITE(HCTL, OMAP_HSMMC_READ(HCTL) | (1 << 1));//DTW 4 bits - p. 3650
 #endif
 
@@ -727,7 +737,7 @@ static int sdiodrv_send_data_xfer_commad(u32 cmd, u32 cmdarg, int length, u32 bu
 		return 0;
 	}
 	PDEBUG("%s() length = %d(%dw) BLK = 0x%x\n",
-		   __FUNCTION__, length,((length + 3) >> 2), OMAP_HSMMC_READ(BLK));
+		__FUNCTION__, length,((length + 3) >> 2), OMAP_HSMMC_READ(BLK));
 
 	return sdiodrv_poll_status(OMAP_HSMMC_PSTATE, buffer_enable_status, MMC_TIMEOUT_MS);
 
@@ -878,8 +888,6 @@ int sdioDrv_ReadSync (unsigned int uFunc,
 	unsigned int uCmdArg;
 	int          iStatus;
 
-//	printk(KERN_INFO "in sdioDrv_ReadSync\n");
-
 	uCmdArg = SDIO_CMD53_READ(0, uFunc, 0, bIncAddr, uHwAddr, uLen);
 
 	iStatus = sdiodrv_data_xfer_sync(OMAP_HSMMC_CMD53_READ, uCmdArg, pData, uLen, BRE);
@@ -906,8 +914,6 @@ int sdioDrv_ReadAsync (unsigned int uFunc,
 	unsigned int uDmaBlockCount;
 	unsigned int uNumOfElem;
 	dma_addr_t dma_bus_address;
-
-	//printk(KERN_INFO "in sdioDrv_ReadAsync\n");
 
 	if (bBlkMode)
 	{
@@ -1002,7 +1008,6 @@ int sdioDrv_WriteSync (unsigned int uFunc,
 {
 	unsigned int uCmdArg;
 	int          iStatus;
-//	printk(KERN_INFO "in sdioDrv_WriteSync\n");
 
 	uCmdArg = SDIO_CMD53_WRITE(1, uFunc, 0, bIncAddr, uHwAddr, uLen);
 
@@ -1184,7 +1189,7 @@ static int sdioDrv_probe(struct platform_device *pdev)
 {
 	int rc;
 
-	printk(KERN_INFO "TIWLAN SDIO probe: initializing mmc%d device\n", pdev->id + 1);
+	pr_notice("TIWLAN: 'generic' SDIO probe, initializing mmc%d device\n", pdev->id + 1);
 
 	/* remember device struct for future DMA operations */
 	g_drv.dev = &pdev->dev;
@@ -1194,8 +1199,10 @@ static int sdioDrv_probe(struct platform_device *pdev)
 
 	rc = request_irq(g_drv.irq, sdiodrv_irq, 0, SDIO_DRIVER_NAME, &g_drv);
 	if (rc != 0) {
-	    PERR("sdioDrv_probe() - request_irq FAILED!!\n");
-	    return rc;
+		PERR("sdioDrv_probe() - request_irq %d FAILED !!\n", g_drv.irq);
+		return rc;
+	} else {
+		pr_info("TIWLAN: sdio/mmc irq %d requested, mmc det irq=%d\n", g_drv.irq, gpio_to_irq(GPIO_SIGNAL_MMC_DET));
 	}
 	sdiodrv_irq_requested = 1;
 
@@ -1228,17 +1235,15 @@ static int sdioDrv_probe(struct platform_device *pdev)
 	}
 	sdiodrv_iclk_got = 1;
 
-	pr_info("Configuring SDIO DMA registers\n");
-	pr_info("pdev->id is %d\n", pdev->id);
 	if ( pdev->id == 1 ) {
-		/* MMC2 */
+		// MMC2
 		TIWLAN_MMC_CONTROLLER_BASE_ADDR = OMAP_HSMMC2_BASE;
 		TIWLAN_MMC_DMA_TX = OMAP24XX_DMA_MMC2_TX;
 		TIWLAN_MMC_DMA_RX = OMAP24XX_DMA_MMC2_RX;
         }
 	else if ( pdev->id == 2 ) {
-		/* MMC3 */
-		TIWLAN_MMC_CONTROLLER_BASE_ADDR	= OMAP_HSMMC3_BASE;
+		// MMC3
+		TIWLAN_MMC_CONTROLLER_BASE_ADDR = OMAP_HSMMC3_BASE;
 		TIWLAN_MMC_DMA_TX = OMAP34XX_DMA_MMC3_TX;
 		TIWLAN_MMC_DMA_RX = OMAP34XX_DMA_MMC3_RX;
 	}
@@ -1256,7 +1261,7 @@ err:
 
 static int sdioDrv_remove(struct platform_device *pdev)
 {
-	pr_info("%s: calling sdiodrv_shutdown\n", __func__);
+	pr_debug("TIWLAN: %s() calling sdiodrv_shutdown\n", __func__);
 
 	sdiodrv_shutdown();
 
@@ -1266,19 +1271,18 @@ static int sdioDrv_remove(struct platform_device *pdev)
 #ifdef CONFIG_PM
 static int sdioDrv_suspend(struct platform_device *pdev, pm_message_t state)
 {
-#if 0
-	int rc = 0;
+#ifdef TIWLAN_HARD_SUSPEND
+	int rc;
 
 	/* Tell WLAN driver to suspend, if a suspension function has been registered */
 	if (g_drv.wlanDrvIf_pm_suspend) {
-		printk(KERN_INFO "TISDIO: Asking TIWLAN to suspend\n");
+		pr_info("TIWLAN: Asking pm suspend\n");
 		rc = g_drv.wlanDrvIf_pm_suspend();
 		if (rc != 0)
 			return rc;
 	}
 
-	printk(KERN_INFO "TISDIO: sdioDrv is suspending\n");
-
+	pr_notice("TIWLAN: sdioDrv suspending (shutdown)\n");
 	sdiodrv_shutdown();
 #endif
 
@@ -1288,19 +1292,19 @@ static int sdioDrv_suspend(struct platform_device *pdev, pm_message_t state)
 /* Routine to resume the MMC device */
 static int sdioDrv_resume(struct platform_device *pdev)
 {
-#if 0
-	int rc
+#ifdef TIWLAN_HARD_SUSPEND
+	int rc;
 
-	printk(KERN_INFO "TISDIO: sdioDrv is resuming\n");
+	pr_info("TIWLAN: sdioDrv is resuming (probe)\n");
 
 	rc = sdioDrv_probe(pdev);
 	if (rc != 0) {
-		printk(KERN_ERR "TISDIO: resume error\n");
+		pr_err("TIWLAN: sdioDrv resume error\n");
 		return rc;
 	}
 
 	if (g_drv.wlanDrvIf_pm_resume) {
-		printk(KERN_INFO "TISDIO: Asking TIWLAN to resume\n");
+		pr_info("TIWLAN: Asking pm resume\n");
 		return(g_drv.wlanDrvIf_pm_resume());
 	}
 #endif
@@ -1372,17 +1376,16 @@ int sdioDrv_init(void)
 	memset(&g_drv, 0, sizeof(g_drv));
 	memset(&hsmmc_ctx, 0, sizeof(hsmmc_ctx));
 
-	printk(KERN_INFO "TIWLAN SDIO init\n");
+	pr_info("TIWLAN: SDIO init\n");
 
 	/* MMC port init is done by the kernel on boot */
-
 	g_drv.pWorkQueue = create_freezeable_workqueue(SDIO_WQ_NAME);
 	if (!g_drv.pWorkQueue) {
-		printk("TISDIO: Failed to create SDIO WQ\n");
+		pr_err("TIWLAN: Failed to create SDIO WQ %s\n", SDIO_WQ_NAME);
 		return -EINVAL;
 	}
+
 	/* Register the sdio driver */
-	printk("in sdioDrv_init(), before platform_driver_register(&sdioDrv_struct)\n");
 	return platform_driver_register(&sdioDrv_struct);
 }
 

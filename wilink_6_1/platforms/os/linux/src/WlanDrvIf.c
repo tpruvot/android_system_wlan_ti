@@ -83,7 +83,7 @@
 #endif
 
 /* save driver handle just for module cleanup */
-static TWlanDrvIfObj *pDrvStaticHandle;
+static TWlanDrvIfObj *pDrvStaticHandle = NULL;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT         (0xFFFFFFFF)    /* assume OS never reach that limit */
 
@@ -641,7 +641,7 @@ int wlanDrvIf_Start (struct net_device *dev)
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Start()\n");
-    printk("%s\n", __func__);
+    pr_info("TIWLAN: %s\n", __func__);
     if (!drv->tCommon.hDrvMain)
     {
         ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Start() Driver not created!\n");
@@ -673,7 +673,7 @@ int wlanDrvIf_Open (struct net_device *dev)
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Open()\n");
-    printk("%s\n", __func__);
+    pr_info("TIWLAN: %s\n", __func__);
     if (!drv->tCommon.hDrvMain)
     {
         ti_dprintf (TIWLAN_LOG_ERROR, "wlanDrvIf_Open() Driver not created!\n");
@@ -724,7 +724,7 @@ int wlanDrvIf_Stop (struct net_device *dev)
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Stop()\n");
-    printk("%s\n", __func__);
+    pr_info("TIWLAN: %s\n", __func__);
 
     if (DRV_STATE_FAILED == drv->tCommon.eDriverState)
     {
@@ -747,7 +747,7 @@ int wlanDrvIf_Stop (struct net_device *dev)
 int wlanDrvIf_Release (struct net_device *dev)
 {
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Release()\n");
-    printk("%s\n", __func__);
+    pr_info("TIWLAN: %s\n", __func__);
     /* Disable network interface queue */
     netif_stop_queue (dev);
     return 0;
@@ -767,60 +767,58 @@ int wlanDrvIf_Release (struct net_device *dev)
  */
 static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
 {
-   struct net_device *dev;
-   int res;
+    struct net_device *dev;
+    int res;
 
-   /* Allocate network interface structure for the driver */
-   dev = alloc_etherdev (0);
-   if (dev == NULL)
-   {
-      ti_dprintf (TIWLAN_LOG_ERROR, "alloc_etherdev() failed\n");
-      return -ENOMEM;
-   }
+    /* Allocate network interface structure for the driver */
+    dev = alloc_etherdev (0);
+    if (dev == NULL)
+    {
+       ti_dprintf (TIWLAN_LOG_ERROR, "alloc_etherdev() failed\n");
+       return -ENOMEM;
+    }
 
-   /* Setup the network interface */
-   ether_setup (dev);
+    /* Setup the network interface */
+    ether_setup (dev);
 
-   NETDEV_SET_PRIVATE(dev,drv);
-   drv->netdev = dev;
-   strcpy (dev->name, TIWLAN_DRV_IF_NAME);
-   netif_carrier_off (dev);
+    NETDEV_SET_PRIVATE(dev,drv);
+    drv->netdev = dev;
+    strcpy (dev->name, TIWLAN_DRV_IF_NAME);
+    netif_carrier_off (dev);
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
    /* the following is required on at least BSP 23.8 and higher.
     Without it, the Open function of the driver will not be called
     when trying to 'ifconfig up' the interface */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-   dev->validate_addr   = NULL;
+    dev->validate_addr   = NULL;
 #endif
-   dev->open = wlanDrvIf_Open;
-   dev->stop = wlanDrvIf_Release;
-   dev->hard_start_xmit = wlanDrvIf_XmitDummy;
-   dev->get_stats = wlanDrvIf_NetGetStat;
-   dev->do_ioctl = NULL;
+    dev->open = wlanDrvIf_Open;
+    dev->stop = wlanDrvIf_Release;
+    dev->hard_start_xmit = wlanDrvIf_XmitDummy;
+    dev->get_stats = wlanDrvIf_NetGetStat;
+    dev->do_ioctl = NULL;
 #else
-   dev->netdev_ops = &tiwlan_ops_dummy;
+    dev->netdev_ops = &tiwlan_ops_dummy;
 #endif
-   dev->tx_queue_len = 100;
+    dev->tx_queue_len = 100;
 
-   /* Initialize Wireless Extensions interface (WEXT) */
-   wlanDrvWext_Init (dev);
+    /* Initialize Wireless Extensions interface (WEXT) */
+    wlanDrvWext_Init (dev);
 
-   res = register_netdev (dev);
-   if (res != 0)
-   {
-      ti_dprintf (TIWLAN_LOG_ERROR, "register_netdev() failed : %d\n", res);
-      kfree (dev);
-      return res;
-   }
+    res = register_netdev (dev);
+    if (res != 0)
+    {
+        ti_dprintf (TIWLAN_LOG_ERROR, "register_netdev() failed : %d\n", res);
+        kfree (dev);
+        return res;
+    }
 
-/*
-On the latest Kernel there is no more support for the below macro.
-*/
+/* On the recent kernels there is no more support for the below macro. */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
-   SET_MODULE_OWNER (dev);
+    SET_MODULE_OWNER (dev);
 #endif
 
-   return 0;
+    return 0;
 }
 
 /**
@@ -984,10 +982,11 @@ drv_create_end_3:
     }
 
 drv_create_end_2:
-#ifdef CONFIG_HAS_WAKELOCK
+    #ifdef CONFIG_HAS_WAKELOCK
     wake_lock_destroy(&drv->wl_wifi);
     wake_lock_destroy(&drv->wl_rxwake);
-#endif
+    #endif
+
     if (drv->tiwlan_wq)
         destroy_workqueue(drv->tiwlan_wq);
 
@@ -1020,7 +1019,7 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
 #if defined(CONFIG_HAS_EARLYSUSPEND)
     if(drv->early_suspend.suspend)
     {
-       unregister_early_suspend(&drv->early_suspend);
+        unregister_early_suspend(&drv->early_suspend);
     }
 #endif /* defined(CONFIG_HAS_EARLYSUSPEND) */
 
@@ -1062,14 +1061,14 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
         hPlatform_freeInterrupt (drv);
     }
 #endif
-       if (drv->tiwlan_wq)
-               destroy_workqueue(drv->tiwlan_wq);
+
+    if (drv->tiwlan_wq)
+        destroy_workqueue(drv->tiwlan_wq);
 
 #ifdef CONFIG_HAS_WAKELOCK
-       wake_lock_destroy(&drv->wl_wifi);
-       wake_lock_destroy(&drv->wl_rxwake);
+    wake_lock_destroy(&drv->wl_wifi);
+    wake_lock_destroy(&drv->wl_rxwake);
 #endif
-
 
     /*
      *  Free init files memory
@@ -1119,12 +1118,12 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
  * \sa     wlanDrvIf_Create, wlanDrvIf_Destroy
  */
 
-static int sdc_ctrl = 2;
-module_param(sdc_ctrl, int, S_IRUGO | S_IWUSR | S_IWGRP);
+//static int sdc_ctrl = 2;
+//module_param(sdc_ctrl, int, S_IRUGO | S_IWUSR | S_IWGRP);
 
 static int __init wlanDrvIf_ModuleInit (void)
 {
-    printk(KERN_INFO "TIWLAN: driver init\n");
+    pr_info("TIWLAN: driver init\n");
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
     sdioDrv_init();
 #endif
@@ -1137,7 +1136,7 @@ static void __exit wlanDrvIf_ModuleExit (void)
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
     sdioDrv_exit();
 #endif
-    printk (KERN_INFO "TI WLAN: driver unloaded\n");
+    pr_info("TIWLAN: driver unloaded\n");
 }
 
 
@@ -1177,44 +1176,46 @@ void wlanDrvIf_ResumeTx (TI_HANDLE hOs)
     netif_wake_queue (drv->netdev);
 }
 
-#if defined(CONFIG_HAS_EARLYSUSPEND)
+#ifdef CONFIG_HAS_EARLYSUSPEND
 
 int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
 {
     paramInfo_t param_dtim_set;
-    TI_UINT8 beaconInterval,dtimListenInterval;
+    TI_UINT8 beaconInterval, dtimListenInterval;
 
     param_dtim_set.paramType = POWER_MGR_DTIM_LISTEN_INTERVAL;
     param_dtim_set.paramLength = sizeof(TI_UINT8);
 
+    pr_info("TIWLAN: %s(suspend=%d), drv->in_suspend=%d\n", __func__, value, (drv->in_suspend)? 1:0);
+
     if(drv)
     {
         /* Kernel Suspended */
-        if(drv->in_suspend && value)
+        if (drv->in_suspend && value)
         {
             dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
             beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
 
-            if (dtimListenInterval==1 && beaconInterval==100)
+            if (dtimListenInterval < 3 && beaconInterval==100)
             {
                 /* Skip 3 DTIM */
                 param_dtim_set.content.dtimListenInterval = 3;
                 cmdDispatch_SetParam(drv->tCommon.hCmdDispatch, &param_dtim_set);
-                printk("Suspend : DTIM skipping feature : Set DTIM to 3 \n");
+                pr_notice("TIWLAN: [suspend] Set DTIM skip interval to 3 \n");
                 drv->in_dtim_skipping = 1;
-            }else{
+            } else {
                 /* No Skip */
                 drv->in_dtim_skipping = 0;
             }
         }
         else /* Kernel Resume */
         {
-            if(drv->in_dtim_skipping)
+            if (drv->in_dtim_skipping)
             {
                 /* Don't skip DTIM's */
                 param_dtim_set.content.dtimListenInterval = 1;
                 cmdDispatch_SetParam(drv->tCommon.hCmdDispatch, &param_dtim_set);
-                printk("Resume : DTIM skipping feature : Set DTIM back to 1 \n");
+                pr_notice("TIWLAN: [resume] Reset DTIM skip interval back to 1 \n");
                 drv->in_dtim_skipping = 0;
             }
         }
@@ -1224,41 +1225,60 @@ int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
 
 static void wlanDrvIf_suspend_resume_hlpr(TWlanDrvIfObj *drv, int value)
 {
-
-   drv->in_suspend = value;
-   down(&drv->sem);
-   wlanDrvIf_set_suspend_resume(value, drv);
-   up(&drv->sem);
-
+    if(drv)
+    {
+        drv->in_suspend = value;
+        down(&drv->sem);
+        wlanDrvIf_set_suspend_resume(value, drv);
+        up(&drv->sem);
+    }
 }
 
 static void wlanDrvIf_early_suspend(struct early_suspend *h)
 {
-   TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
+    TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
 
     if(drv)
     {
-        if(drv->allow_suspend){
+        if (drv->allow_suspend) {
             wlanDrvIf_suspend_resume_hlpr(drv, 1);
-        }else{
+        } else {
             drv->skipped_suspend = 1;
+            pr_info("TIWLAN: %s() suspend not allowed, skip\n", __func__);
         }
     }
 }
 
 static void wlanDrvIf_late_resume(struct early_suspend *h)
 {
-   TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
+    TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
+    TI_UINT8 beaconInterval, dtimListenInterval;
 
-   if(drv)
-   {
+    if(drv)
+    {
         drv->skipped_suspend = 0;
+        pr_info("TIWLAN: %s() reset drv->skipped_suspend\n", __func__);
         wlanDrvIf_suspend_resume_hlpr(drv, 0);
-   }
+
+        dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
+        beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
+
+        /* Check for buggy state on resume */
+        if (beaconInterval==0 && dtimListenInterval==0) {
+            int status;
+            pr_warning("TIWLAN: main driver answered 0 to intervals, reset interface...\n");
+
+            //status = wlanDrvIf_Stop(drv->netdev);
+            status = wlanDrvIf_Release(drv->netdev);
+            pr_info("TIWLAN: Release status=%d\n", status);
+            status = wlanDrvIf_Open(drv->netdev);
+            pr_info("TIWLAN: Open status=%d\n", status);
+            //status = wlanDrvIf_Start(drv->netdev);
+        }
+    }
 }
 
-#endif
-
+#endif /* CONFIG_HAS_EARLYSUSPEND */
 
 module_init (wlanDrvIf_ModuleInit);
 module_exit (wlanDrvIf_ModuleExit);

@@ -54,12 +54,12 @@ static int wifi_probe( struct platform_device *pdev )
 {
 	struct wifi_platform_data *wifi_ctrl = (struct wifi_platform_data *)(pdev->dev.platform_data);
 
-	printk("%s\n", __FUNCTION__);
+	pr_info("TIWLAN: %s\n", __FUNCTION__);
 	wifi_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ, "device_wifi_irq");
 #if 0
 	if (wifi_irqres) {
-		printk("wifi_irqres->start = %lu\n", (unsigned long)(wifi_irqres->start));
-		printk("wifi_irqres->flags = %lx\n", wifi_irqres->flags);
+		pr_info("wifi_irqres->start = %lu\n", (unsigned long)(wifi_irqres->start));
+		pr_info("wifi_irqres->flags = 0x%lx\n", wifi_irqres->flags);
 	}
 #endif
 	if( wifi_ctrl ) {
@@ -75,12 +75,12 @@ static int wifi_probe( struct platform_device *pdev )
 	}
 	return 0;
 }
-											
+
 static int wifi_remove( struct platform_device *pdev )
 {
 	struct wifi_platform_data *wifi_ctrl = (struct wifi_platform_data *)(pdev->dev.platform_data);
 
-	printk("%s\n", __FUNCTION__);
+	pr_info("TIWLAN: %s\n", __FUNCTION__);
 	if( wifi_ctrl ) {
 		if( wifi_ctrl->set_carddetect )
 			wifi_ctrl->set_carddetect(0);	/* CardDetect (1->0) */
@@ -93,30 +93,30 @@ static int wifi_remove( struct platform_device *pdev )
 }
 
 static struct platform_driver wifi_device = {
-	.probe          = wifi_probe,
-	.remove         = wifi_remove,
-	.suspend        = NULL,
-	.resume         = NULL,
-	.driver         = {
+	.probe   = wifi_probe,
+	.remove  = wifi_remove,
+	.suspend = NULL,
+	.resume  = NULL,
+	.driver  = {
 		.name   = "device_wifi",
 	},
 };
 
 static int wifi_add_dev( void )
 {
-	printk("%s\n", __FUNCTION__);
+	pr_info("TIWLAN: %s\n", __FUNCTION__);
 	return platform_driver_register( &wifi_device );
 }
 
 static void wifi_del_dev( void )
 {
-	printk("%s\n", __FUNCTION__);
+	pr_info("TIWLAN: %s\n", __FUNCTION__);
 	platform_driver_unregister( &wifi_device );
 }
 
 int wifi_set_carddetect( int on )
 {
-	printk("%s = %d\n", __FUNCTION__, on);
+	pr_info("TIWLAN: %s = %d\n", __FUNCTION__, on);
 	if( wifi_control_data && wifi_control_data->set_carddetect ) {
 		wifi_control_data->set_carddetect(on);
 	}
@@ -125,7 +125,7 @@ int wifi_set_carddetect( int on )
 
 int wifi_set_power( int on, unsigned long msec )
 {
-	printk("%s = %d\n", __FUNCTION__, on);
+	pr_debug("TIWLAN: %s = %d\n", __FUNCTION__, on);
 	if( wifi_control_data && wifi_control_data->set_power ) {
 		wifi_control_data->set_power(on);
 	}
@@ -139,7 +139,7 @@ int wifi_set_power( int on, unsigned long msec )
 
 int wifi_set_reset( int on, unsigned long msec )
 {
-	printk("%s = %d\n", __FUNCTION__, on);
+	pr_info("TIWLAN: %s = %d\n", __FUNCTION__, on);
 	if( wifi_control_data && wifi_control_data->set_reset ) {
 		wifi_control_data->set_reset(on);
 	}
@@ -149,12 +149,11 @@ int wifi_set_reset( int on, unsigned long msec )
 }
 
 /*-----------------------------------------------------------------------------
-Routine Name: hPlatform_hardResetTnetw
-Routine Description: set the GPIO to low after awaking the TNET from ELP.
-Arguments: None
-Return Value: 0 - Ok
------------------------------------------------------------------------------*/
-
+ * Routine Name: hPlatform_hardResetTnetw
+ * Routine Description: set the GPIO to low after awaking the TNET from ELP.
+ * Arguments: None
+ * Return Value: 0 - Ok
+ *-----------------------------------------------------------------------------*/
 int hPlatform_hardResetTnetw( void )
 {
 	int err;
@@ -165,7 +164,7 @@ int hPlatform_hardResetTnetw( void )
 		err = wifi_set_power(1, 50);
 	}
 	return err;
-} /* hPlatform_hardResetTnetw() */
+}
 
 /* Turn device power off */
 int hPlatform_DevicePowerOff( void )
@@ -180,11 +179,11 @@ int hPlatform_DevicePowerOff( void )
 /* Turn device power off according to a given delay */
 int hPlatform_DevicePowerOffSetLongerDelay(void)
 {
-    int err;
-    
-    err = wifi_set_power(0, SDIO_ATTEMPT_LONGER_DELAY_LINUX);
-    
-    return err;
+	int err;
+
+	err = wifi_set_power(0, SDIO_ATTEMPT_LONGER_DELAY_LINUX);
+
+	return err;
 }
 
 /* Turn device power on */
@@ -205,7 +204,7 @@ int hPlatform_Wlan_Hardware_Init(void *tnet_drv)
 {
 	TWlanDrvIfObj *drv = tnet_drv;
 
-	printk("%s\n", __FUNCTION__);
+	pr_debug("TIWLAN: %s\n", __FUNCTION__);
 	wifi_add_dev();
 	if (wifi_irqres) {
 		drv->irq = wifi_irqres->start;
@@ -221,19 +220,15 @@ int hPlatform_Wlan_Hardware_Init(void *tnet_drv)
 /*-----------------------------------------------------------------------------
 
 Routine Name:
-
         InitInterrupt
 
 Routine Description:
-
         this function init the interrupt to the Wlan ISR routine.
 
 Arguments:
-
         tnet_drv - Golbal Tnet driver pointer.
 
 Return Value:
-
         status
 
 -----------------------------------------------------------------------------*/
@@ -242,7 +237,7 @@ int hPlatform_initInterrupt( void *tnet_drv, void* handle_add )
 {
 	TWlanDrvIfObj *drv = tnet_drv;
 	int rc;
-	
+
 	if (drv->irq == 0 || handle_add == NULL)
 	{
 		print_err("hPlatform_initInterrupt() bad param drv->irq=%d handle_add=0x%x !!!\n",drv->irq,(int)handle_add);
@@ -254,7 +249,7 @@ int hPlatform_initInterrupt( void *tnet_drv, void* handle_add )
 		print_err("TIWLAN: Failed to register interrupt handler\n");
 		return rc;
 	}
-	set_irq_wake(drv->irq, 1);	
+	set_irq_wake(drv->irq, 1);
 	return rc;
 
 } /* hPlatform_initInterrupt() */
@@ -270,15 +265,15 @@ void hPlatform_freeInterrupt( void *tnet_drv )
 }
 
 /****************************************************************************************
- *                        hPlatform_hwGetRegistersAddr()                                 
+ *                        hPlatform_hwGetRegistersAddr()
  ****************************************************************************************
-DESCRIPTION:	
+DESCRIPTION:
 
-ARGUMENTS:		
+ARGUMENTS:
 
-RETURN:			
+RETURN:
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void *hPlatform_hwGetRegistersAddr(TI_HANDLE OsContext)
 {
@@ -286,15 +281,15 @@ void *hPlatform_hwGetRegistersAddr(TI_HANDLE OsContext)
 }
 
 /****************************************************************************************
- *                        hPlatform_hwGetMemoryAddr()                                 
+ *                        hPlatform_hwGetMemoryAddr()
  ****************************************************************************************
-DESCRIPTION:	
+DESCRIPTION:
 
-ARGUMENTS:		
+ARGUMENTS:
 
-RETURN:			
+RETURN:
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void *hPlatform_hwGetMemoryAddr(TI_HANDLE OsContext)
 {
