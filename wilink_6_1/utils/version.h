@@ -37,15 +37,18 @@
 /*   PURPOSE: release specific definitions file.                          */
 /*                                                                        */
 /**************************************************************************/
-
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define SW_VERSION_STR      "WiLink_Driver_6.1.0.0.131_Defy_DTIM"
+#include <linux/stringify.h>
+
+#define SW_VERSION_STR      "WiLink_Driver_6.1.131 Defy_DTIM_2"
 
 #define SW_RELEASE_MONTH    05
-#define SW_RELEASE_DAY      24
+#define SW_RELEASE_DAY      27
 #define SW_RELEASE_YEAR     2012
+
+#define WILINK_VERSION "6.1." __stringify(SW_RELEASE_YEAR) "." __stringify(SW_RELEASE_MONTH) "." __stringify(SW_RELEASE_DAY)
 
 #endif /* _VERSION_H_ */
 

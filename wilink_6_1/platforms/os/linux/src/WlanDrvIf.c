@@ -57,7 +57,6 @@
 #include <linux/netlink.h>
 #include <linux/version.h>
 
-
 #include "WlanDrvIf.h"
 #include "osApi.h"
 #include "host_platform.h"
@@ -87,8 +86,9 @@ static TWlanDrvIfObj *pDrvStaticHandle = NULL;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT         (0xFFFFFFFF)    /* assume OS never reach that limit */
 
-MODULE_AUTHOR("Texas Instruments Inc - built by CyanogenDefy");
+MODULE_AUTHOR("Texas Instruments Inc - Retouched by CyanogenDefy");
 MODULE_LICENSE("GPL");
+MODULE_VERSION(WILINK_VERSION);
 
 static void wlanDrvIf_early_suspend(struct early_suspend *h);
 static void wlanDrvIf_late_resume(struct early_suspend *h);
@@ -332,11 +332,6 @@ static void wlanDrvIf_PollIrqHandler (TI_HANDLE parm)
  * \return void
  * \sa
  */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-static void wlanDrvIf_DriverTask (void *hDrv)
-{
-    TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hDrv;
-#else
 static void wlanDrvIf_DriverTask(struct work_struct *work)
 {
 #ifdef STACK_PROFILE
@@ -344,7 +339,6 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
     unsigned long local_sp = sp;
 #endif
     TWlanDrvIfObj *drv = container_of(work, TWlanDrvIfObj, tWork);
-#endif
 
 #ifdef STACK_PROFILE
     unsigned long curr1, base1;
@@ -356,7 +350,6 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
 #ifdef STACK_PROFILE
     curr1 = check_stack_start(&base1, local_sp + 4, 0);
 #endif
-
 
     /* Call the driver main task */
     context_DriverTask (drv->tCommon.hContext);
@@ -510,12 +503,11 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         pFileInfo->uLength = drv->tCommon.tNvsImage.uSize;
         break;
     case FILE_TYPE_FW:
-
-                if (drv->tCommon.tFwImage.pImage == NULL)
-                {
-                    ti_dprintf(TIWLAN_LOG_ERROR, "wlanDrv_GetFile: ERROR: no Firmware image, Exiting");
-                    return TI_NOK;
-                }
+        if (drv->tCommon.tFwImage.pImage == NULL)
+        {
+            ti_dprintf(TIWLAN_LOG_ERROR, "wlanDrv_GetFile: ERROR: no Firmware image, Exiting");
+            return TI_NOK;
+        }
 
         pFileInfo->pBuffer = (TI_UINT8 *)drv->tCommon.tFwImage.pImage;
         pFileInfo->bLast        = TI_FALSE;
@@ -531,6 +523,7 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         }
         pFileInfo->pBuffer += DRV_ADDRESS_SIZE;
         /* FALL THROUGH */
+
     case FILE_TYPE_FW_NEXT:
         /* check dec. validity */
         if ( pFileInfo->uChunkBytesLeft >= pFileInfo->uLength )
@@ -587,7 +580,6 @@ int wlanDrvIf_GetFile (TI_HANDLE hOs, TFileInfo *pFileInfo)
         {
             pFileInfo->bLast = TI_TRUE;
         }
-
         break;
     }
 
@@ -680,7 +672,6 @@ int wlanDrvIf_Open (struct net_device *dev)
         return -ENODEV;
     }
 
-
     if (drv->tCommon.eDriverState == DRV_STATE_STOPPED ||
         drv->tCommon.eDriverState == DRV_STATE_IDLE) {
         status = wlanDrvIf_Start(dev);
@@ -688,8 +679,8 @@ int wlanDrvIf_Open (struct net_device *dev)
     drv->allow_suspend = 1;
 
     if (drv->skipped_suspend){
-       wlanDrvIf_suspend_resume_hlpr(drv, 1);
-       drv->skipped_suspend = 0;
+        wlanDrvIf_suspend_resume_hlpr(drv, 1);
+        drv->skipped_suspend = 0;
     }
 
     /*
@@ -786,12 +777,10 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
     strcpy (dev->name, TIWLAN_DRV_IF_NAME);
     netif_carrier_off (dev);
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
-   /* the following is required on at least BSP 23.8 and higher.
-    Without it, the Open function of the driver will not be called
-    when trying to 'ifconfig up' the interface */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
+    /* the following is required on at least BSP 23.8 and higher.
+       Without it, the Open function of the driver will not be called
+       when trying to 'ifconfig up' the interface */
     dev->validate_addr   = NULL;
-#endif
     dev->open = wlanDrvIf_Open;
     dev->stop = wlanDrvIf_Release;
     dev->hard_start_xmit = wlanDrvIf_XmitDummy;
@@ -812,11 +801,6 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
         kfree (dev);
         return res;
     }
-
-/* On the recent kernels there is no more support for the below macro. */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
-    SET_MODULE_OWNER (dev);
-#endif
 
     return 0;
 }
@@ -890,11 +874,7 @@ static int wlanDrvIf_Create (void)
     wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-    INIT_WORK(&drv->tWork, wlanDrvIf_DriverTask, (void *)drv);
-#else
     INIT_WORK(&drv->tWork, wlanDrvIf_DriverTask);
-#endif
     spin_lock_init (&drv->lock);
 
     /* Setup driver network interface. */
@@ -906,11 +886,7 @@ static int wlanDrvIf_Create (void)
 
 
     /* Create the events socket interface */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-    drv->wl_sock = netlink_kernel_create( NETLINK_USERSOCK, 0, NULL, THIS_MODULE );
-#else
-        drv->wl_sock = netlink_kernel_create(&init_net, NETLINK_USERSOCK, 0, NULL, NULL, THIS_MODULE );
-#endif
+    drv->wl_sock = netlink_kernel_create(&init_net, NETLINK_USERSOCK, 0, NULL, NULL, THIS_MODULE );
     if (drv->wl_sock == NULL)
     {
         ti_dprintf (TIWLAN_LOG_ERROR, "netlink_kernel_create() failed !\n");
@@ -1268,12 +1244,19 @@ static void wlanDrvIf_late_resume(struct early_suspend *h)
             int status;
             pr_warning("TIWLAN: main driver answered 0 to intervals, reset interface...\n");
 
-            //status = wlanDrvIf_Stop(drv->netdev);
             status = wlanDrvIf_Release(drv->netdev);
             pr_info("TIWLAN: Release status=%d\n", status);
+            WARN_ON(status);
+            status = wlanDrvIf_Stop(drv->netdev);
+            pr_info("TIWLAN: Stop status=%d\n", status);
+            WARN_ON(status);
+
+            status = wlanDrvIf_Start(drv->netdev);
+            pr_info("TIWLAN: Start status=%d\n", status);
+            WARN_ON(status);
             status = wlanDrvIf_Open(drv->netdev);
             pr_info("TIWLAN: Open status=%d\n", status);
-            //status = wlanDrvIf_Start(drv->netdev);
+            WARN_ON(status);
         }
     }
 }
