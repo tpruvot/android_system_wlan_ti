@@ -31,21 +31,23 @@ SDIO_DEBUGLEVEL_DEBUG=8
 
 extern int g_sdio_debug_level;
 
+#define LOGTAG "TIWLAN: "
+
 #ifdef SDIO_DEBUG
 
-#define PERR(format, args... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_ERR) printk(format , ##args)
-#define PDEBUG(format, args... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_DEBUG) printk(format , ##args)
-#define PINFO(format, ... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_INFO) printk( format , ##__VA_ARGS__)
-#define PNOTICE(format, ... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_NOTICE) printk( format , ##__VA_ARGS__)
-#define PWARNING(format, ... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_WARNING) printk(format , ##__VA_ARGS__)
+#define PDEBUG(format, ...)   if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_DEBUG)   pr_info(LOG_TAG format, ##__VA_ARGS__)
+#define PINFO(format, ...)    if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_INFO)    pr_info(LOG_TAG format, ##__VA_ARGS__)
+#define PNOTICE(format, ...)  if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_NOTICE)  pr_notice(LOG_TAG format, ##__VA_ARGS__)
+#define PWARNING(format, ...) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_WARNING) pr_warning(LOG_TAG format, ##__VA_ARGS__)
+#define PERR(format, ...)     if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_ERR)     pr_err(LOG_TAG format, ##__VA_ARGS__)
 
 #else
 
-#define PERR(format, args... ) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_ERR) printk(format , ##args)
-#define PDEBUG(format, args... )
-#define PINFO(format, ... )
-#define PNOTICE(format, ... )
-#define PWARNING(format, ... )
+#define PDEBUG(format, ...)
+#define PINFO(format, ...)    if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_INFO)    pr_info(LOG_TAG format, ##__VA_ARGS__)
+#define PNOTICE(format, ...)  if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_NOTICE)  pr_notice(LOG_TAG format, ##__VA_ARGS__)
+#define PWARNING(format, ...) if(g_sdio_debug_level >= SDIO_DEBUGLEVEL_WARNING) pr_warning(LOG_TAG format, ##__VA_ARGS__)
+#define PERR(format, ...)     pr_err(format , ##__VA_ARGS__)
 
 #endif
 
