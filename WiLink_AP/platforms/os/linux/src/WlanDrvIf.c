@@ -99,9 +99,9 @@ static TWlanDrvIfObj *pDrvStaticHandle;
 
 #define OS_SPECIFIC_RAM_ALLOC_LIMIT         (0xFFFFFFFF)    /* assume OS never reach that limit */
 
-
 MODULE_DESCRIPTION("TI WLAN Embedded Station Driver");
 MODULE_LICENSE("Dual BSD/GPL");
+MODULE_VERSION(WILINK_VERSION);
 
 /*External board parameter*/
 int g_external_board = 0;
@@ -397,15 +397,9 @@ static void wlanDrvIf_PollIrqHandler (TI_HANDLE parm)
  * \return void
  * \sa     
  */ 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-static void wlanDrvIf_DriverTask (void *hDrv)
-{
-    TWlanDrvIfObj *drv = (TWlanDrvIfObj *)hDrv;
-#else
 static void wlanDrvIf_DriverTask(struct work_struct *work)
 {
     TWlanDrvIfObj *drv = container_of(work, TWlanDrvIfObj, tWork);
-#endif
 
     #ifdef STACK_PROFILE
     unsigned int curr1,base1;
@@ -720,25 +714,10 @@ int wlanDrvIf_Start (struct net_device *dev)
      */
     os_wake_lock_timeout_enable(drv);	//MOTO
     drvMain_InsertAction (drv->tCommon.hDrvMain, ACTION_TYPE_START);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-     /* 
-     *  Finalize network interface setup
-     */
-    netif_start_queue (dev);
-#ifdef AP_MODE_ENABLED
-    netif_carrier_on (dev);
-#endif
 
-
-    /* register 3430 PM hooks in our SDIO driver */
-#if defined HOST_PLATFORM_OMAP3430 || defined HOST_PLATFORM_ZOOM2 || defined HOST_PLATFORM_ZOOM1
-    /*sdioDrv_register_pm(wlanDrvIf_pm_resume, wlanDrvIf_pm_suspend);*/
-#endif
-
-#endif
     return 0;
 }
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
+
 /** 
  * \fn     wlanDrvIf_Open
  * \brief  Start driver
@@ -774,14 +753,14 @@ int wlanDrvIf_Open (struct net_device *dev)
     }
 //yangm: maybe should not define at here
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
-	drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
+    drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
 #else
-	drv->netdev->netdev_ops = &tiwlan_ops_pri;
+    drv->netdev->netdev_ops = &tiwlan_ops_pri;
 #endif
-        drv->netdev->addr_len = MAC_ADDR_LEN;
-	
+    drv->netdev->addr_len = MAC_ADDR_LEN;
+
 #ifndef AP_MODE_ENABLED 
-	netif_start_queue (dev); /* Temporal, use wlanDrvIf_Enable/DisableTx in STA mode */
+    netif_start_queue (dev); /* Temporal, use wlanDrvIf_Enable/DisableTx in STA mode */
 #endif
 
     /* register 3430 PM hooks in our SDIO driver */
@@ -791,7 +770,7 @@ int wlanDrvIf_Open (struct net_device *dev)
 
     return 0;
 }
-#endif   /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)*/
+
 /** 
  * \fn     wlanDrvIf_Stop
  * \brief  Stop driver
@@ -811,10 +790,6 @@ int wlanDrvIf_Stop (struct net_device *dev)
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Stop()\n");
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-    /* Disable network interface queue */
-    netif_stop_queue (dev);
-#endif
     /* 
      *  Insert Stop command in DrvMain action queue, request driver scheduling 
      *      and wait for Stop process completion.
@@ -824,7 +799,6 @@ int wlanDrvIf_Stop (struct net_device *dev)
     return 0;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
 /** 
  * \fn     wlanDrvIf_Release
  * \brief  Stop driver
@@ -848,23 +822,8 @@ int wlanDrvIf_Release (struct net_device *dev)
     netif_stop_queue (dev);
     return 0;
 }
-#endif
 
 /* 3430 PM hooksr */
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-#if defined HOST_PLATFORM_OMAP3430 || defined HOST_PLATFORM_ZOOM2 || defined HOST_PLATFORM_ZOOM1
-static int wlanDrvIf_pm_resume(void)
-{
-    return(wlanDrvIf_Start(pDrvStaticHandle->netdev));
-}
-
-static int wlanDrvIf_pm_suspend(void)
-{
-    return(wlanDrvIf_Stop(pDrvStaticHandle->netdev));
-}
-#endif
-#else
 #ifdef CONFIG_PM
 static int wlanDrvIf_pm_resume(void)
 {
@@ -877,7 +836,7 @@ static int wlanDrvIf_pm_suspend(void)
     return(wlanDrvIf_Stop(pDrvStaticHandle->netdev));
 }
 #endif
-#endif  /*#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)*/
+
 /** 
  * \fn     wlanDrvIf_SetupNetif
  * \brief  Setup driver network interface
@@ -914,21 +873,14 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
 /* the following is required on at least BSP 23.8 and higher.
     Without it, the Open function of the driver will not be called
     when trying to 'ifconfig up' the interface */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
    dev->validate_addr   = NULL;
-#endif
 
    NETDEV_SET_PRIVATE(dev,drv);
    drv->netdev = dev;
    strcpy (dev->name, TIWLAN_DRV_IF_NAME);
    netif_carrier_off (dev);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-   dev->open = wlanDrvIf_Start;
-   dev->stop = wlanDrvIf_Stop;
-#else
    dev->open = wlanDrvIf_Open;
    dev->stop = wlanDrvIf_Release;
-#endif
    /*dev->hard_start_xmit = wlanDrvIf_XmitDummy;*/
    dev->hard_start_xmit = wlanDrvIf_Xmit;
    dev->addr_len = MAC_ADDR_LEN;
@@ -936,8 +888,8 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
    dev->tx_queue_len = 100;
    dev->do_ioctl = NULL;
 #else
-    dev->tx_queue_len = 100;
-    dev->netdev_ops = &tiwlan_ops_dummy;
+   dev->tx_queue_len = 100;
+   dev->netdev_ops = &tiwlan_ops_dummy;
 #endif 
 
    /* Initialize Wireless Extensions interface (WEXT) */
@@ -950,21 +902,10 @@ static int wlanDrvIf_SetupNetif (TWlanDrvIfObj *drv)
       kfree (dev);
       return res;
    }
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-#if defined HOST_PLATFORM_OMAP3430 || defined HOST_PLATFORM_ZOOM2 || defined HOST_PLATFORM_ZOOM1
-   sdioDrv_register_pm(wlanDrvIf_pm_resume, wlanDrvIf_pm_suspend);
-#endif
-#else
 #ifdef CONFIG_PM
    sdioDrv_register_pm(wlanDrvIf_pm_resume, wlanDrvIf_pm_suspend);
 #endif
-#endif
-/*
-On the latest Kernel there is no more support for the below macro.
-*/
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
-   SET_MODULE_OWNER (dev);
-#endif
+
    return 0;
 }
 
@@ -1044,11 +985,8 @@ static int wlanDrvIf_Create (void)
        wake_lock_init(&drv->wl_rxwake, WAKE_LOCK_SUSPEND, "wifi_rx_wake");
 #endif
 //MOTO END
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-    INIT_WORK(&drv->tWork, wlanDrvIf_DriverTask, (void *)drv);
-#else
+
     INIT_WORK(&drv->tWork, wlanDrvIf_DriverTask);
-#endif
     spin_lock_init (&drv->lock);
 
     /* Setup driver network interface. */
@@ -1061,11 +999,7 @@ static int wlanDrvIf_Create (void)
    
 
     /* Create the events socket interface */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-    drv->wl_sock = netlink_kernel_create( NETLINK_USERSOCK, 0, NULL, THIS_MODULE );
-#else
-        drv->wl_sock = netlink_kernel_create(&init_net, NETLINK_USERSOCK, 0, NULL, NULL, THIS_MODULE );
-#endif
+    drv->wl_sock = netlink_kernel_create(&init_net, NETLINK_USERSOCK, 0, NULL, NULL, THIS_MODULE );
     if (drv->wl_sock == NULL)
     {
         ti_dprintf (TIWLAN_LOG_ERROR, "netlink_kernel_create() failed !\n");
@@ -1126,73 +1060,48 @@ static int wlanDrvIf_Create (void)
 static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
 {
     /* Release the driver network interface */
-//printk("   wlanDrvIf_Destroy enter \n");
- if (drv->netdev)
+    if (drv->netdev)
     {
-//printk("   wlanDrvIf_Destroy enter 2\n");  
-   netif_stop_queue  (drv->netdev);
-//printk("   wlanDrvIf_Destroy cp1 \n");
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
+        netif_stop_queue  (drv->netdev);
         wlanDrvIf_Stop    (drv->netdev);
-//printk("   wlanDrvIf_Destroy cp2 \n");
-#endif
         unregister_netdev (drv->netdev);
-//printk("   wlanDrvIf_Destroy cp3 \n");
         free_netdev(drv->netdev);
-//printk("   wlanDrvIf_Destroy cp4 \n");
     }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21))
-//printk("   wlanDrvIf_Destroy cp5 \n");
     cancel_work_sync (&drv->tWork); 
-#else
-//printk("   wlanDrvIf_Destroy cp6 \n");
-    cancel_delayed_work (&drv->tWork);
-#endif
+
     //TODO: Yang Ming. check with STA code again.
     /*
     flush_workqueue (drv->pWorkQueue);
     destroy_workqueue (drv->pWorkQueue);
     */
-//printk("   wlanDrvIf_Destroy cp7 \n");
     /* Destroy all driver modules */
     if (drv->tCommon.hDrvMain)
     {
- //printk("   wlanDrvIf_Destroy cp8 \n");
         drvMain_Destroy (drv->tCommon.hDrvMain);
     }
-//printk("   wlanDrvIf_Destroy cp9 \n");
     /* close the ipc_kernel socket*/
     if (drv && drv->wl_sock) 
     {
-  //     printk("   wlanDrvIf_Destroy cp10 \n");
         sock_release (drv->wl_sock->sk_socket);
     }
-//printk("   wlanDrvIf_Destroy cp11 \n");
+
     /* Release the driver interrupt (or polling timer) */
 #ifdef PRIODIC_INTERRUPT
-//printk("   wlanDrvIf_Destroy cp12 \n");
     os_timerDestroy (drv, drv->hPollTimer);
 #else
     if (drv->irq)
     {
-//printk("   wlanDrvIf_Destroy cp13 \n");
-//        free_irq (drv->irq, drv);
         hPlatform_freeInterrupt (drv);	//MOTO
-//printk("   wlanDrvIf_Destroy cp14 \n");
     }
 #endif
-//MOTO BEGIN
     if (drv->pWorkQueue)
-//printk("   wlanDrvIf_Destroy cp15 \n");
         destroy_workqueue(drv->pWorkQueue);
-//printk("   wlanDrvIf_Destroy cp16 \n");
 #ifdef CONFIG_HAS_WAKELOCK
 	wake_lock_destroy(&drv->wl_wifi);
 	wake_lock_destroy(&drv->wl_rxwake);
 #endif
-//MOTO END
-//printk("   wlanDrvIf_Destroy cp17 \n");
+
     /* 
      *  Free init files memory
      */
@@ -1204,7 +1113,6 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tFwImage.uSize, -drv->tCommon.tFwImage.uSize);
         #endif
     }
-//printk("   wlanDrvIf_Destroy cp18 \n");
     if (drv->tCommon.tNvsImage.pImage)
     {
         kfree (drv->tCommon.tNvsImage.pImage);
@@ -1213,7 +1121,6 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tNvsImage.uSize, -drv->tCommon.tNvsImage.uSize);
         #endif
     }
-//printk("   wlanDrvIf_Destroy cp19 \n");
     if (drv->tCommon.tIniFile.pImage)
     {
         kfree (drv->tCommon.tIniFile.pImage);
@@ -1222,7 +1129,6 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
               __FUNCTION__, __LINE__, drv->tCommon.tIniFile.uSize, -drv->tCommon.tIniFile.uSize);
         #endif
     }
-//printk("   wlanDrvIf_Destroy cp20 \n");
     /* Free the driver object */
 #ifdef TI_DBG
     tb_destroy();
@@ -1273,10 +1179,7 @@ static void __exit wlanDrvIf_ModuleExit (void)
 //MOTO BEGIN
 #ifndef TI_SDIO_STANDALONE
 #ifndef CONFIG_MMC_EMBEDDED_SDIO
-//printk("   wlanDrvIf_exit cp2 \n");
     sdioDrv_exit();
-
-//printk("   wlanDrvIf_exit cp3 \n");
 #endif
 #endif
 //MOTO END
@@ -1423,6 +1326,6 @@ TI_BOOL wlanDrvIf_receivePacket(TI_HANDLE OsContext, void *pRxDesc ,void *pPacke
 }
 
 
-module_init (wlanDrvIf_ModuleInit);
-module_exit (wlanDrvIf_ModuleExit);
+module_init(wlanDrvIf_ModuleInit);
+module_exit(wlanDrvIf_ModuleExit);
 
