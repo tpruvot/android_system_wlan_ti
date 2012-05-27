@@ -366,7 +366,6 @@ RETURN:
 void healthMonitor_proccessFailureEvent (TI_HANDLE hHealthMonitor, TI_BOOL bTwdInitOccured)
 {
     THealthMonitor *pHealthMonitor = (THealthMonitor*)hHealthMonitor;
-	static TFwDebugParams  tParam;
 
     /* Check failure event validity */
     if (pHealthMonitor->failureEvent < MAX_FAILURE_EVENTS)
@@ -376,13 +375,15 @@ void healthMonitor_proccessFailureEvent (TI_HANDLE hHealthMonitor, TI_BOOL bTwdI
         TRACE2(pHealthMonitor->hReport, REPORT_SEVERITY_CONSOLE, "***** recovery trigger: failureEvent =%d *****, ts=%d\n", pHealthMonitor->failureEvent, os_timeStampMs(pHealthMonitor->hOs));
         WLAN_OS_REPORT (("***** recovery trigger: %s *****, ts=%d\n", sRecoveryTriggersNames[pHealthMonitor->failureEvent], os_timeStampMs(pHealthMonitor->hOs)));
 
-		/* FW debug, print SCR_PAD4 register */
-        tParam.addr = 0x305618;
-		tParam.length = 4;
-		TWD_Debug (pHealthMonitor->hTWD, 3, &tParam);
-
         if (TWD_RecoveryEnabled (pHealthMonitor->hTWD))
         {
+#ifdef TI_DBG_TESTS
+            static TFwDebugParams  tParam;
+            /* FW debug, print SCR_PAD4 register */
+            tParam.addr = 0x305618;
+            tParam.length = 4;
+            TWD_Debug (pHealthMonitor->hTWD, 3, &tParam);
+#endif
             pHealthMonitor->numOfRecoveryPerformed ++;
             drvMain_Recovery (pHealthMonitor->hDrvMain);
         }
@@ -397,7 +398,7 @@ void healthMonitor_proccessFailureEvent (TI_HANDLE hHealthMonitor, TI_BOOL bTwdI
     else
     {
         TRACE1(pHealthMonitor->hReport, REPORT_SEVERITY_ERROR , "unsupported failure event = %d\n", pHealthMonitor->failureEvent);
-    }    
+    }
 }
 
 
