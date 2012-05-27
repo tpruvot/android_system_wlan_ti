@@ -56,7 +56,7 @@ OS_DK_INCS_FILES = \
         $(TWD)/TwIf/TwIf.h \
         $(TXN)/BusDrv.h \
         $(TXN)/TxnQueue.h \
-	$(EXT_APP)/Linux/bmtrace/Export_Inc \
+        $(EXT_APP)/Linux/bmtrace/Export_Inc \
         $(TESTSRC)/debug.h
 
 #start of OS_DK_INCS_FILES_XCC#   do not remove or change this comment
@@ -92,8 +92,11 @@ OS_DK_INCS = \
         $(TWD)/TwIf \
         $(TWD)/MacServices \
         $(TWD)/TWDriver \
-        $(TESTSRC) \
         $(TXN)
+
+ifeq ($(DEBUG_TESTS),y)
+    OS_DK_INCS += $(TESTSRC)
+endif
 
 #start of OS_DK_INCS_XCC#   do not remove or change this comment
 ifeq ($(XCC),y)

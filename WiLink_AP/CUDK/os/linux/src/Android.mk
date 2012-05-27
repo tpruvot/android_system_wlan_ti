@@ -3,13 +3,17 @@ include $(CLEAR_VARS)
 
 STATIC_LIB ?= y
 DEBUG ?= y
+DEBUG_TESTS ?= n
 BUILD_SUPPL ?= y
 WPA_ENTERPRISE ?= y
 
 ifeq ($(DEBUG),y)
-  DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin   
+    DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin
+    ifeq ($(DEBUG_TESTS),y)
+        DEBUGFLAGS += -DTI_DBG_TESTS
+    endif
 else
-  DEBUGFLAGS = -O2
+    DEBUGFLAGS = -O2
 endif
 
 WILINK_ROOT = ../../../..

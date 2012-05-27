@@ -48,18 +48,12 @@ CORE_INCS = \
     $(COMSRC)/Data_link \
     $(COMSRC)/Connection_Managment \
     $(COMSRC)/Sta_Management \
-    $(COMSRC)/Connection_Managment
-
-ifeq ($(DEBUG),y)
-    CORE_INCS += \
-        $(TESTSRC)/
-endif 
+    $(COMSRC)/Connection_Managment \
+    $(TESTSRC)
 
 #start of CORE_INCS_XCC#     do not remove or change this comment
 ifeq ($(XCC),y)
-    CORE_INCS_XCC += \
-        $(COMSRC)/XCC
-
+    CORE_INCS_XCC += $(COMSRC)/XCC
     CORE_INCS += $(CORE_INCS_XCC)
 endif
 #end of CORE_INCS_XCC#   do not remove or change this comment
@@ -220,14 +214,18 @@ CORE_SRCS = \
     $(COMSRC)/Application/roamingMngr_manualSM.c \
     $(COMSRC)/Application/roamingMngr_autoSM.c
 
+
 ifeq ($(DEBUG),y)
+    CORE_SRCS += $(TESTSRC)/debug.c
+endif
+
+ifeq ($(DEBUG_TESTS),y)
     CORE_SRCS += \
         $(TESTSRC)/connDebug.c \
         $(TESTSRC)/siteMgrDebug.c \
         $(TESTSRC)/ctrlDbg.c \
         $(TESTSRC)/RxDbg.c \
         $(TESTSRC)/TxDbg.c \
-        $(TESTSRC)/debug.c \
         $(TESTSRC)/PowerMgrDebug.c \
         $(TESTSRC)/rsnDbg.c \
         $(TESTSRC)/TWD_Debug.c \
@@ -243,7 +241,7 @@ ifeq ($(DEBUG),y)
         $(TESTSRC)/smeDebug.c \
         $(TESTSRC)/fwdriverdebug.c \
         $(TESTSRC)/MibDbg.c \
-		$(TESTSRC)/TwIfDebug.c
+        $(TESTSRC)/TwIfDebug.c
 endif
 
 #start of CORE_SRCS_XCC#   do not remove or change this comment

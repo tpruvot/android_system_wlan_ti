@@ -21,6 +21,7 @@ TNETW_INCS = \
     $(TWD)/MacServices \
     $(TWD)/TWDriver \
     $(TXN)
+
 #MOTO update TNETW_INCS
 ifeq ($(XCC),y)
 #start of TNETW_INCS_XCC#   do not remove or change this comment
@@ -49,18 +50,12 @@ CORE_INCS = \
     $(COMSRC)/Connection_Managment \
     $(COMSRC)/Sta_Management \
     $(COMSRC)/RolesAndLinks \
-    $(COMSRC)/Connection_Managment
-
-ifeq ($(DEBUG),y)
-    CORE_INCS += \
-        $(TESTSRC)/
-endif 
+    $(COMSRC)/Connection_Managment \
+    $(TESTSRC)
 
 #start of CORE_INCS_XCC#     do not remove or change this comment
 ifeq ($(XCC),y)
-    CORE_INCS_XCC += \
-        $(COMSRC)/XCC
-
+    CORE_INCS_XCC += $(COMSRC)/XCC
     CORE_INCS += $(CORE_INCS_XCC)
 endif
 #end of CORE_INCS_XCC#   do not remove or change this comment
@@ -121,13 +116,11 @@ TNETW_SRCS = \
     $(TXN)/TxnQueue.c
 
 ifeq ($(WSPI),y)
-    TNETW_SRCS += \
-	$(TXN)/WspiBusDrv.c 
+    TNETW_SRCS += $(TXN)/WspiBusDrv.c
 endif
 
 ifeq ($(WSPI),n)
-    TNETW_SRCS += \
-	$(TXN)/SdioBusDrv.c 
+    TNETW_SRCS += $(TXN)/SdioBusDrv.c
 endif
 
 #start of TNETW_SRCS_XCC#   do not remove or change this comment
@@ -224,15 +217,18 @@ CORE_SRCS = \
     $(COMSRC)/RolesAndLinks/rolesMgr.c \
     $(COMSRC)/RolesAndLinks/roleAP.c \
     $(COMSRC)/RolesAndLinks/wlanLinks.c
-    
+
 ifeq ($(DEBUG),y)
+    CORE_SRCS += $(TESTSRC)/debug.c
+endif
+
+ifeq ($(DEBUG_TESTS),y)
     CORE_SRCS += \
         $(TESTSRC)/connDebug.c \
         $(TESTSRC)/siteMgrDebug.c \
         $(TESTSRC)/ctrlDbg.c \
         $(TESTSRC)/RxDbg.c \
         $(TESTSRC)/TxDbg.c \
-        $(TESTSRC)/debug.c \
         $(TESTSRC)/PowerMgrDebug.c \
         $(TESTSRC)/rsnDbg.c \
         $(TESTSRC)/TWD_Debug.c \
@@ -248,7 +244,7 @@ ifeq ($(DEBUG),y)
         $(TESTSRC)/smeDebug.c \
         $(TESTSRC)/fwdriverdebug.c \
         $(TESTSRC)/MibDbg.c \
-		$(TESTSRC)/TwIfDebug.c
+        $(TESTSRC)/TwIfDebug.c
 endif
 
 #start of CORE_SRCS_XCC#   do not remove or change this comment
@@ -270,12 +266,12 @@ endif
 
 
 DK_INCS = \
-$(TNETW_INCS) \
-$(CORE_INCS)
+    $(TNETW_INCS) \
+    $(CORE_INCS)
 
 DK_SRCS = \
-$(CORE_SRCS) \
-$(TNETW_SRCS)
+    $(CORE_SRCS) \
+    $(TNETW_SRCS)
 
 DK_OBJS = $(patsubst %.c, %.o, $(DK_SRCS) $(UTIL_SRCS))
 

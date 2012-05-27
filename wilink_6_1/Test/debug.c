@@ -37,6 +37,8 @@
  *  \see reportReplvl.h
  */
 
+#if defined(TI_DBG)
+
 /***************************************************************************/
 /*                                                                         */
 /*      MODULE: reportReplvl.c                                             */
@@ -72,48 +74,48 @@
 /* Following are the modules numbers */
 typedef enum
 {
-	GENERAL_DEBUG				= 0,
-	TEST_ASSOC_MODULE_PARAM		        = 1,
-	TEST_UTILS_MODULE_PARAM	                = 2,
-	TEST_RX_TX_DATA_MODULE_PARAM            = 3,
-	TEST_CTRL_DATA_MODULE_PARAM	        = 4,
-	TEST_SITE_MGR_MODULE_PARAM	        = 5,
-	TEST_CONN_MODULE_PARAM		        = 6,
-	TEST_RSN_MODULE_PARAM	         	= 7,
-	TEST_TWD_MODULE_PARAM	                = 8,
-	TEST_QOS_MNGR_MODULE_PARAM              = 10,
+    GENERAL_DEBUG                           = 0,
+    TEST_ASSOC_MODULE_PARAM                 = 1,
+    TEST_UTILS_MODULE_PARAM                 = 2,
+    TEST_RX_TX_DATA_MODULE_PARAM            = 3,
+    TEST_CTRL_DATA_MODULE_PARAM             = 4,
+    TEST_SITE_MGR_MODULE_PARAM              = 5,
+    TEST_CONN_MODULE_PARAM                  = 6,
+    TEST_RSN_MODULE_PARAM                   = 7,
+    TEST_TWD_MODULE_PARAM                   = 8,
+    TEST_QOS_MNGR_MODULE_PARAM              = 10,
     TEST_MEASUREMENT_MODULE_PARAM           = 11,
     TEST_POWER_MGR_MODULE_PARAM             = 12,
-	TEST_HAL_CTRL_BUFFER_PARAM	        = 13,
+    TEST_HAL_CTRL_BUFFER_PARAM              = 13,
     TEST_SCAN_CNCN_MODULE_PARAM             = 14,
     TEST_SCAN_MNGR_MODULE_PARAM             = 15,
-	TEST_ROAMING_MNGR_PARAM		        = 16,
+    TEST_ROAMING_MNGR_PARAM                 = 16,
     TEST_SCR_PARAM                          = 17,
-    TEST_SG_PARAM				= 18,
-	TEST_SME_PARAM				= 19,
-	TEST_HEALTH_MONITOR_PARAM	        = 20,
-    TEST_MIB_DEBUG_PARAM	            = 21,
-    TEST_FW_DEBUG_PARAM	                = 22,
-    TEST_TWIF_DEBUG_PARAM	            = 23,
-	/*
-    last module - DO NOT TOUCH!
-    */
+    TEST_SG_PARAM                           = 18,
+    TEST_SME_PARAM                          = 19,
+    TEST_HEALTH_MONITOR_PARAM               = 20,
+    TEST_MIB_DEBUG_PARAM                    = 21,
+    TEST_FW_DEBUG_PARAM                     = 22,
+    TEST_TWIF_DEBUG_PARAM                   = 23,
+    /*
+     * last module - DO NOT TOUCH!
+     */
     NUMBER_OF_TEST_MODULES
 
-}	testModuleParam_e;
+} testModuleParam_e;
 
 #define MAX_PARAM_TYPE  (NUMBER_OF_TEST_MODULES - 1)
 
 /* Utils debug functions */
-#define DBG_UTILS_PRINT_HELP		    	 0
+#define DBG_UTILS_PRINT_HELP                 0
 #define DBG_UTILS_PRINT_CONTEXT_INFO         1
 #define DBG_UTILS_PRINT_TIMER_MODULE_INFO    2
 #define DBG_UTILS_PRINT_TRACE_BUFFER         3
 /* General Parameters Structure */
-typedef struct 
+typedef struct
 {
-	TI_UINT32	paramType;
-	TI_UINT32	value;
+    TI_UINT32 paramType;
+    TI_UINT32 value;
 } testParam_t;
 
 extern void measurementDebugFunction(TI_HANDLE hMeasurementMgr, TI_HANDLE hSwitchChannel, TI_HANDLE hRegulatoryDomain, TI_UINT32 funcType, void *pParam);
@@ -123,18 +125,18 @@ static void printUtilsDbgFunctions (void);
 
 
 /******************************************************************
-*                       FUNCTIONS  IMPLEMENTATION				  *
+                       FUNCTIONS  IMPLEMENTATION
 *******************************************************************/
 
-/** 
+/**
  * \fn     debugFunction
  * \brief  The debug functions dispatcher
- * 
+ *
  * Decode from the debug functionNumber the relevant module and call its debug
  *   function with the provided parameters.
  * The functionNumber parameter is composed as follows:
- *   Module Number      = functionNumber / 100  
- *   Specific Functionc = functionNumber % 100  
+ *   Module Number      = functionNumber / 100
+ *   Specific Functionc = functionNumber % 100
  * 
  * \note   
  * \param  pStadHandles   - Pointer to the STAD modules handles                           
@@ -154,16 +156,19 @@ TI_STATUS debugFunction(TStadHandlesList *pStadHandles, TI_UINT32 functionNumber
 
     switch (moduleNumber)
     {
+
     case GENERAL_DEBUG:
         printMenue();
         break;
 
-    case TEST_ASSOC_MODULE_PARAM:
-        break;
-
     case TEST_UTILS_MODULE_PARAM:
         utilsDebugFunction (pStadHandles, functionNumber % 100, pParam);
-		break;
+        break;
+
+#ifdef TI_DBG_TESTS
+
+    case TEST_ASSOC_MODULE_PARAM:
+        break;
 
     case TEST_RX_TX_DATA_MODULE_PARAM:
         if( functionNumber < 350)
@@ -225,7 +230,7 @@ TI_STATUS debugFunction(TStadHandlesList *pStadHandles, TI_UINT32 functionNumber
     case TEST_SCR_PARAM:
         scrDebugFunction( pStadHandles->hSCR, functionNumber % 100, pParam );
         break;
-    
+
     case TEST_SG_PARAM:
         SoftGeminiDebugFunction( pStadHandles->hSoftGemini, functionNumber % 100, pParam );
         break;
@@ -243,22 +248,23 @@ TI_STATUS debugFunction(TStadHandlesList *pStadHandles, TI_UINT32 functionNumber
         break;
 
     case TEST_FW_DEBUG_PARAM:
-         FWDebugFunction(pStadHandles->hDrvMain, 
-						 pStadHandles->hOs, 
-						 pStadHandles->hTWD, 
-						 pStadHandles->hMlmeSm, 
-						 pStadHandles->hTxMgmtQ,
-						 pStadHandles->hTxCtrl,
-						 functionNumber % 100, 
-						 pParam/*yael , packetNum*/);
+         FWDebugFunction(pStadHandles->hDrvMain,
+             pStadHandles->hOs,
+             pStadHandles->hTWD,
+             pStadHandles->hMlmeSm,
+             pStadHandles->hTxMgmtQ,
+             pStadHandles->hTxCtrl,
+             functionNumber % 100,
+             pParam/*yael , packetNum*/);
         break;
 
     case TEST_TWIF_DEBUG_PARAM:
          twifDebugFunction (pStadHandles->hTWD, functionNumber % 100, pParam);
         break;
 
+#endif /* TI_DBG_TESTS */
     default:
-        WLAN_OS_REPORT(("Invalid debug function module number: %d\n\n", moduleNumber)); 
+        WLAN_OS_REPORT(("Invalid debug function module number: %d\n\n", moduleNumber));
         break;
     }
 
@@ -270,6 +276,7 @@ static void printMenue(void)
     WLAN_OS_REPORT(("   Debug main menu (p <num>)\n"));
     WLAN_OS_REPORT(("-----------------------------\n"));
 
+#ifdef TI_DBG_TESTS
     WLAN_OS_REPORT(("Association             100\n")); 
     WLAN_OS_REPORT(("Utils                   200\n"));
     WLAN_OS_REPORT(("Tx                      300\n"));
@@ -293,6 +300,8 @@ static void printMenue(void)
     WLAN_OS_REPORT(("MIB                    2100\n"));
     WLAN_OS_REPORT(("FW Debug               2200\n"));
     WLAN_OS_REPORT(("TwIf                   2300\n"));
+#endif
+
 }
 
 
@@ -311,21 +320,23 @@ static void utilsDebugFunction (TStadHandlesList *pStadHandles, TI_UINT32 funcTy
         case DBG_UTILS_PRINT_HELP:
             printUtilsDbgFunctions ();
             break;
-    
+
         case DBG_UTILS_PRINT_CONTEXT_INFO:
             context_Print (pStadHandles->hContext);
             break;
-    
+
         case DBG_UTILS_PRINT_TIMER_MODULE_INFO:
             tmr_PrintModule (pStadHandles->hTimer);
             break;
-    
+
         case DBG_UTILS_PRINT_TRACE_BUFFER:
-/*          tb_printf(); */
+#ifdef TI_TRACE_BUF
+            tb_printf();
+#endif
             break;
-    
+
         default:
-       		WLAN_OS_REPORT(("utilsDebugFunction(): Invalid function type: %d\n", funcType));
+            WLAN_OS_REPORT(("utilsDebugFunction(): Invalid function type: %d\n", funcType));
             break;
     }
 }
@@ -338,10 +349,13 @@ static void utilsDebugFunction (TStadHandlesList *pStadHandles, TI_UINT32 funcTy
 static void printUtilsDbgFunctions (void)
 {
     WLAN_OS_REPORT(("   Utils Debug Functions   \n"));
-	WLAN_OS_REPORT(("---------------------------\n"));
-	WLAN_OS_REPORT(("200 - Print the Utils Debug Help\n"));
-	WLAN_OS_REPORT(("201 - Print Context module info\n"));
-	WLAN_OS_REPORT(("202 - Print Timer module info\n"));
-	WLAN_OS_REPORT(("203 - Print the trace buffer\n"));
+    WLAN_OS_REPORT(("---------------------------\n"));
+    WLAN_OS_REPORT(("200 - Print the Utils Debug Help\n"));
+    WLAN_OS_REPORT(("201 - Print Context module info\n"));
+    WLAN_OS_REPORT(("202 - Print Timer module info\n"));
+#ifdef TI_TRACE_BUF
+    WLAN_OS_REPORT(("203 - Print the trace buffer\n"));
+#endif
 }
 
+#endif /* TI_DBG */

@@ -24,7 +24,7 @@ endif
 #
 # Include directory for Odyssey supplicant files
 #
-ifeq ($(BUILD_SUPPL),y)
+ifeq ($(BUILD_ODYSSEY_SUPPL),y)
     ODD_INC = $(DK_ROOT)/CUDK/Supplicant/odyssey/odSupp/linux/inc 
 else
     ODD_INC = 
@@ -34,8 +34,9 @@ endif
 # OS include paths required for compilation.
 # 
 OS_INCS = $(DK_ROOT)/platforms/os/linux/inc $(DK_ROOT)/platforms/os/common/inc
-#OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/Test $(DK_ROOT)/platforms/hw/host_platform_$(HOST_PLATFORM)/linux
-OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/Test $(DK_ROOT)/platforms/hw/linux
+#OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/platforms/hw/host_platform_$(HOST_PLATFORM)/linux
+OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/platforms/hw/linux
+#OS_INCS += $(DK_ROOT)/Test
 
 #
 # Location and filename of the driver .lib file created by this makefile.

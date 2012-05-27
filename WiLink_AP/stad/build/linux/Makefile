@@ -34,16 +34,15 @@ endif
 # OS include paths required for compilation.
 # 
 OS_INCS = $(DK_ROOT)/platforms/os/linux/inc $(DK_ROOT)/platforms/os/common/inc
-# OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/Test $(DK_ROOT)/platforms/hw/host_platform_$(HOST_PLATFORM)/linux	#MOTO
-OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/Test $(DK_ROOT)/platforms/hw/linux	#MOTO
+# OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/platforms/hw/host_platform_$(HOST_PLATFORM)/linux	#MOTO
+OS_INCS += $(DK_ROOT)/stad/src/core/EvHandler $(DK_ROOT)/platforms/hw/linux	#MOTO
+# OS_INCS += $(DK_ROOT)/Test
 
 #
 # Location and filename of the driver .lib file created by this makefile.
 #
 OUTPUT_DIR = $(DK_ROOT)/stad/build/linux
 OUTPUT_FILE = $(OUTPUT_DIR)/libestadrv.a
-
-
 
 
 
@@ -65,7 +64,7 @@ ifneq ($(KERNELRELEASE),)
 #
 # Adds the current directory as a prefix to all include directories.
 #
-	EXTRA_CFLAGS += $(addprefix -I$(M)/, $(DK_INCS) $(OS_INCS) $(ODD_INC))
+EXTRA_CFLAGS += $(addprefix -I$(M)/, $(DK_INCS) $(OS_INCS) $(ODD_INC))
 
 #
 # Intermediate object name - this should be converted to the appropriate library file

@@ -68,9 +68,11 @@
 #ifdef XCC_MODULE_INCLUDED
 #include "XCCMngr.h"
 #endif
+#ifdef TI_DBG
+#include "debug.h"
+#endif
 #include "TxnQueue.h"
 #include "TWDriver.h"
-#include "debug.h"
 #include "host_platform.h"
 #include "StaCap.h"
 #include "WlanDrvCommon.h"

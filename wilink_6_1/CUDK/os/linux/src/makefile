@@ -1,14 +1,18 @@
 STATIC_LIB ?= y
 DEBUG ?= y
+DEBUG_TESTS ?= n
 BUILD_SUPPL ?= y
 SUPPL ?= ANDROID
 WPA_ENTERPRISE ?= y
 ETH_SUPPORT ?= n
 
 ifeq ($(DEBUG),y)
-  DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin   
+    DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin
+    ifeq ($(DEBUG_TESTS),y)
+        DEBUGFLAGS += -DTI_DBG_TESTS
+    endif
 else
-  DEBUGFLAGS = -O2
+    DEBUGFLAGS = -O2
 endif
 
 WILINK_ROOT = ../../../..
@@ -18,15 +22,15 @@ OUTPUT_DIR ?= $(CUDK_ROOT)/output
 
 DK_DEFINES = 
 ifeq ($(WPA_ENTERPRISE), y)
-        DK_DEFINES += -D WPA_ENTERPRISE
+    DK_DEFINES += -D WPA_ENTERPRISE
 endif
 
 ifeq ($(BUILD_SUPPL), y)
-  DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
-  -include $(CUDK_ROOT)/$(TI_SUPP_LIB_DIR)/.config
-  ifeq ($(CONFIG_EAP_WSC), y)
-    DK_DEFINES += -DCONFIG_EAP_WSC
-  endif
+    DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
+    -include $(CUDK_ROOT)/$(TI_SUPP_LIB_DIR)/.config
+    ifeq ($(CONFIG_EAP_WSC), y)
+        DK_DEFINES += -DCONFIG_EAP_WSC
+    endif
 endif
 
 ifeq ($(STATIC_LIB),y)
@@ -67,16 +71,17 @@ INCLUDES = \
         -I $(WILINK_ROOT)/utils \
         -I $(WILINK_ROOT)/Txn \
         -I $(WILINK_ROOT)/TWD/TWDriver \
-		-I $(WILINK_ROOT)/TWD/FirmwareApi \
-		-I $(WILINK_ROOT)/TWD/FW_Transfer/Export_Inc \
-		-I $(WILINK_ROOT)/TWD/TwIf \
+        -I $(WILINK_ROOT)/TWD/FirmwareApi \
+        -I $(WILINK_ROOT)/TWD/FW_Transfer/Export_Inc \
+        -I $(WILINK_ROOT)/TWD/TwIf \
         -I $(WILINK_ROOT)/platforms/os/linux/inc \
         -I $(WILINK_ROOT)/platforms/os/common/inc \
         -I $(WILINK_ROOT)/TWD/FirmwareApi \
         -I $(CUDK_ROOT)/$(TI_SUPP_LIB_DIR) \
         -I $(CUDK_ROOT)/configurationutility/inc
-        
-CFLAGS = -Wall -Wstrict-prototypes $(DEBUGFLAGS) $(INCLUDES) -D__LINUX__ $(DK_DEFINES) -D__BYTE_ORDER_LITTLE_ENDIAN
+
+CFLAGS = -Wall -Wstrict-prototypes $(DEBUGFLAGS) $(INCLUDES) -D__LINUX__ -DANDROID \
+        $(DK_DEFINES) -D__BYTE_ORDER_LITTLE_ENDIAN
 
 ifneq "$(CROSS_COMPILE)" ""             #compile for ARM
         CFLAGS += $(ARMFLAGS)

@@ -60,6 +60,7 @@ TI_HOSTAPD_LIB ?= n
 # Enable or disable debugging
 #
 DEBUG ?= y
+DEBUG_TESTS ?= n
 KERNEL_DEBUGGER ?= n
 STRIP ?= y
 BMTRACE ?= y
@@ -108,7 +109,6 @@ ifeq ($(TI_HOSTAPD_LIB),y)
     DK_DEFINES += -D TI_HOSTAPD_LIB
 endif
 
-
 ifeq ($(AP_MODE_ENABLED),y)
     DK_DEFINES += -D AP_MODE_ENABLED
     DK_DEFINES += -D AP_DATA_PATH_DEBUG  # Temp debug flag - will be removed after data path integration completion
@@ -130,14 +130,17 @@ ifeq ($(DEBUG),y)
     DK_DEFINES += -D TI_DBG
     DK_DEFINES += -D REPORT_LOG
     DK_DEFINES += -O2 
-    DK_DEFINES += -D PRINTF_ROLLBACK           #MOTO
+    DK_DEFINES += -D PRINTF_ROLLBACK
+    ifeq ($(DEBUG_TESTS),y)
+        DK_DEFINES += -D TI_DBG_TESTS
+    endif
 else
     DK_DEFINES += -U REPORT_LOG
     DK_DEFINES += -O2
 endif
 ifeq ($(KERNEL_DEBUGGER),y)
-    DK_DEFINES += -g -O2
-	STRIP = n
+    DK_DEFINES += -g
+    STRIP = n
 endif
 export KERNEL_DEBUGGER
 

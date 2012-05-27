@@ -3,13 +3,18 @@ include $(CLEAR_VARS)
 
 STATIC_LIB ?= y
 DEBUG ?= y
+DEBUG_TESTS ?= n
 BUILD_SUPPL ?= y
+BUILD_ODYSSEY_SUPPL ?= n
 WPA_ENTERPRISE ?= y
 
 ifeq ($(DEBUG),y)
-  DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin   
+    DEBUGFLAGS = -O2 -g -DDEBUG -DTI_DBG -fno-builtin
+    ifeq ($(DEBUG_TESTS),y)
+        DEBUGFLAGS += -DTI_DBG_TESTS
+    endif
 else
-  DEBUGFLAGS = -O2
+    DEBUGFLAGS = -O2
 endif
 
 WILINK_ROOT = ../../../..
@@ -18,22 +23,20 @@ TI_SUPP_LIB_DIR = $(WILINK_ROOT)/../../../../external/wpa_supplicant_6/wpa_suppl
 
 DK_DEFINES = 
 ifeq ($(WPA_ENTERPRISE), y)
-        DK_DEFINES += -D WPA_ENTERPRISE
+    DK_DEFINES += -D WPA_ENTERPRISE
 endif
 
 ifeq ($(BUILD_SUPPL), y)
-  DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
-  -include external/wpa_supplicant_6/wpa_supplicant/.config
-  ifeq ($(CONFIG_WPS), y)
-    DK_DEFINES += -DCONFIG_WPS
-  endif
+    DK_DEFINES += -D WPA_SUPPLICANT -D CONFIG_CTRL_IFACE -D CONFIG_CTRL_IFACE_UNIX
+    -include external/wpa_supplicant_6/wpa_supplicant/.config
+    ifeq ($(CONFIG_WPS), y)
+        DK_DEFINES += -DCONFIG_WPS
+    endif
 endif
 
-LOCAL_CFLAGS+= \
-	 -DANDROID
-
-LOCAL_CFLAGS+= \
-	-Wall -Wstrict-prototypes $(DEBUGFLAGS) -D__LINUX__ $(DK_DEFINES) -D__BYTE_ORDER_LITTLE_ENDIAN -fno-common #-pipe
+LOCAL_CFLAGS += \
+    -Wall -Wstrict-prototypes $(DEBUGFLAGS) -D__LINUX__ -DANDROID \
+    $(DK_DEFINES) -D__BYTE_ORDER_LITTLE_ENDIAN -fno-common 
 
 LOCAL_SRC_FILES:= \
 	cu_wext.c \

@@ -1,9 +1,5 @@
-
-
-##
 ##
 ## Directory Locations
-##
 ##
 
 COMMON      := $(DK_ROOT)/stad
@@ -17,9 +13,7 @@ EXT_DRV     := $(DK_ROOT)/external_drivers
 TXN         := $(DK_ROOT)/Txn
 
 ##
-##
 ## Make Flags
-##
 ##
 
 #
@@ -52,6 +46,7 @@ INTR ?= y
 # Enable or disable debugging
 #
 DEBUG ?= y
+DEBUG_TESTS ?= n
 KERNEL_DEBUGGER ?= n
 STRIP ?= y
 BMTRACE ?= n
@@ -71,18 +66,16 @@ FPGA1273 ?= n
 TI_TRACE_BUFFER ?= n
 
 ##
-##
 ## Driver Compilation Directives
 ##
-##
 ifeq "$(HOST_PLATFORM)" "omap3430"
-	DK_DEFINES += -D HOST_PLATFORM_OMAP3430
+    DK_DEFINES += -D HOST_PLATFORM_OMAP3430
 endif
 ifeq "$(HOST_PLATFORM)" "zoom2"
-	DK_DEFINES += -D HOST_PLATFORM_ZOOM2
+    DK_DEFINES += -D HOST_PLATFORM_ZOOM2
 endif
 ifeq "$(HOST_PLATFORM)" "zoom1"
-	DK_DEFINES += -D HOST_PLATFORM_ZOOM1
+    DK_DEFINES += -D HOST_PLATFORM_ZOOM1
 endif
 
 ifeq ($(XCC),y)
@@ -95,19 +88,22 @@ endif
 
 ifeq ($(INTR),n)
     DK_DEFINES += -D PRIODIC_INTERRUPT
-endif    
+endif
 
 ifeq ($(DEBUG),y)
     DK_DEFINES += -D TI_DBG
     DK_DEFINES += -D REPORT_LOG
     DK_DEFINES += -Os
+    ifeq ($(DEBUG_TESTS),y)
+        DK_DEFINES += -D TI_DBG_TESTS
+    endif
 else
     DK_DEFINES += -U REPORT_LOG
     DK_DEFINES += -Os
 endif
 ifeq ($(KERNEL_DEBUGGER),y)
-    DK_DEFINES += -g -Os
-	STRIP = n
+    DK_DEFINES += -g
+    STRIP = n
 endif
 export KERNEL_DEBUGGER
 
@@ -122,9 +118,7 @@ ifeq ($(BMTRACE),y)
 endif
 
 ##
-##
 ## Platform Compilation Directives
-##
 ##
 
 #
@@ -165,9 +159,7 @@ ifeq ($(USE_IRQ_ACTIVE_HIGH),y)
 endif
 
 ##
-##
 ## Miscellaneous Compilation Directivcs
-##
 ##
 
 EXTRA_CFLAGS += -fsigned-char
