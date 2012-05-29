@@ -42,10 +42,10 @@
 
 #include <linux/stringify.h>
 
-#define SW_VERSION_STR      "WiLink_Driver_6.1.131 Defy_DTIM_2"
+#define SW_VERSION_STR      "WiLink_Driver_6.1.131 Defy"
 
 #define SW_RELEASE_MONTH    05
-#define SW_RELEASE_DAY      27
+#define SW_RELEASE_DAY      29
 #define SW_RELEASE_YEAR     2012
 
 #define WILINK_VERSION "6.1." __stringify(SW_RELEASE_YEAR) "." __stringify(SW_RELEASE_MONTH) "." __stringify(SW_RELEASE_DAY)

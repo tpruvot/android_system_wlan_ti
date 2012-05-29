@@ -32,7 +32,7 @@
  */
 
 /* define to use the old suspend method (shutdown / re-probe) */
-//#define TIWLAN_HARD_SUSPEND
+#define TIWLAN_HARD_SUSPEND
 
 #include <linux/kernel.h>
 #include <linux/module.h>

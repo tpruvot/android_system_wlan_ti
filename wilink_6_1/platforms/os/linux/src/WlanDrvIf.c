@@ -50,7 +50,6 @@
  *  \see    WlanDrvIf.h, Wext.c
  */
 
-
 #include <net/sock.h>
 #include <linux/etherdevice.h>
 #include <linux/delay.h>
@@ -337,14 +336,12 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
 #ifdef STACK_PROFILE
     register unsigned long sp asm ("sp");
     unsigned long local_sp = sp;
-#endif
-    TWlanDrvIfObj *drv = container_of(work, TWlanDrvIfObj, tWork);
-
-#ifdef STACK_PROFILE
     unsigned long curr1, base1;
     unsigned long curr2, base2;
     static unsigned long maximum_stack = 0;
 #endif
+
+    TWlanDrvIfObj *drv = container_of(work, TWlanDrvIfObj, tWork);
     os_profile (drv, 0, 0);
 
 #ifdef STACK_PROFILE
@@ -357,6 +354,7 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
     os_profile (drv, 1, 0);
     os_wake_lock_timeout(drv);
     os_wake_unlock(drv);
+
 #ifdef STACK_PROFILE
     curr2 = check_stack_stop(&base2, 0);
     if (base2 == base1) {
@@ -408,7 +406,8 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
         drv->tCommon.tIniFile.uSize = pInitFiles->uIniFileLength;
         drv->tCommon.tIniFile.pImage = kmalloc (pInitFiles->uIniFileLength, GFP_KERNEL);
         #ifdef TI_MEM_ALLOC_TRACE
-          os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__, pInitFiles->uIniFileLength, GFP_KERNEL, pInitFiles->uIniFileLength);
+        os_printf("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__, 
+                  pInitFiles->uIniFileLength, GFP_KERNEL, pInitFiles->uIniFileLength);
         #endif
         if (!drv->tCommon.tIniFile.pImage)
         {
@@ -425,8 +424,8 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
         drv->tCommon.tNvsImage.uSize = pInitFiles->uNvsFileLength;
         drv->tCommon.tNvsImage.pImage = kmalloc (drv->tCommon.tNvsImage.uSize, GFP_KERNEL);
         #ifdef TI_MEM_ALLOC_TRACE
-          os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n",
-              __FUNCTION__, __LINE__, drv->tCommon.tNvsImage.uSize, GFP_KERNEL, drv->tCommon.tNvsImage.uSize);
+        os_printf("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__,
+                  drv->tCommon.tNvsImage.uSize, GFP_KERNEL, drv->tCommon.tNvsImage.uSize);
         #endif
         if (!drv->tCommon.tNvsImage.pImage)
         {
@@ -444,8 +443,8 @@ int wlanDrvIf_LoadFiles (TWlanDrvIfObj *drv, TLoaderFilesData *pInitFiles)
     }
     drv->tCommon.tFwImage.pImage = os_memoryAlloc (drv, drv->tCommon.tFwImage.uSize);
     #ifdef TI_MEM_ALLOC_TRACE
-      os_printf ("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n",
-          __FUNCTION__, __LINE__, drv->tCommon.tFwImage.uSize, GFP_KERNEL, drv->tCommon.tFwImage.uSize);
+    os_printf("MTT:%s:%d ::kmalloc(%lu, %x) : %lu\n", __FUNCTION__, __LINE__,
+              drv->tCommon.tFwImage.uSize, GFP_KERNEL, drv->tCommon.tFwImage.uSize);
     #endif
     if (!drv->tCommon.tFwImage.pImage)
     {
@@ -686,10 +685,10 @@ int wlanDrvIf_Open (struct net_device *dev)
     /*
      *  Finalize network interface setup
      */
-#if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 31))
-    drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
-#else
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32))
     drv->netdev->netdev_ops = &tiwlan_ops_pri;
+#else
+    drv->netdev->hard_start_xmit = wlanDrvIf_Xmit;
 #endif
     drv->netdev->addr_len = MAC_ADDR_LEN;
     netif_start_queue (dev);
@@ -715,7 +714,6 @@ int wlanDrvIf_Stop (struct net_device *dev)
     TWlanDrvIfObj *drv = (TWlanDrvIfObj *)NETDEV_GET_PRIVATE(dev);
 
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Stop()\n");
-    pr_info("TIWLAN: %s\n", __func__);
 
     if (DRV_STATE_FAILED == drv->tCommon.eDriverState)
     {
@@ -738,7 +736,6 @@ int wlanDrvIf_Stop (struct net_device *dev)
 int wlanDrvIf_Release (struct net_device *dev)
 {
     ti_dprintf (TIWLAN_LOG_OTHER, "wlanDrvIf_Release()\n");
-    pr_info("TIWLAN: %s\n", __func__);
     /* Disable network interface queue */
     netif_stop_queue (dev);
     return 0;
@@ -1162,7 +1159,7 @@ int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
     param_dtim_set.paramType = POWER_MGR_DTIM_LISTEN_INTERVAL;
     param_dtim_set.paramLength = sizeof(TI_UINT8);
 
-    pr_info("TIWLAN: %s(suspend=%d), drv->in_suspend=%d\n", __func__, value, (drv->in_suspend)? 1:0);
+    pr_debug("TIWLAN: %s(suspend=%d), drv->in_suspend=%d\n", __func__, value, (drv->in_suspend)? 1:0);
 
     if(drv)
     {
@@ -1172,7 +1169,7 @@ int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
             dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
             beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
 
-            if (dtimListenInterval < 3 && beaconInterval==100)
+            if (dtimListenInterval==1 && beaconInterval==100)
             {
                 /* Skip 3 DTIM */
                 param_dtim_set.content.dtimListenInterval = 3;
@@ -1228,7 +1225,7 @@ static void wlanDrvIf_early_suspend(struct early_suspend *h)
 static void wlanDrvIf_late_resume(struct early_suspend *h)
 {
     TWlanDrvIfObj *drv = container_of(h, TWlanDrvIfObj, early_suspend);
-    TI_UINT8 beaconInterval, dtimListenInterval;
+    TI_UINT8 beaconInterval=0, dtimListenInterval=0;
 
     if(drv)
     {
@@ -1236,27 +1233,15 @@ static void wlanDrvIf_late_resume(struct early_suspend *h)
         pr_info("TIWLAN: %s() reset drv->skipped_suspend\n", __func__);
         wlanDrvIf_suspend_resume_hlpr(drv, 0);
 
-        dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
-        beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
+        if (drv->tCommon.hDrvMain) {
+            dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
+            beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
+        }
 
         /* Check for buggy state on resume */
         if (beaconInterval==0 && dtimListenInterval==0) {
             int status;
-            pr_warning("TIWLAN: main driver answered 0 to intervals, reset interface...\n");
-
-            status = wlanDrvIf_Release(drv->netdev);
-            pr_info("TIWLAN: Release status=%d\n", status);
-            WARN_ON(status);
-            status = wlanDrvIf_Stop(drv->netdev);
-            pr_info("TIWLAN: Stop status=%d\n", status);
-            WARN_ON(status);
-
-            status = wlanDrvIf_Start(drv->netdev);
-            pr_info("TIWLAN: Start status=%d\n", status);
-            WARN_ON(status);
-            status = wlanDrvIf_Open(drv->netdev);
-            pr_info("TIWLAN: Open status=%d\n", status);
-            WARN_ON(status);
+            pr_warning("TIWLAN: main driver answered 0 to intervals !\n");
         }
     }
 }
