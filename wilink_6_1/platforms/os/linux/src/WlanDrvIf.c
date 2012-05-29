@@ -342,32 +342,32 @@ static void wlanDrvIf_DriverTask(struct work_struct *work)
 #endif
 
     TWlanDrvIfObj *drv = container_of(work, TWlanDrvIfObj, tWork);
-    os_profile (drv, 0, 0);
+    os_profile(drv, 0, 0);
 
 #ifdef STACK_PROFILE
     curr1 = check_stack_start(&base1, local_sp + 4, 0);
 #endif
 
     /* Call the driver main task */
-    context_DriverTask (drv->tCommon.hContext);
-
-    os_profile (drv, 1, 0);
-    os_wake_lock_timeout(drv);
-    os_wake_unlock(drv);
+    context_DriverTask(drv->tCommon.hContext);
 
 #ifdef STACK_PROFILE
     curr2 = check_stack_stop(&base2, 0);
     if (base2 == base1) {
     /* if the current measurement is bigger then the maximum store it and print*/
         if ((curr1 - curr2) > maximum_stack) {
-            printk("STACK PROFILER GOT THE LOCAL MAXIMMUM!!!! \n");
+            printk("STACK PROFILER GOT THE LOCAL MAXIMUM!!! \n");
             printk("current operation stack use=%lu \n",(curr1 - curr2));
             printk("total stack use=%lu \n",8192 - curr2 + base2);
-            printk("total stack usage=%lu percent \n",100 * (8192 - curr2 + base2) / 8192);
+            printk("total stack usage=%lu %%\n",100 * (8192 - curr2 + base2) / 8192);
             maximum_stack = curr1 - curr2;
         }
     }
 #endif
+
+    os_profile(drv, 1, 0);
+    os_wake_lock_timeout(drv);
+    os_wake_unlock(drv);
 }
 
 
