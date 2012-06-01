@@ -86,109 +86,99 @@ extern void enable_irq(unsigned int);
 
 
 /****************************************************************************************
- *                        																*
- *						OS Report API													*       
- *																						*
+ * OS Report API
+ *
  ****************************************************************************************/
 static void SendLoggerData (TI_HANDLE OsContext, TI_UINT8 *pMsg, TI_UINT16 len)
-{    
-	TWlanDrvIfObj *drv = (TWlanDrvIfObj *)OsContext;
+{
+    TWlanDrvIfObj *drv = (TWlanDrvIfObj *)OsContext;
 
-	if (len > 0)
-	{
-		EvHandlerSendEvent(drv->tCommon.hEvHandler, IPC_EVENT_LOGGER, pMsg, len);
-	}   
+    if (len > 0)
+    {
+        EvHandlerSendEvent(drv->tCommon.hEvHandler, IPC_EVENT_LOGGER, pMsg, len);
+    }
 }
 
 void os_setDebugOutputToLogger(TI_BOOL value)
 {
-	bRedirectOutputToLogger = value;
+    bRedirectOutputToLogger = value;
 }
 /****************************************************************************************
- *                        os_setDebugMode()                                 
+ *                        os_setDebugMode()
  ****************************************************************************************
-DESCRIPTION:  	Set the Debug Mode 
+DESCRIPTION:  Set the Debug Mode
 
-INPUT:            
+INPUT:
 
-RETURN:			None   
+RETURN:       None
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void os_setDebugMode(TI_BOOL enable)
 {
-	use_debug_module = enable;
+    use_debug_module = enable;
 }
 
 
 /****************************************************************************************
- *                        os_printf()                                 
+ *                        os_printf()
  ****************************************************************************************
-DESCRIPTION:  	Print formatted output. 
+DESCRIPTION:  Print formatted output.
 
-INPUT:          format -  Specifies the string, to be printed
+INPUT:        format -  Specifies the string, to be printed
 
-RETURN:			None   
+RETURN:       None
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void os_printf(const char *format ,...)
 {
-   static int from_new_line = 1;		/* Used to save the last message EOL */
-   va_list ap;
-   static char msg[MAX_MESSAGE_SIZE];
-   char *p_msg = msg;					/* Pointer to the message */
-   TI_UINT16 message_len;
-   TI_UINT32 sec = 0;
-   TI_UINT32 uSec = 0;
-   os_memoryZero(NULL,msg, MAX_MESSAGE_SIZE);
+    static int from_new_line = 1; /* Used to save the last message EOL */
+    va_list ap;
+    static char msg[MAX_MESSAGE_SIZE];
+    char *p_msg = msg;  /* Pointer to the message */
+    TI_UINT16 message_len;
+    os_memoryZero(NULL,msg, MAX_MESSAGE_SIZE);
 
-	/* Format the message and keep the message length */
-   va_start(ap,format);
-   message_len = vsnprintf(&msg[0], sizeof(msg) -1 , format, ap);
-   if( from_new_line )
-	{
-		if (msg[1] == '$')
-		{
-			p_msg += 4;
-		}
+    /* Format the message and keep the message length */
+    va_start(ap,format);
+    message_len = vsnprintf(&msg[0], sizeof(msg) - 1, format, ap);
+    if (from_new_line)
+    {
+        if (msg[1] == '$')
+        {
+            p_msg += 4;
+        }
+        pr_info(DRIVER_NAME ": %s", p_msg);
 
-		sec = os_timeStampUs(NULL);
-		uSec = sec % MICROSECOND_IN_SECONDS;
-		sec /= MICROSECOND_IN_SECONDS;
+    } else {
+        printk(&msg[0]);
+    }
 
-		printk(KERN_INFO DRIVER_NAME ": %d.%06d: %s",sec,uSec,p_msg);
-	}
-	else
-	{
-	printk(&msg[0]);
-	}
+    from_new_line = ( msg[message_len - 1] == '\n' );
 
-	from_new_line = ( msg[message_len - 1] == '\n' );
-
-	va_end(ap);
+    va_end(ap);
 }
 
 /****************************************************************************************
- *                        																*
- *							OS TIMER API												*
- *																						*
+ * OS TIMER API
+ *
  ****************************************************************************************/
 
 /****************************************************************************************
- *                        os_timerCreate()                                 
+ *                        os_timerCreate()
  ****************************************************************************************
 DESCRIPTION:    This function creates and initializes an OS timer object associated with a
-				caller's pRoutine function.
+                caller's pRoutine function.
 
-ARGUMENTS:		OsContext   - The OS handle
+ARGUMENTS:      OsContext   - The OS handle
                 pRoutine    - The user callback function
                 hFuncHandle - The user callback handle
 
-RETURN:			A handle of the created OS timer.
+RETURN:         A handle of the created OS timer.
 
-NOTES:         	1) The user's callback is called directly from OS timer context when expired.
-                2) In some OSs, it may be needed to use an intermediate callback in the 
+NOTES:          1) The user's callback is called directly from OS timer context when expired.
+                2) In some OSs, it may be needed to use an intermediate callback in the
                    osapi layer (use os_timerHandlr for that).
 
 *****************************************************************************************/
@@ -203,17 +193,16 @@ TI_HANDLE os_timerCreate (TI_HANDLE OsContext, fTimerFunction pRoutine, TI_HANDL
     return (TI_HANDLE)pOsTimer;
 }
 
-
 /****************************************************************************************
- *                        os_timerDestroy()                                 
+ *                        os_timerDestroy()
  ****************************************************************************************
 DESCRIPTION:    This function destroys the OS timer object.
 
-ARGUMENTS:		
+ARGUMENTS:
 
-RETURN:			
+RETURN:
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void os_timerDestroy (TI_HANDLE OsContext, TI_HANDLE TimerHandle)
 {
@@ -223,15 +212,15 @@ void os_timerDestroy (TI_HANDLE OsContext, TI_HANDLE TimerHandle)
 
 
 /****************************************************************************************
- *                        os_timerStart()                                 
+ *                        os_timerStart()
  ****************************************************************************************
 DESCRIPTION:    This function start the timer object.
 
-ARGUMENTS:		
+ARGUMENTS:
 
-RETURN:			
+RETURN:
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void os_timerStart (TI_HANDLE OsContext, TI_HANDLE TimerHandle, TI_UINT32 DelayMs)
 {
@@ -242,15 +231,15 @@ void os_timerStart (TI_HANDLE OsContext, TI_HANDLE TimerHandle, TI_UINT32 DelayM
 
 
 /****************************************************************************************
- *                        os_stopTimer()                                 
+ *                        os_stopTimer()
  ****************************************************************************************
 DESCRIPTION:    This function stop the timer object.
 
-ARGUMENTS:		
+ARGUMENTS:
 
-RETURN:			
+RETURN:
 
-NOTES:         	
+NOTES:
 *****************************************************************************************/
 void os_timerStop (TI_HANDLE OsContext, TI_HANDLE TimerHandle)
 {

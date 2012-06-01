@@ -47,6 +47,7 @@ INTR ?= y
 # Enable or disable debugging
 #
 DEBUG ?= y
+DEBUG_TESTS ?= n
 KERNEL_DEBUGGER ?= n
 STRIP ?= y
 BMTRACE ?= n
@@ -71,13 +72,13 @@ TI_TRACE_BUFFER ?= n
 ##
 ##
 ifeq "$(HOST_PLATFORM)" "omap3430"
-	DK_DEFINES += -D HOST_PLATFORM_OMAP3430
+    DK_DEFINES += -D HOST_PLATFORM_OMAP3430
 endif
 ifeq "$(HOST_PLATFORM)" "zoom2"
-	DK_DEFINES += -D HOST_PLATFORM_ZOOM2
+    DK_DEFINES += -D HOST_PLATFORM_ZOOM2
 endif
 ifeq "$(HOST_PLATFORM)" "zoom1"
-	DK_DEFINES += -D HOST_PLATFORM_ZOOM1
+    DK_DEFINES += -D HOST_PLATFORM_ZOOM1
 endif
 
 ifeq ($(XCC),y)
@@ -86,13 +87,16 @@ endif
 
 ifeq ($(INTR),n)
     DK_DEFINES += -D PRIODIC_INTERRUPT
-endif    
+endif
 
 ifeq ($(DEBUG),y)
     DK_DEFINES += -D TI_DBG
     DK_DEFINES += -D REPORT_LOG
     DK_DEFINES += -O2
-    DK_DEFINES += -D PRINTF_ROLLBACK    
+    DK_DEFINES += -D PRINTF_ROLLBACK
+    ifeq ($(DEBUG_TESTS),y)
+        DK_DEFINES += -D TI_DBG_TESTS
+    endif
 else
     DK_DEFINES += -D TI_DBG
     DK_DEFINES += -U REPORT_LOG
@@ -100,7 +104,7 @@ else
 endif
 ifeq ($(KERNEL_DEBUGGER),y)
     DK_DEFINES += -g -O2
-	STRIP = n
+    STRIP = n
 endif
 export KERNEL_DEBUGGER
 

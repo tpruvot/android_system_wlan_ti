@@ -39,6 +39,7 @@
  *
  */
 
+#define ENABLE_DTIM_SKIPPING 0
 
 /** \file   WlanDrvIf.c
  *  \brief  The OS-Dependent interfaces of the WLAN driver with external applications:
@@ -94,7 +95,7 @@ static void wlanDrvIf_late_resume(struct early_suspend *h);
 static void wlanDrvIf_suspend_resume_hlpr(TWlanDrvIfObj *drv, int value);
 int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv);
 
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32))
 static int wlanDrvIf_Xmit(struct sk_buff *skb, struct net_device *dev);
 static int wlanDrvIf_XmitDummy(struct sk_buff *skb, struct net_device *dev);
 static struct net_device_stats *wlanDrvIf_NetGetStat(struct net_device *dev);
@@ -927,13 +928,13 @@ static int wlanDrvIf_Create (void)
 #endif  /* PRIODIC_INTERRUPT */
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-       init_MUTEX(&drv->sem);
-       drv->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 20;
-       drv->early_suspend.suspend = wlanDrvIf_early_suspend;
-       drv->early_suspend.resume = wlanDrvIf_late_resume;
-       drv->allow_suspend = 0;
-       drv->skipped_suspend = 0;
-       register_early_suspend(&drv->early_suspend);
+    init_MUTEX(&drv->sem);
+    drv->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 20;
+    drv->early_suspend.suspend = wlanDrvIf_early_suspend;
+    drv->early_suspend.resume = wlanDrvIf_late_resume;
+    drv->allow_suspend = 0;
+    drv->skipped_suspend = 0;
+    register_early_suspend(&drv->early_suspend);
 #endif
 
    return 0;
@@ -994,7 +995,7 @@ static void wlanDrvIf_Destroy (TWlanDrvIfObj *drv)
     {
         unregister_early_suspend(&drv->early_suspend);
     }
-#endif /* defined(CONFIG_HAS_EARLYSUSPEND) */
+#endif
 
     if (drv->tiwlan_wq) {
         cancel_work_sync(&drv->tWork);
@@ -1154,7 +1155,7 @@ void wlanDrvIf_ResumeTx (TI_HANDLE hOs)
 int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
 {
     paramInfo_t param_dtim_set;
-    TI_UINT8 beaconInterval, dtimListenInterval;
+    TI_UINT8 beaconInterval=0, dtimListenInterval=0;
 
     param_dtim_set.paramType = POWER_MGR_DTIM_LISTEN_INTERVAL;
     param_dtim_set.paramLength = sizeof(TI_UINT8);
@@ -1166,10 +1167,12 @@ int wlanDrvIf_set_suspend_resume(int value, TWlanDrvIfObj *drv)
         /* Kernel Suspended */
         if (drv->in_suspend && value)
         {
-            dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
-            beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
+            if (drv->tCommon.hDrvMain) {
+                dtimListenInterval = drvMain_GetDtimListenInterval (drv->tCommon.hDrvMain) ;
+                beaconInterval = drvMain_GetBeaconInterval (drv->tCommon.hDrvMain);
+            }
 
-            if (dtimListenInterval==1 && beaconInterval==100)
+            if (dtimListenInterval==1 && beaconInterval==100 && ENABLE_DTIM_SKIPPING)
             {
                 /* Skip 3 DTIM */
                 param_dtim_set.content.dtimListenInterval = 3;
@@ -1230,7 +1233,6 @@ static void wlanDrvIf_late_resume(struct early_suspend *h)
     if(drv)
     {
         drv->skipped_suspend = 0;
-        pr_info("TIWLAN: %s() reset drv->skipped_suspend\n", __func__);
         wlanDrvIf_suspend_resume_hlpr(drv, 0);
 
         if (drv->tCommon.hDrvMain) {
@@ -1240,8 +1242,7 @@ static void wlanDrvIf_late_resume(struct early_suspend *h)
 
         /* Check for buggy state on resume */
         if (beaconInterval==0 && dtimListenInterval==0) {
-            int status;
-            pr_warning("TIWLAN: main driver answered 0 to intervals !\n");
+            pr_warning("TIWLAN: connection lost ? main driver answered 0 to intervals !\n");
         }
     }
 }

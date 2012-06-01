@@ -208,7 +208,7 @@ ifeq "$(HOST_PLATFORM)" "*UNDEFINED*"
 TARGET = help
 endif
 #
-.PHONY: all
+.PHONY: all help
 all: verifypackages .depend $(TARGET)
 help:
 	@echo 

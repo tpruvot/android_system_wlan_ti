@@ -32,7 +32,8 @@
  */
 
 /* define to use the old suspend method (shutdown / re-probe) */
-#define TIWLAN_HARD_SUSPEND
+
+//#define TIWLAN_HARD_SUSPEND .... stack problems :/
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -47,7 +48,8 @@
 #include <linux/errno.h>
 #include <linux/clk.h>
 #include <linux/gpio.h>
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 31))
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32))
 #include <plat/hardware.h>
 #include <plat/board.h>
 #include <plat/clock.h>
@@ -65,6 +67,7 @@
 #include <mach/gpio.h>
 #include <mach/resource.h>
 #endif
+
 typedef void * TI_HANDLE;
 #include "host_platform.h"
 #include "SdioDrvDbg.h"
